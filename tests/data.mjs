@@ -46,4 +46,6 @@ await T('real-test',()=>{ const t=ev("JSON.stringify(TESTS.map(t=>[t.id,t.kind,t
   ok(ev("TESTS.every(t=>t.blocks.every(b=>b.tl.every(x=>hanOf(b.u.map(u=>u.zh).join('')).join('').includes(x.seg.join('')))))"),'плитки pr18'); });
 await T('local-date',()=>ok(ev("dstr(new Date(2026,0,5))")==='2026-01-05','dstr'));
 await T('pinyin-fixes',()=>{ ok(ev("BYS['便宜'].p")==='pián yi','便宜'); ok(ev("BYS['重点'].p")==='zhòng diǎn','重点'); ok(ev("WORDS.some(w=>w.d==='接(电话)')"),'помета 接(电话)'); });
+await T('petrosyan',()=>{ ok(Object.keys(ev("RAD2")).length===214,'пособие: не все ключи'); ok(ev("RAD2[1].e")==='三'&&ev("RAD2[9].e")==='佛','примеры');
+  ok(ev("Object.keys(RAD2).every(n=>RAD2[n].m&&RAD2[n].e)"),'пустые значения/примеры'); });
 A.finish('data: уроки, разбор иероглифов, ключи Канси, блоки тренировки, проверочная 18');

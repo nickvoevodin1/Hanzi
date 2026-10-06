@@ -1485,7 +1485,7 @@ function viewRadical(s){
   const p2=RAD2[n];
   if(p2){ const ex=p2.e&&HZ.c[p2.e]?`<span class="hz han" data-c="${p2.e}" style="font-size:20px">${esc(p2.e)}</span>`:`<span class="han" style="font-size:20px">${esc(p2.e||'')}</span>`;
     const box=el('div','meta');
-    box.appendChild(mr('По пособию',`${esc(p2.m||'')}${p2.s?` · упрощённо: <span class="han" style="font-size:18px">${esc(p2.s)}</span>`:''}<div class="lbl" style="margin-top:2px">Петросян, «Таблица иероглифических ключей (по словарю Кан Си)»</div>`));
+    box.appendChild(mr('По пособию',`${esc(p2.m||'')}${p2.p&&p2.p!==r[2]?` · чтение в пособии: ${pinyinHTML(p2.p)}`:''}${p2.s?` · упрощённо: <span class="han" style="font-size:18px">${esc(p2.s)}</span>`:''}${p2.pn?` · формы: <span class="han">${esc(/^[\u2e80-\u9fff]/.test(p2.pn)?p2.f.split(' ')[0]+', '+p2.pn:p2.f.split(' ').join(', ')+' '+p2.pn)}</span>`:''}<div class="lbl" style="margin-top:2px">Петросян, «Таблица иероглифических ключей (по словарю Кан Си)»</div>`));
     if(p2.e) box.appendChild(mr('Пример',`${ex} ${esc(p2.ep||'')} — ${esc(p2.er||'')}`));
     v.appendChild(box); }
   const lc=radChars(n);
