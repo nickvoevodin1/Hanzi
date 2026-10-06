@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "python3 tools/build.py",
-    "test": "for t in smoke2 smoke3 audit audit2 audit3 audit4; do node tests/$t.mjs || exit 1; done",
+    "test": "for t in data smoke srs migrate cycle; do node tests/$t.mjs || exit 1; done",
     "serve": "cd app && python3 -m http.server 8080"
   },
   "devDependencies": { "jsdom": "^24.0.0" }

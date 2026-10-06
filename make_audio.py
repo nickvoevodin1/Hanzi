@@ -3,7 +3,7 @@
 """
 Генератор аудио-пака для тренажёра 朱 (озвучка нейроголосом носителя).
 
-Что делает: берёт ВСЕ слова и примеры предложений прямо из index.html
+Что делает: берёт ВСЕ слова, иероглифы, ключи, примеры и предложения проверочных прямо из index.html
 и озвучивает их через Microsoft Edge TTS (бесплатно, без ключей).
 Результат кладёт в папку ./audio рядом с index.html + пишет manifest.json.
 Приложение само найдёт папку audio и начнёт играть эти файлы вместо синтеза.
@@ -27,17 +27,29 @@ DEF_VOICE = "zh-CN-XiaoxiaoNeural"   # женский, очень естеств
 RATE = "-10%"                         # чуть медленнее для учёбы
 
 def load_texts(index_path: Path):
+    """Всё, что приложение озвучивает: слова, примеры, иероглифы, ключи, предложения проверочных."""
     html = index_path.read_text(encoding="utf-8")
-    m = re.search(r"const DB_RAW = (\{.*?\});\nconst WORDS", html, re.S)
-    if not m:
-        sys.exit("Не нашёл данные в index.html — положи скрипт рядом с index.html из приложения.")
-    db = json.loads(m.group(1))
-    texts = []
-    seen = set()
+    dec = json.JSONDecoder()
+    def const(name):
+        m = re.search(r"const " + name + r" = ", html)
+        if not m:
+            sys.exit("Не нашёл данные в index.html — положи скрипт рядом с index.html из приложения.")
+        return dec.raw_decode(html, m.end())[0]
+    db, lessons, tests, rads = const("DB_RAW"), const("LESSONS"), const("TESTS"), const("RADS")
+    texts, seen = [], set()
+    def add(t):
+        if t and t not in seen:
+            seen.add(t); texts.append(t)
     for w in db["words"]:
-        for t in [w.get("s")] + ([w["ex"][0]] if w.get("ex") else []):
-            if t and t not in seen:
-                seen.add(t); texts.append(t)
+        add(w.get("s"))
+        if w.get("ex"): add(w["ex"][0])
+    for ch in db["chars"]: add(ch)
+    for r in rads: add(r[4][0])
+    blocks = [b for l in lessons.values() for b in l["b"]] + [b for t in tests for b in t["blocks"]]
+    for b in blocks:
+        for u in b["u"]:
+            add(u["zh"])
+            for part in u.get("parts", []): add(part[1])
     return texts
 
 async def synth_all(texts, outdir: Path, voice: str, concurrency: int = 4):
