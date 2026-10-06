@@ -3,8 +3,22 @@ import {load} from './env.mjs';
 const A=await load(); const {T,ev,ok}=A;
 await T('rads-index',()=>ok(ev("RADS.every((r,i)=>r[0]===i+1)")&&ev("RADS.length")===214,'RADS не по порядку'));
 await T('lesson-words',()=>{ const n=ev("Object.keys(LESSONS).length"); ok(n===30,'уроков '+n);
-  ok(ev("Object.values(LESSONS).every(l=>l.o.every(s=>s in BYS))"),'слово урока не найдено в словаре');
-  ok(ev("COURSE.filter(k=>!isRad(k)).length")===696,'слов курса '+ev("COURSE.filter(k=>!isRad(k)).length")); });
+  ok(ev("Object.values(LESSONS).every(l=>l.o.every(k=>k in BYK)&&l.x.every(x=>x.o.every(k=>k in BYK)))"),'слово урока не найдено в словаре');
+  const nc=ev("COURSE.filter(k=>!isRad(k)).length"); ok(nc===ev("new Set(Object.values(LESSONS).flatMap(l=>l.o.concat(...l.x.map(x=>x.o)))).size"),'слов курса '+nc);
+  ok(nc>=750,'слов курса мало: '+nc); });
+await T('homographs',()=>{ ok(ev("BYK['还'].p")==='huán'&&ev("BYK['还:hái'].p")==='hái','还'); ok(ev("BYK['行:xíng'].k[0]")===28,'行');
+  ok(ev("LESSONS[15].o.includes('还:hái')")&&ev("LESSONS[11].o.includes('还')"),'омографы в уроках'); });
+await T('textbook-pinyin',()=>{ for(const [s,p] of [['大夫','dài fu'],['多少','duō shao'],['教','jiāo'],['告诉','gào su'],['东西','dōng xi'],['一起','yì qǐ'],['得','de']]) ok(ev(`BYK['${s}'].p`)===p,s+' → '+ev(`BYK['${s}'].p`)); });
+await T('group-words',()=>{ const x=ev("JSON.stringify(LESSONS[16].x.map(x=>[x.id,x.o.length]))"); ok(x==='[["g16",70]]','список группы: '+x);
+  ok(ev("WORD_L['女儿']")===16&&ev("EXTRA_OF['女儿']").includes('Список группы'),'女儿 в списке группы'); ok(ev("BYK['姥姥'].p")==='lǎo lao','姥姥');
+  ok(ev("LESSONS[17].x[0].o.includes('洗脸')"),'презентация 17'); });
+await T('syllables',()=>{ // все слоги слов курса — из таблицы слогов курса
+  const bad=ev(`COURSE.filter(k=>!isRad(k)).flatMap(k=>BYK[k].p.split(' ').map(x=>toneless(x)).filter(x=>x&&!PALL[x]&&!(x.endsWith('r')&&PALL[x.slice(0,-1)])).map(x=>k+':'+x)).join(' ')`);
+  ok(!bad||bad==='T恤:t','слоги вне таблицы: '+bad); });
+await T('palladius',()=>{ ok(ev("palladius('běi jīng')")==='бэй цзин','北京'); ok(ev("palladius('nǎr')")==='нар','эрхуа'); ok(ev("palladius(BYK['什么'].p)")==='шэнь мэ','什么'); });
+await T('strokes',()=>{ ok(ev("strokesOf('心').map(x=>x.n).join(',')")==='8,0,7,7','心: '+ev("strokesOf('心').map(x=>x.n).join(',')"));
+  ok(ev("strokesOf('皮')[0].n")===9&&ev("strokesOf('又')[0].n")===15,'横钩/横撇'); ok(ev("strokesOf('我')[4].n")===13,'斜钩');
+  ok(ev("Object.keys(CHARS).every(c=>strokesOf(c).length===CHARS[c][0])"),'число черт'); });
 await T('lesson-order',()=>{ const o=ev("LESSONS[17].o.slice(0,4).join(',')"); ok(o==='点,食堂,食,堂','порядок учебника: '+o); });
 await T('hanzi-coverage',()=>{
   ok(ev("Object.keys(CHARS).every(c=>HZ.c[c]&&HZ.c[c][0]>=1&&HZ.c[c][0]<=214)"),'нет разбора/ключа у части иероглифов');

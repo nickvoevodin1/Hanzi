@@ -5,10 +5,12 @@
        src/data/char_ru.json   (ручные русские значения знаков и компонентов),
        src/data/app_data.json, src/data/radicals.json.
 Выход: src/data/hanzi.json = {"c": {знак: [№ключа, форма ключа, состав IDS, тип, смысл.часть,
-       звук.часть, рус., пиньинь, №ключа в других словарях|0]}, "p": {компонент: [пиньинь, рус.]}}
+       звук.часть, рус., пиньинь, №ключа в других словарях|0, англ.|"", коды черт]}, "p": {компонент: [пиньинь, рус.]}}
+Коды черт — буквы cnchar (src/data/stroke_codes.json), уточнённые по форме черты из hanzi-data.json:
+  e → E, если это 横钩 (короткий крюк), иначе 横撇;  y → Y, если это 卧钩 (лежачая), иначе 斜钩.
 Тип: p — смысл + звук (фоноидеограмма), i — составной по смыслу, g — рисунок (пиктограмма).
 """
-import json
+import json, math
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -20,8 +22,27 @@ ALIASES = {'丷': '八', '⺊': '卜', '母': '毋', '㔾': '卩', '乛': '乙',
 def load(name):
     return json.loads((DATA / name).read_text(encoding="utf-8"))
 
+def refine(code, medians):
+    """Уточнить неоднозначные коды по геометрии черт (медианы hanzi-writer)."""
+    if not medians or len(medians) != len(code):
+        return code
+    out = []
+    for c, pts in zip(code, medians):
+        if c == "e":                     # 横钩: после угла — короткий крюк; 横撇: длинная откидная
+            i = max(range(len(pts)), key=lambda k: pts[k][0])
+            a = sum(math.dist(pts[k], pts[k + 1]) for k in range(i))
+            b = sum(math.dist(pts[k], pts[k + 1]) for k in range(i, len(pts) - 1))
+            c = "E" if b / max(a, 1) < 0.42 else "e"
+        elif c == "y":                   # 斜钩 — крутая диагональ; 卧钩 — пологая (心)
+            ys = [q[1] for q in pts]
+            c = "y" if max(ys) - min(ys) > 450 else "Y"
+        out.append(c)
+    return "".join(out)
+
 def main():
     src, ru, app, rads = load("hanzi_src.json"), load("char_ru.json"), load("app_data.json"), load("radicals.json")
+    codes = load("stroke_codes.json")
+    hd = json.loads((ROOT / "hanzi-data.json").read_text(encoding="utf-8"))
     ridx = {}
     for r in rads:
         for f in r[4]:
@@ -50,15 +71,16 @@ def main():
         py = w["p"] if w else " / ".join(s["py"])
         out[ch] = [kx, form, s["ids"] if s["ids"] != "？" else "", TYPES.get(ety.get("type"), ""),
                    ety.get("semantic", ""), ety.get("phonetic", ""), mean, py,
-                   mm_n if (mm_n and mm_n != kx) else 0]
-        if not mean:
-            out[ch].append(s.get("en", ""))   # англ. значение, если русского нет
+                   mm_n if (mm_n and mm_n != kx) else 0,
+                   "" if mean else s.get("en", ""),   # англ. значение, если русского нет
+                   refine(codes.get(ch, ""), (hd.get(ch) or {}).get("medians"))]
         for p in s["ids"]:
             if p in IDC or p in app["chars"] or p in comps:
                 continue
             cs = src.get(p, {})
             comps[p] = [" / ".join(cs.get("py", [])), ru.get(p, "")]
-    lesson_chars = {c for w in app["words"] if w.get("k") for c in w["s"] if c in out}
+    group = {g["s"] for x in load("group.json") for g in x["words"]}
+    lesson_chars = {c for w in app["words"] if w.get("k") or w.get("grp") or w["s"] in group for c in w["s"] if c in out}
     no_ru = [c for c in lesson_chars if not out[c][6]]
     if no_ru:
         warn.append("без русского значения (знаки уроков): " + "".join(sorted(no_ru)))

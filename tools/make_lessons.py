@@ -3,7 +3,8 @@
 
 Для каждого урока 1–30:
   t   — название, sub — заголовок текста урока
-  o   — слова в порядке учебника (ключи s из app_data.json)
+  o   — слова в порядке учебника (ключ карточки: s, у омографов — key «还:hái»)
+  x   — дополнительные наборы после урока (src/data/group.json): список группы, презентации
   b   — блоки тренировки «к проверочной» из примеров предложений урока:
         u  — предложения {zh, py, ru, sy}; sy — слоги по одному на каждый иероглиф (для упражнения на тоны)
         w  — слова блока (ключи s)
@@ -76,12 +77,22 @@ def main():
     LESSONS = ns["LESSONS"]
     titles = json.loads((DATA / "lesson_titles.json").read_text(encoding="utf-8"))
     app = json.loads((DATA / "app_data.json").read_text(encoding="utf-8"))
-    by = {}
+    from collections import defaultdict
+    cand = defaultdict(list)
     for w in app["words"]:
-        by.setdefault(w["s"], w)
+        cand[w["s"]].append(w)
         if w.get("d"):
-            by.setdefault(w["d"], w)
-    vocab = {w["s"]: w for w in app["words"]}
+            cand[w["d"]].append(w)
+    tl = lambda p: re.sub(r"[^a-zü]", "", p.lower().translate(str.maketrans("āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ", "aaaaeeeeiiiioooouuuuüüüü")))
+    def pick(hz, py):
+        ws = cand.get(hz) or []
+        return next((w for w in ws if tl(w["p"]) == tl(py)), ws[0] if ws else None)
+    key = lambda w: w.get("key", w["s"])
+    vocab = {}
+    for w in app["words"]:
+        vocab.setdefault(w["s"], w)
+    bykey = {key(w): w for w in app["words"]}
+    group = json.loads((DATA / "group.json").read_text(encoding="utf-8"))
     maxlen = max(len(s) for s in vocab)
     out, stats = {}, {"units": 0, "noalign": 0, "tiles": 0}
     for L in range(1, 31):
@@ -89,13 +100,13 @@ def main():
         order = []
         for grp in ("words", "extra", "names"):
             for t in v.get(grp, []):
-                w = by.get(FIX.get(t[0], t[0]))
-                if w and w["s"] not in order:
-                    order.append(w["s"])
+                w = pick(FIX.get(t[0], t[0]), t[1])
+                if w and key(w) not in order:
+                    order.append(key(w))
         # примеры, написанные для этого урока (лексика строго из пройденного)
         units, owners, seen = [], [], set()
         for s in order:
-            w = vocab[s]
+            w = bykey[s]
             if not w.get("ex") or min(w["k"]) != L:
                 continue
             zh, py, ru = w["ex"]
@@ -125,7 +136,7 @@ def main():
         for b in blocks:
             words = []
             for u in b["u"]:
-                for s in [u["_own"]] + [sg for sg in u["_seg"] if sg in vocab and L in (vocab[sg].get("k") or [])]:
+                for s in [u["_own"]] + [sg for sg in u["_seg"] if sg in vocab and L in (vocab[sg].get("k") or []) and sg in order]:
                     if s not in words:
                         words.append(s)
             b["w"] = words
@@ -134,7 +145,10 @@ def main():
             for u in b["u"]:
                 del u["_seg"], u["_own"]
             stats["units"] += len(b["u"])
-        out[str(L)] = {"t": titles.get(str(L), ""), "sub": v.get("sub", ""), "o": order, "b": blocks}
+        extra = [{"id": g["id"], "title": g["title"], "src": g["src"], "note": g.get("note", ""),
+                  "o": [key(pick(x["s"], x.get("p", "")) or bykey[x["s"]]) for x in g["words"]]}
+                 for g in group if g["after"] == L]
+        out[str(L)] = {"t": titles.get(str(L), ""), "sub": v.get("sub", ""), "o": order, "b": blocks, "x": extra}
     (DATA / "lessons.json").write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     print("lessons.json:", stats, "блоков:", sum(len(x["b"]) for x in out.values()))
 

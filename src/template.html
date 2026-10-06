@@ -163,6 +163,21 @@ h2.title{margin:2px 0 4px;font-size:20px}
 .sheet{position:fixed;inset:0;background:rgba(43,33,27,.42);display:flex;align-items:flex-end;justify-content:center;z-index:60}
 .sheetc{background:var(--ink);width:100%;max-width:560px;border-radius:18px 18px 0 0;padding:16px 16px calc(18px + var(--safe-b));max-height:84vh;overflow:auto}
 
+details.strk{margin-top:2px}
+details.strk summary{cursor:pointer;color:var(--paper-dim);font-size:13px;font-weight:600}
+details.strk ol{margin:6px 0 0;padding-left:22px;font-size:13px;line-height:1.75}
+details.strk .sti{vertical-align:middle;margin-right:6px;opacity:.85}
+.evo{margin-top:6px}
+.evo img{width:100%;height:auto;border:1px solid var(--line);border-radius:8px;background:#fff;display:block}
+.evocap{display:grid;grid-template-columns:repeat(8,1fr);font-size:9.5px;color:var(--muted);text-align:center;line-height:1.2;margin-top:3px}
+.palla{font-size:13px;color:var(--muted);margin-top:2px}
+.strow{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.strow:last-child{border-bottom:none}
+.strow .sti{height:34px;width:46px;object-fit:contain;flex:none}
+.strow .num{width:26px;color:var(--muted);font-weight:700;font-size:12px;flex:none}
+.strow .nm{flex:1;font-size:14px}
+.strow .ex{font-size:20px;letter-spacing:4px}
+
 /* Учёба */
 .qwrap{display:flex;flex-direction:column}
 .progress{height:5px;background:var(--ink3);border-radius:3px;overflow:hidden;margin-bottom:12px}
@@ -291,12 +306,47 @@ const HZ = /*__HANZI__*/;           // разбор: HZ.c[знак]=[№ключ
 const LESSONS = /*__LESSONS__*/;    // уроки 1–30: t название, sub, o порядок слов, b блоки тренировки
 const TESTS = /*__TESTS__*/;        // настоящие проверочные / диктанты / контрольные
 const RADS = /*__RADS__*/;          // 214 ключей: [номер, черт, пиньинь, рус. название (таблица ДВФУ), формы]
+const PALL = /*__PALL__*/;          // система Палладия (таблица курса): слог без тона → кириллица
+const RAD2 = /*__RAD2__*/;          // пособие Петросяна (по Канси): №ключа → {m значение, s упрощ., e пример, ep пиньинь, er перевод}
+const EVO = '子牛马鱼羊鹿虎象龟步日月山水火雨从车采为';   // таблица «Эволюция графических стилей» (материал курса)
+// Черты по таблице курса (24 черты). Ключ — код порядка черт (cnchar, уточнённый по форме черты).
+const STROKE_TABLE = [
+  ['Основные черты',[[1,'горизонтальная','二五百'],[2,'вертикальная','千士巾'],[3,'откидная вправо','欠又文'],[4,'откидная влево','成石九'],
+    [5,'наклонная пересекающаяся','戈戰戒'],[6,'восходящая','冰決波'],[7,'точка вправо','六玉交'],[8,'точка влево','心小亦']]],
+  ['Черты с крюком',[[9,'горизонтальная с крюком вниз','皮軍罕'],[10,'вертикальная с крюком влево','水月則'],[11,'вертикальная с крюком вправо','艮衣長'],
+    [12,'вертикальная изогнутая с крюком вверх','也巳兒'],[13,'наклонная пересекающаяся','民划戎']]],
+  ['Ломаные черты',[[14,'горизонтальная ломаная с вертикальной','口日田'],[15,'горизонтальная ломаная с откидной влево','又久夕'],
+    [16,'трижды ломанная с откидной влево','建延廷'],[17,'вертикальная ломаная с горизонтальной','山世凶'],
+    [18,'откидная влево ломаная с горизонтальной','厶紅允'],[19,'откидная влево ломаная с откидной вправо','女好妥']]],
+  ['Ломаные черты с крюком',[[20,'горизонтальная ломаная с вертикальной и крюком влево','刁力那'],[21,'горизонтальная ломаная с вертикальной и крюком вправо','话讨许'],
+    [22,'горизонтальная трижды ломаная с вертикальной и крюком влево','乃鼎汤'],[23,'горизонтальная ломаная с откидной вправо и крюком вверх','汽九肌'],
+    [24,'вертикальная дважды ломаная с крюком влево','朽馬与']]],
+];
+const STROKE_NO = {j:1,f:2,l:3,s:4,i:6,k:7,d:8,E:9,g:10,h:11,u:12,y:13,c:14,e:15,a:16,b:17,n:18,m:19,r:20,p:21,w:22,o:23,z:24};
+const STROKE_EXTRA = {Y:'лежачая с крюком (卧钩, как в 心)',t:'изогнутая с крюком (弯钩, как в 子)',v:'горизонтальная дважды ломаная (横折折 / 横折弯)',
+  x:'вертикальная дважды ломаная (竖折撇 / 竖折折)',q:'горизонтальная трижды ломаная (横折折折)'};   // нет в таблице курса
+const STROKE_NAME = {}; STROKE_TABLE.forEach(([,rows])=>rows.forEach(([n,name])=>{ STROKE_NAME[n]=name; }));
+function strokesOf(ch){ const h=HZ.c[ch]; return h&&h[10] ? [...h[10]].map(c=>STROKE_NO[c]?{n:STROKE_NO[c],name:STROKE_NAME[STROKE_NO[c]]}:{n:0,name:STROKE_EXTRA[c]||'черта'}) : []; }
+function strokeImg(n,h){ return n?`<img class="sti" src="strokes/${String(n).padStart(2,'0')}.png" alt="" style="height:${h||20}px">`:''; }
+// Палладий по таблице курса; слоги через пробел, эрхуа (nǎr) — с «р» на конце
+function palladius(p){
+  const out=[];
+  for(const tok of (p||'').trim().split(/\s+/)){
+    let t=toneless(tok); if(!t) continue;
+    let er=''; if(t.length>2&&t.endsWith('r')&&!PALL[t]&&PALL[t.slice(0,-1)]){ t=t.slice(0,-1); er='р'; }
+    const c=PALL[t]; if(!c) return '';
+    out.push(c.toLowerCase()+er);
+  }
+  return out.join(' ');
+}
 
 const WORDS = DB_RAW.words;
 const CHARS = DB_RAW.chars;
-WORDS.forEach((w,i)=>{ w.id=i; });
-const BYS = {};                     // иероглифы слова → слово
+WORDS.forEach((w,i)=>{ w.id=i; w.key=w.key||w.s; });   // ключ карточки: иероглифы; у омографов — «还:hái»
+const BYS = {};                     // иероглифы слова → первое слово с ними
 WORDS.forEach(w=>{ if(!(w.s in BYS)) BYS[w.s]=w; });
+const BYK = {};                     // ключ карточки → слово
+WORDS.forEach(w=>{ BYK[w.key]=w; });
 const NL = 30;                      // уроков в томе 1
 const RIDX = {};                    // форма ключа → индекс в RADS
 RADS.forEach((r,i)=>{ for(const ch of r[4]) if(!(ch in RIDX)) RIDX[ch]=i; });
@@ -305,23 +355,26 @@ RADS.forEach((r,i)=>{ for(const ch of r[4]) if(!(ch in RIDX)) RIDX[ch]=i; });
 const isHan = c => c>='一' && c<='鿿';
 const hanOf = s => [...s].filter(isHan);
 function radOf(c){ const h=HZ.c[c]; return h? h[0] : 0; }           // номер ключа Канси
-function lessonWords(L){ return ((LESSONS[L]||{}).o||[]).map(s=>BYS[s]).filter(Boolean); }
+function lessonWords(L){ return ((LESSONS[L]||{}).o||[]).map(k=>BYK[k]).filter(Boolean); }
+function lessonExtras(L){ return ((LESSONS[L]||{}).x||[]).map(x=>({...x,words:x.o.map(k=>BYK[k]).filter(Boolean)})); }   // список группы, презентации
 function lessonTitle(L){ return (LESSONS[L]&&LESSONS[L].t) || ('Урок '+L); }
 
 // Где иероглиф и ключ появляются впервые; общий порядок изучения курса
-const CHAR_L={}, RAD_L={}, LESSON_CHARS={}, LESSON_RADS={}, WORD_L={};
-const COURSE=[];                    // ключи карточек: слово (иероглифы) или 'r:N' — ключ №N
+const CHAR_L={}, RAD_L={}, LESSON_CHARS={}, LESSON_RADS={}, WORD_L={}, EXTRA_OF={};
+const COURSE=[];                    // ключи карточек: слово или 'r:N' — ключ №N
 for(let L=1;L<=NL;L++){
   LESSON_CHARS[L]=[]; LESSON_RADS[L]=[];
-  lessonWords(L).forEach(w=>{
+  const add=w=>{
     hanOf(w.s).forEach(c=>{
       if(c in CHAR_L) return;
       CHAR_L[c]=L; LESSON_CHARS[L].push(c);
       const k=radOf(c);
       if(k && !(k in RAD_L)){ RAD_L[k]=L; LESSON_RADS[L].push(k); COURSE.push('r:'+k); }   // ключ — перед первым словом с ним
     });
-    if(!(w.s in WORD_L)){ WORD_L[w.s]=L; COURSE.push(w.s); }
-  });
+    if(!(w.key in WORD_L)){ WORD_L[w.key]=L; COURSE.push(w.key); }
+  };
+  lessonWords(L).forEach(add);
+  lessonExtras(L).forEach(x=>x.words.forEach(w=>{ if(!(w.key in EXTRA_OF)) EXTRA_OF[w.key]=x.title; add(w); }));   // после урока — слова группы
 }
 
 /*==================================================================
@@ -426,7 +479,7 @@ async function save(what){
 ==================================================================*/
 const isRad = k => typeof k==='string' && k.startsWith('r:');
 const radNum = k => +k.slice(2);
-const validKey = k => isRad(k) ? (radNum(k)>=1&&radNum(k)<=214) : (k in BYS);
+const validKey = k => isRad(k) ? (radNum(k)>=1&&radNum(k)<=214) : (k in BYK);
 const cardOf = k => State.cards[k];
 const isNew = k => { const c=cardOf(k); return !c||!c.state; };
 const isDue = k => { const c=cardOf(k); return !!(c&&c.state&&c.due<=Date.now()); };
@@ -456,8 +509,8 @@ function poolQueue(keys){
   const fresh=keys.filter(isNew);
   return due.concat(fresh).slice(0,SESSION_CAP);
 }
-function lessonKeys(L){ return LESSON_RADS[L].map(n=>'r:'+n).concat(lessonWords(L).map(w=>w.s)); }
-function courseKeys(N){ const o=[]; for(let L=1;L<=N;L++) o.push(...lessonKeys(L)); return [...new Set(o)]; }
+function lessonKeys(L){ return LESSON_RADS[L].map(n=>'r:'+n).concat(lessonWords(L).map(w=>w.key)); }
+function courseKeys(N){ const o=[]; for(let L=1;L<=N;L++){ o.push(...lessonKeys(L)); lessonExtras(L).forEach(x=>o.push(...x.words.map(w=>w.key))); } return [...new Set(o)]; }
 
 /*==================================================================
   ПИНЬИНЬ
@@ -557,11 +610,13 @@ function charBox(ch,opts){
   const strokes = CHARS[ch] ? CHARS[ch][0]+' черт' : '';
   const where = CHAR_L[ch] ? 'урок '+CHAR_L[ch] : '';
   return `<div class="bk">
-    <div class="bkh"><span class="han">${ch}</span><span style="font-size:17px">${pinyinHTML(py)}</span><span class="lbl">${[strokes,where].filter(Boolean).join(' · ')}</span></div>
+    <div class="bkh"><span class="han">${ch}</span><span style="font-size:17px">${pinyinHTML(py)}</span>${palladius(py.split(' / ')[0])?`<span class="lbl">${esc(palladius(py.split(' / ')[0]))}</span>`:''}<span class="lbl">${[strokes,where].filter(Boolean).join(' · ')}</span></div>
     ${ru?`<div style="font-weight:650">${esc(ru)}</div>`:(h[9]?`<div class="lbl">${esc(h[9])}</div>`:'')}
     <div><span class="lbl">Ключ:</span> <b class="han">${esc(form)}</b> — №${kx} <span class="han">${r[4][0]}</span> ${esc(r[2])}, ${esc(radName(kx))}${alt?` <span class="lbl">(в других словарях — №${alt} ${RADS[alt-1]?esc(RADS[alt-1][4][0]):''})</span>`:''}</div>
     <div><span class="lbl">Состав:</span> ${sostav}</div>
     ${type?`<div class="lbl">Тип: ${TYPES[type]}${type==='p'&&(sem||phon)?` — смысловая часть <b class="han">${esc(sem||'—')}</b>, звуковая <b class="han">${esc(phon||'—')}</b>`:''}</div>`:''}
+    ${(()=>{ const st=strokesOf(ch); return st.length?`<details class="strk"><summary>Порядок черт (${st.length}) — по таблице черт курса</summary><ol>${st.map(x=>`<li>${strokeImg(x.n,18)}${esc(x.name)}${x.n?` <span class="lbl">№${x.n}</span>`:' <span class="lbl">(нет в таблице)</span>'}</li>`).join('')}</ol></details>`:''; })()}
+    ${EVO.includes(ch)?`<div class="evo"><div class="lbl">Эволюция написания (таблица курса):</div><img src="evolution/${ch.codePointAt(0).toString(16)}.jpg" loading="lazy" alt="эволюция ${ch}"><div class="evocap"><span>Инь, гадат. надписи</span><span>Чжоу, бронза</span><span>сяо-чжуань</span><span>лишу</span><span>кайшу</span><span>цаошу</span><span>синшу</span><span>сокращ.</span></div></div>`:''}
     ${opts&&opts.actions?`<div class="actionrow" style="margin-top:6px"><button class="say" data-say="${ch}">🔊 Слушать</button><button class="say" data-draw="${ch}">笔 Прописи</button></div>`:''}
   </div>`;
 }
@@ -573,8 +628,8 @@ function openSheet(html){
 }
 function closeSheet(){ $('#sheet').hidden=true; }
 function openChar(ch){
-  const words=WORDS.filter(w=>w.s.includes(ch)).sort((a,b)=>((WORD_L[a.s]||99)-(WORD_L[b.s]||99))||(a.s.length-b.s.length)).slice(0,10);
-  openSheet(charBox(ch,{actions:true}) + (words.length?`<p class="eyebrow">Слова с ${ch}</p><div class="rowlist">${words.map(w=>`<button class="witem" data-word="${w.id}"><div class="hzw han">${esc(w.d||w.s)}</div><div class="mid"><div class="py">${pinyinHTML(w.p)}</div><div class="tr">${esc(meaning(w))}</div></div>${WORD_L[w.s]?`<span class="pill k">ур. ${WORD_L[w.s]}</span>`:''}</button>`).join('')}</div>`:''));
+  const words=WORDS.filter(w=>w.s.includes(ch)).sort((a,b)=>((WORD_L[a.key]||99)-(WORD_L[b.key]||99))||(a.s.length-b.s.length)).slice(0,10);
+  openSheet(charBox(ch,{actions:true}) + (words.length?`<p class="eyebrow">Слова с ${ch}</p><div class="rowlist">${words.map(w=>`<button class="witem" data-word="${w.id}"><div class="hzw han">${esc(w.d||w.s)}</div><div class="mid"><div class="py">${pinyinHTML(w.p)}</div><div class="tr">${esc(meaning(w))}</div></div>${WORD_L[w.key]?`<span class="pill k">ур. ${WORD_L[w.key]}</span>`:''}</button>`).join('')}</div>`:''));
 }
 $('#sheet').addEventListener('click',e=>{
   if(e.target.id==='sheet'){ closeSheet(); return; }
@@ -590,7 +645,7 @@ document.addEventListener('click',e=>{
 /*==================================================================
   РОУТЕР И НАВИГАЦИЯ
 ==================================================================*/
-const TAB_OF={home:'home',lessons:'lessons',lesson:'lessons',tests:'tests',test:'tests',keys:'keys',radical:'keys',dict:'dict',list:'dict'};
+const TAB_OF={home:'home',lessons:'lessons',lesson:'lessons',extra:'lessons',strokes:'keys',tests:'tests',test:'tests',keys:'keys',radical:'keys',dict:'dict',list:'dict'};
 function go(name,params){
   State.route={name,...params}; if(TAB_OF[name]) State.tab=TAB_OF[name];
   closeSheet(); clearTimeout(playT); Speech.stop(); render(); window.scrollTo(0,0);
@@ -598,7 +653,7 @@ function go(name,params){
 function render(){
   document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.nav===State.tab));
   $('#topSub').textContent='Кондрашевский · урок группы '+State.settings.lesson;
-  const V={home:viewHome,lessons:viewLessons,lesson:viewLesson,card:viewCard,session:viewSession,draw:viewDraw,
+  const V={home:viewHome,lessons:viewLessons,lesson:viewLesson,extra:viewExtra,strokes:viewStrokes,card:viewCard,session:viewSession,draw:viewDraw,
     tests:viewTests,test:viewTest,keys:viewKeys,radical:viewRadical,dict:viewDict,list:viewList,settings:viewSettings};
   const s=$('#screen'); s.innerHTML=''; (V[State.route.name]||viewHome)(s);
 }
@@ -698,14 +753,33 @@ function viewLessons(s){
   v.appendChild(el('p','note','Кондрашевский, том 1. Красным — текущий урок группы ('+N+'). Цифра справа — слов в работе.'));
   const list=el('div','rowlist'); list.style.marginTop='10px';
   for(let L=1;L<=NL;L++){
-    const ws=lessonWords(L), lw=learnedCount(ws.map(w=>w.s));
+    const ws=lessonWords(L), lw=learnedCount(ws.map(w=>w.key));
     const has=TESTS.some(t=>t.lesson===L);
     const r=el('button','row'+(L===N?' cur':''),`<div class="n">${L}</div>
       <div class="tt"><b>${esc(lessonTitle(L))}</b><small><span class="han">${esc(LESSONS[L].sub||'')}</span> · ${ws.length} слов · ${LESSON_CHARS[L].length} нов. иероглифов${has?' · 考 проверочная':''}</small></div>
       <div class="cnt"${lw===ws.length&&ws.length?' style="color:var(--jade)"':''}>${lw}/${ws.length}</div>`);
     r.onclick=()=>go('lesson',{L}); list.appendChild(r);
+    lessonExtras(L).forEach(x=>{ const xl=learnedCount(x.words.map(w=>w.key));
+      const xr=el('button','row',`<div class="n" style="color:var(--cinnabar-2)">+</div>
+        <div class="tt"><b>${esc(x.title)}</b><small>${x.words.length} слов · после урока ${L}</small></div><div class="cnt">${xl}/${x.words.length}</div>`);
+      xr.onclick=()=>go('extra',{L,id:x.id}); list.appendChild(xr); });
   }
   v.appendChild(list); s.appendChild(v);
+}
+function viewExtra(s){
+  const {L,id}=State.route, x=lessonExtras(L).find(e=>e.id===id); if(!x){ go('lessons'); return; }
+  const keys=x.words.map(w=>w.key), chars=[...new Set(x.words.flatMap(w=>hanOf(w.s)))];
+  const v=el('div','view');
+  const back=el('button','back','‹ Уроки'); back.onclick=()=>go('lessons'); v.appendChild(back);
+  v.appendChild(el('h2','title',esc(x.title)));
+  v.appendChild(el('p','note',`${x.words.length} слов, в работе ${learnedCount(keys)} · в «Уроке дня» идут после урока ${L}.<br>${esc(x.note||'')}<br>Источник: ${esc(x.src||'')}`));
+  const act=el('div','actionrow');
+  const b1=el('button','btn','▶ Учить'); b1.onclick=()=>startSession(poolQueue(keys),'auto',x.title,()=>poolQueue(keys));
+  const b2=el('button','btn ghost','笔 Прописи'); b2.onclick=()=>go('draw',{chars,title:x.title,back:{name:'extra',L,id}});
+  act.appendChild(b1); act.appendChild(b2); v.appendChild(act);
+  const b3=el('button','btn mini ghost','🔊 Прослушать'); b3.style.marginTop='10px'; b3.onclick=()=>playAll(x.words); v.appendChild(b3);
+  const list=el('div','rowlist'); list.style.marginTop='12px'; x.words.forEach(w=>list.appendChild(witem(w))); v.appendChild(list);
+  s.appendChild(v);
 }
 const MODES=[['auto','Авто'],['recog','汉字 → перевод'],['recall','Перевод → 汉字'],['write','Написать'],['listen','На слух'],['tones','Тоны'],['pinyin','Пиньинь']];
 function viewLesson(s){
@@ -714,7 +788,7 @@ function viewLesson(s){
   const v=el('div','view');
   const back=el('button','back','‹ Уроки'); back.onclick=()=>go('lessons'); v.appendChild(back);
   v.appendChild(el('h2','title','Урок '+L+' · '+esc(lessonTitle(L))));
-  v.appendChild(el('p','note',`<span class="han" style="font-size:15px;color:var(--paper)">${esc(LESSONS[L].sub||'')}</span> · ${ws.length} слов, в работе ${learnedCount(ws.map(w=>w.s))} · новых иероглифов ${LESSON_CHARS[L].length} · новых ключей ${LESSON_RADS[L].length}`));
+  v.appendChild(el('p','note',`<span class="han" style="font-size:15px;color:var(--paper)">${esc(LESSONS[L].sub||'')}</span> · ${ws.length} слов, в работе ${learnedCount(ws.map(w=>w.key))} · новых иероглифов ${LESSON_CHARS[L].length} · новых ключей ${LESSON_RADS[L].length}`));
   const act=el('div','actionrow');
   const b1=el('button','btn','▶ Учить урок'); b1.onclick=()=>startSession(poolQueue(keys),mode,'Урок '+L,()=>poolQueue(keys));
   const real=TESTS.find(t=>t.lesson===L);
@@ -724,6 +798,7 @@ function viewLesson(s){
   const b3=el('button','btn mini ghost','笔 Прописи урока'); b3.onclick=()=>go('draw',{chars:LESSON_CHARS[L].slice(),title:'Урок '+L+' · новые иероглифы',back:{name:'lesson',L}});
   const b4=el('button','btn mini ghost','🔊 Прослушать'); b4.onclick=()=>playAll(ws);
   act2.appendChild(b3); act2.appendChild(b4); v.appendChild(act2);
+  lessonExtras(L).forEach(x=>{ const xb=el('button','item rowbtn','＋ '+esc(x.title)+' · '+x.words.length+' слов ›'); xb.style.marginTop='10px'; xb.onclick=()=>go('extra',{L,id:x.id}); v.appendChild(xb); });
   const mc=el('div','chips'); mc.appendChild(el('span','note','Режим:')).style.margin='6px 4px 0 0';
   MODES.forEach(([id,t])=>{ const c=el('button','chip'+(mode===id?' on':''),t); c.onclick=()=>go('lesson',{L,tab,mode:id}); mc.appendChild(c); });
   v.appendChild(mc);
@@ -746,7 +821,7 @@ function viewLesson(s){
 }
 function witem(w){
   const it=el('button','witem',`<div class="hzw han">${esc(w.d||w.s)}</div>
-    <div class="mid"><div class="py">${pinyinHTML(w.p)}</div><div class="tr">${esc(meaning(w))}</div></div><div class="st ${statusOf(w.s)}"></div>`);
+    <div class="mid"><div class="py">${pinyinHTML(w.p)}</div><div class="tr">${esc(meaning(w))}</div></div><div class="st ${statusOf(w.key)}"></div>`);
   it.onclick=()=>go('card',{id:w.id,from:State.route}); return it;
 }
 let playT;
@@ -762,9 +837,10 @@ function viewCard(s){
   const card=el('div','card');
   card.innerHTML=`<div class="bighz han">${esc(w.d||w.s)}</div>
     <div class="bigpy">${pinyinHTML(w.p)}</div>
+    ${palladius(w.p)?`<div class="palla" style="margin:-2px 0 6px">по Палладию: ${esc(palladius(w.p))}</div>`:''}
     <div class="bigtr">${esc(w.ru||meaning(w))}</div>
     ${w.ru&&w.en?`<div class="bigen">${esc(w.en.slice(0,2).join('; '))}</div>`:''}
-    <div class="tagrow">${(w.k||[]).map(n=>`<span class="pill k">Урок ${n}</span>`).join('')}${w.hsk?`<span class="pill hsk">HSK ${w.hsk}</span>`:''}${statusOf(w.s)!=='new'?'<span class="pill ok">в работе</span>':''}</div>
+    <div class="tagrow">${(w.k||[]).map(n=>`<span class="pill k">Урок ${n}</span>`).join('')}${w.hsk?`<span class="pill hsk">HSK ${w.hsk}</span>`:''}${EXTRA_OF[w.key]?`<span class="pill k">${esc(EXTRA_OF[w.key])}</span>`:''}${statusOf(w.key)!=='new'?'<span class="pill ok">в работе</span>':''}</div>
     <div class="cardbtns"><button class="iconbtn primary" id="cSay" aria-label="Слушать">🔊</button><button class="iconbtn" id="cDraw" aria-label="Прописи">笔</button></div>`;
   v.appendChild(card);
   const meta=el('div','meta');
@@ -799,7 +875,7 @@ function canWrite(w){ return typeof HanziWriter!=='undefined' && hanOf(w.s).leng
 function pickMode(w){
   let m=SESSION.mode;
   if(m==='auto'){
-    const c=cardOf(w.s), S=c&&c.state?c.S:0;
+    const c=cardOf(w.key), S=c&&c.state?c.S:0;
     const pool = S<2 ? ['recog','recog','choice','listen'] : S<10 ? ['recog','recall','produce','tones','pinyin','listen'] : ['recall','write','write','dictate','tones','produce'];
     m=pool[Math.random()*pool.length|0];
   }
@@ -826,7 +902,7 @@ function viewSession(s){
     if(!SESSION.cur) SESSION.cur=Math.random()<.5?'rname':'rform';
     return SESSION.cur==='rname'?qRadName(stage,n):qRadForm(stage,n);
   }
-  const w=BYS[key];
+  const w=BYK[key];
   if(isNew(key)&&!SESSION.intro[key]) return qIntro(stage,w);
   if(!SESSION.cur) SESSION.cur=pickMode(w);
   ({recog:qRecog,choice:qChoice,produce:qProduce,recall:qRecall,pinyin:qPinyin,listen:qListen,tones:qTones,write:qWrite,dictate:qDictate}[SESSION.cur]||qRecog)(stage,w);
@@ -869,15 +945,15 @@ function undoLast(){
 // — знакомство с новым словом
 function qIntro(stage,w){
   const c=el('div','qcard');
-  c.innerHTML=`<div class="qprompt" style="color:var(--cinnabar-2)">✦ Новое слово${WORD_L[w.s]?' · урок '+WORD_L[w.s]:''}</div>
+  c.innerHTML=`<div class="qprompt" style="color:var(--cinnabar-2)">✦ Новое слово${EXTRA_OF[w.key]?' · '+esc(EXTRA_OF[w.key]):WORD_L[w.key]?' · урок '+WORD_L[w.key]:''}</div>
     <div class="qhz han" style="font-size:84px">${esc(w.d||w.s)}</div>
-    <div class="reveal" style="margin-top:10px"><div class="py">${pinyinHTML(w.p)}</div><div class="tr">${esc(meaning(w))}</div>
+    <div class="reveal" style="margin-top:10px"><div class="py">${pinyinHTML(w.p)}</div>${palladius(w.p)?`<div class="palla">${esc(palladius(w.p))}</div>`:''}<div class="tr">${esc(meaning(w))}</div>
     ${w.ex?`<div class="en han" style="font-size:16px;margin-top:8px">${wrapHz(w.ex[0])}</div><div class="en">${pinyinHTML(w.ex[1])}</div><div class="en">${esc(w.ex[2])}</div><button class="say" data-say="${esc(w.ex[0])}" style="margin-top:6px">🔊 Пример</button>`:''}</div>
 `;
   stage.appendChild(c);
   const row=el('div','actionrow');
-  const known=el('button','btn ghost','Уже знаю'); known.onclick=()=>{ SESSION.intro[w.s]=1; afterGrade(4); };
-  const go2=el('button','btn','Запомнил → проверить'); go2.dataset.key='space'; go2.onclick=()=>{ SESSION.intro[w.s]=1; render(); };
+  const known=el('button','btn ghost','Уже знаю'); known.onclick=()=>{ SESSION.intro[w.key]=1; afterGrade(4); };
+  const go2=el('button','btn','Запомнил → проверить'); go2.dataset.key='space'; go2.onclick=()=>{ SESSION.intro[w.key]=1; render(); };
   row.appendChild(known); row.appendChild(go2); stage.appendChild(row);
   stage.appendChild(el('p','eyebrow','Разбор по иероглифам'));
   stage.appendChild(el('div','',breakdown(w.s)));
@@ -891,7 +967,7 @@ function qRecog(stage,w){
   showBtn(stage,rev);
 }
 // — 汉字 → 4 перевода
-function distractWords(w){ const L=WORD_L[w.s]; const near=WORDS.filter(x=>x!==w&&x.ru&&(L?WORD_L[x.s]&&Math.abs(WORD_L[x.s]-L)<=6:x.hsk===w.hsk)); return near.length>=8?near:WORDS; }
+function distractWords(w){ const L=WORD_L[w.key]; const near=WORDS.filter(x=>x!==w&&x.ru&&(L?WORD_L[x.key]&&Math.abs(WORD_L[x.key]-L)<=6:x.hsk===w.hsk)); return near.length>=8?near:WORDS; }
 function qChoice(stage,w){
   stage.appendChild(el('div','qprompt','Выбери перевод'));
   const c=el('div','qcard'); c.style.minHeight='24vh'; c.innerHTML=`<div class="qhz han">${esc(w.d||w.s)}</div>`; stage.appendChild(c);
@@ -988,7 +1064,8 @@ function writeQuiz(host,chars,onDone){
     try{
       const inst=HanziWriter.create('wq',chars[idx],{width:230,height:230,padding:8,showCharacter:false,showOutline:false,
         strokeColor:HWC.stroke,drawingColor:HWC.draw,highlightColor:HWC.hl,charDataLoader:(c,ok)=>hwData(c,ok,()=>{ hint.textContent='нет данных о чертах (нужна сеть)'; })});
-      inst.quiz({showHintAfterMisses:3,onMistake:()=>{ mistakes++; },
+      const SN=strokesOf(chars[idx]);
+      inst.quiz({showHintAfterMisses:3,onMistake:st=>{ mistakes++; if(SN[st.strokeNum]) hint.textContent='Черта '+(st.strokeNum+1)+': '+SN[st.strokeNum].name; },
         onComplete:()=>{ idx++; if(idx<chars.length){ hint.textContent='✓'; setTimeout(mount,400); } else onDone(mistakes); }});
     }catch(e){ hint.textContent='прописи недоступны'; onDone(99); }
   }
@@ -1020,7 +1097,8 @@ function radIntro(stage,n){
     <div class="qhz han" style="font-size:80px">${esc(r[4][0])}</div>
     ${r[4].length>1?`<div class="han" style="font-size:22px;color:var(--paper-dim)">другие формы: ${esc([...r[4]].slice(1).join(' '))}</div>`:''}
     <div class="reveal"><div class="py">${pinyinHTML(r[2])}</div><div class="tr">${esc(r[3])}</div><div class="en">${r[1]} ${plural(r[1],'черта','черты','черт')}</div>
-    ${ex.length?`<div class="en" style="margin-top:8px">В иероглифах уроков: <span class="han" style="font-size:22px">${ex.map(ch=>`<span class="hz" data-c="${ch}">${ch}</span>`).join(' ')}</span></div>`:''}</div>`;
+    ${ex.length?`<div class="en" style="margin-top:8px">В иероглифах уроков: <span class="han" style="font-size:22px">${ex.map(ch=>`<span class="hz" data-c="${ch}">${ch}</span>`).join(' ')}</span></div>`:''}
+    ${RAD2[n]&&RAD2[n].e?`<div class="en">Пример из пособия: <span class="han" style="font-size:18px">${esc(RAD2[n].e)}</span> ${esc(RAD2[n].ep)} — ${esc(RAD2[n].er)}</div>`:''}</div>`;
   stage.appendChild(c);
   const row=el('div','actionrow');
   const known=el('button','btn ghost','Уже знаю'); known.onclick=()=>{ SESSION.intro['r:'+n]=1; afterGrade(4); };
@@ -1052,7 +1130,7 @@ function sessionDone(s){
   if(fails.length){
     v.appendChild(el('p','eyebrow','Ошибки'));
     const list=el('div','rowlist');
-    fails.slice(0,15).forEach(k=>{ if(isRad(k)){ const r=RADS[radNum(k)-1]; const it=el('button','witem',`<div class="hzw han">${esc(r[4][0])}</div><div class="mid"><div class="py">ключ №${r[0]}</div><div class="tr">${esc(r[3])}</div></div>`); it.onclick=()=>go('radical',{n:r[0]}); list.appendChild(it); } else list.appendChild(witem(BYS[k])); });
+    fails.slice(0,15).forEach(k=>{ if(isRad(k)){ const r=RADS[radNum(k)-1]; const it=el('button','witem',`<div class="hzw han">${esc(r[4][0])}</div><div class="mid"><div class="py">ключ №${r[0]}</div><div class="tr">${esc(r[3])}</div></div>`); it.onclick=()=>go('radical',{n:r[0]}); list.appendChild(it); } else list.appendChild(witem(BYK[k])); });
     v.appendChild(list);
     const rb=el('button','btn ghost','Повторить ошибки ('+fails.length+')'); rb.style.marginTop='12px'; rb.onclick=()=>startSession(fails,'auto','Работа над ошибками'); v.appendChild(rb);
   }
@@ -1098,10 +1176,11 @@ function viewDraw(s){
       const hw=HanziWriter.create('writer',ch,{width:250,height:250,padding:10,showCharacter:false,showOutline:outline,
         strokeColor:HWC.stroke,outlineColor:HWC.outline,drawingColor:HWC.draw,highlightColor:HWC.hl,strokeAnimationSpeed:1.1,delayBetweenStrokes:120,
         charDataLoader:(x,ok)=>hwData(x,ok,()=>{ hint.textContent='нет данных о чертах для '+x+' (нужна сеть)'; })});
-      hint.textContent=outline?'Обведи по контуру, черта за чертой':'Без контура — по памяти';
+      const SN=strokesOf(ch), sname=i=>SN[i]?(SN[i].name+(SN[i].n?' (№'+SN[i].n+')':'')):'';
+      hint.textContent=(outline?'Обведи по контуру. ':'По памяти. ')+(SN.length?'Черта 1: '+sname(0):'');
       hw.quiz({showHintAfterMisses:3,
-        onMistake:st=>{ hint.textContent='Черта '+(st.strokeNum+1)+': ещё раз'; },
-        onCorrectStroke:st=>{ hint.textContent=st.strokesRemaining>0?'✓ осталось черт: '+st.strokesRemaining:'✓'; },
+        onMistake:st=>{ hint.textContent='Черта '+(st.strokeNum+1)+(SN.length?' — '+sname(st.strokeNum):'')+': ещё раз'; },
+        onCorrectStroke:st=>{ hint.textContent=st.strokesRemaining>0?'✓ черта '+(st.strokeNum+2)+(SN.length?': '+sname(st.strokeNum+1):'')+' · осталось '+st.strokesRemaining:'✓'; },
         onComplete:sum=>{ hint.innerHTML='<span style="color:var(--ok)">Готово! ошибок: '+sum.totalMistakes+'</span>'; Speech.has()&&Speech.say(ch); }});
       $('#dAnim').onclick=()=>hw.animateCharacter();
     }catch(e){ hint.textContent='ошибка: '+e.message; }
@@ -1123,7 +1202,7 @@ const AUTO={};
 function autoTest(L){
   if(AUTO[L]) return AUTO[L];
   const blocks=(LESSONS[L].b||[]).map((b,i)=>({id:'b'+(i+1),title:'Блок '+(i+1),tip:'',u:b.u,
-    w:b.w.map(s=>BYS[s]).filter(Boolean).map(w=>[w.d||w.s,w.p,meaning(w)]),tl:b.tl,auto:true}));
+    w:b.w.map(k=>BYK[k]).filter(Boolean).map(w=>[w.d||w.s,w.p,meaning(w)]),tl:b.tl,auto:true}));
   return AUTO[L]={id:'L'+L,kind:'тренировка',lesson:L,title:'Урок '+L+' · тренировка к проверочной',auto:true,
     note:'Собрано автоматически из примеров учебника к словам урока: только пройденная лексика. Настоящие предложения проверочной добавляются отдельно.',blocks};
 }
@@ -1372,8 +1451,24 @@ function viewKeys(s){
   act.appendChild(b1); act.appendChild(b2); v.appendChild(act);
   const tabs=el('div','tabs');
   [['course','Из уроков 1–'+N],['all','Все 214']].forEach(([id,t])=>{ const b=el('button','tab'+(scope===id?' on':''),t); b.onclick=()=>go('keys',{scope:id}); tabs.appendChild(b); });
+  const sb=el('button','tab','Черты'); sb.onclick=()=>go('strokes'); tabs.appendChild(sb);
   v.appendChild(tabs);
   v.appendChild(radGrid(scope==='all'?all:inC));
+  s.appendChild(v);
+}
+function viewStrokes(s){
+  const v=el('div','view');
+  const back=el('button','back','‹ Ключи'); back.onclick=()=>go('keys'); v.appendChild(back);
+  v.appendChild(el('h2','title','Черты'));
+  v.appendChild(el('p','note','Таблица черт курса (24 черты). Названия черт показываются в разборе иероглифа («Порядок черт») и подсказываются в прописях. Нажми на пример — разбор иероглифа.'));
+  STROKE_TABLE.forEach(([title,rows])=>{
+    v.appendChild(el('p','eyebrow',esc(title)));
+    const list=el('div','rowlist');
+    rows.forEach(([n,name,ex])=>list.appendChild(el('div','strow',`<span class="num">${n}</span>${strokeImg(n)}<span class="nm">${esc(name)}</span><span class="ex han">${[...ex].map(c=>HZ.c[c]?`<span class="hz" data-c="${c}">${c}</span>`:c).join('')}</span>`)));
+    v.appendChild(list);
+  });
+  v.appendChild(el('p','eyebrow','Нет в таблице курса'));
+  v.appendChild(el('p','note','В данных о порядке черт встречаются ещё такие черты; названия для них даны по смыслу: '+Object.values(STROKE_EXTRA).map(esc).join('; ')+'.'));
   s.appendChild(v);
 }
 function viewRadical(s){
@@ -1387,6 +1482,12 @@ function viewRadical(s){
     <div class="tagrow"><span class="pill">Ключ №${n}</span><span class="pill">${r[1]} ${plural(r[1],'черта','черты','черт')}</span>${RAD_L[n]?`<span class="pill k">урок ${RAD_L[n]}</span>`:''}${st!=='new'?'<span class="pill ok">в работе</span>':''}</div>
     <div class="cardbtns"><button class="iconbtn primary" data-say="${esc(r[4][0])}" aria-label="Слушать">🔊</button><button class="iconbtn" data-draw="${esc(r[4][0])}" aria-label="Прописи">笔</button></div>`;
   v.appendChild(card);
+  const p2=RAD2[n];
+  if(p2){ const ex=p2.e&&HZ.c[p2.e]?`<span class="hz han" data-c="${p2.e}" style="font-size:20px">${esc(p2.e)}</span>`:`<span class="han" style="font-size:20px">${esc(p2.e||'')}</span>`;
+    const box=el('div','meta');
+    box.appendChild(mr('По пособию',`${esc(p2.m||'')}${p2.s?` · упрощённо: <span class="han" style="font-size:18px">${esc(p2.s)}</span>`:''}<div class="lbl" style="margin-top:2px">Петросян, «Таблица иероглифических ключей (по словарю Кан Си)»</div>`));
+    if(p2.e) box.appendChild(mr('Пример',`${ex} ${esc(p2.ep||'')} — ${esc(p2.er||'')}`));
+    v.appendChild(box); }
   const lc=radChars(n);
   const other=Object.keys(HZ.c).filter(c=>HZ.c[c][0]===n&&!CHAR_L[c]);
   if(lc.length){ v.appendChild(el('p','eyebrow','Иероглифы уроков с этим ключом ('+lc.length+')'));
@@ -1410,7 +1511,7 @@ function viewDict(s){
       res.appendChild(el('p','eyebrow','HSK 3.0 — дополнительно к урокам'));
       const list=el('div','rowlist');
       [1,2,3,4,5,6].forEach(l=>{ const ws=WORDS.filter(w=>w.hsk===l);
-        const r=el('button','row',`<div class="n" style="color:var(--gold)">${l}</div><div class="tt"><b>HSK ${l}</b><small>${ws.length} слов</small></div><div class="cnt">${learnedCount(ws.map(w=>w.s))}/${ws.length}</div>`);
+        const r=el('button','row',`<div class="n" style="color:var(--gold)">${l}</div><div class="tt"><b>HSK ${l}</b><small>${ws.length} слов</small></div><div class="cnt">${learnedCount(ws.map(w=>w.key))}/${ws.length}</div>`);
         r.onclick=()=>go('list',{hsk:l}); list.appendChild(r); });
       res.appendChild(list);
       res.appendChild(el('p','note',`В базе ${WORDS.length} слов и ${Object.keys(CHARS).length} иероглифов: Кондрашевский (уроки 1–30) + HSK 1–6.`));
@@ -1418,14 +1519,14 @@ function viewDict(s){
     }
     const qt=toneless(q);
     const hits=WORDS.filter(w=>w.s.includes(q)||(w.d&&w.d.includes(q))||(qt&&toneless(w.p).includes(qt))||(w.ru&&w.ru.toLowerCase().includes(q))||(w.en&&w.en.join(' ').toLowerCase().includes(q)))
-      .sort((a,b)=>((WORD_L[a.s]||99)-(WORD_L[b.s]||99))||(a.s.length-b.s.length)).slice(0,80);
+      .sort((a,b)=>((WORD_L[a.key]||99)-(WORD_L[b.key]||99))||(a.s.length-b.s.length)).slice(0,80);
     if(!hits.length){ res.appendChild(el('div','empty','Ничего не найдено')); return; }
     const list=el('div','rowlist'); hits.forEach(w=>list.appendChild(witem(w))); res.appendChild(list);
   };
   inp.oninput=run; run(); s.appendChild(v);
 }
 function viewList(s){
-  const l=State.route.hsk, ws=WORDS.filter(w=>w.hsk===l).sort((a,b)=>(a.f||99999)-(b.f||99999)), keys=ws.map(w=>w.s);
+  const l=State.route.hsk, ws=WORDS.filter(w=>w.hsk===l).sort((a,b)=>(a.f||99999)-(b.f||99999)), keys=ws.map(w=>w.key);
   const v=el('div','view');
   const back=el('button','back','‹ Словарь'); back.onclick=()=>go('dict'); v.appendChild(back);
   v.appendChild(el('h2','title','HSK '+l));

@@ -23,11 +23,19 @@ src/data/app_data.json      → /*__DATA__*/    слова и иероглифы
 src/data/hanzi.json         → /*__HANZI__*/   разбор иероглифов (tools/make_hanzi.py)
 src/data/lessons.json       → /*__LESSONS__*/ уроки: порядок слов + блоки тренировки (tools/make_lessons.py)
 src/data/tests.json         → /*__TESTS__*/   настоящие проверочные/диктанты/контрольные (вручную)
-src/data/radicals.json      → /*__RADS__*/    214 ключей, рус. названия из таблицы ДВФУ
+src/data/radicals.json      → /*__RADS__*/    214 ключей, рус. названия из таблицы ДВФУ (сверено, v16)
+src/data/palladius.json     → /*__PALL__*/    система Палладия — таблица курса (sistema_Palladiya.pdf)
+src/data/rad_petrosyan.json → /*__RAD2__*/    пособие Петросяна «Таблица иероглифических ключей (по Кан Си)»: значение, пример
+src/data/group.json         ← слова списка группы (уроки 1–16) и презентации урока 17 → LESSONS[L].x
+src/data/syllables.json     ← таблица слогов путунхуа курса (docx) — проверка пиньиня
+src/data/stroke_codes.json  ← порядок черт кодами cnchar (tools/fetch_strokes.py)
+strokes/NN.png              ← 24 черты из таблицы черт курса (картинка пользователя)
+evolution/<hex>.jpg         ← ряды таблицы «Эволюция графических стилей» (20 знаков, материал курса)
 src/data/hanzi_src.json     ← выжимка makemeahanzi + Unihan (tools/fetch_hanzi_sources.py)
 src/data/char_ru.json       ← ручные рус. значения знаков/компонентов
 src/data/master_dataset.json, components.json, kondrashevsky_data.py, lesson_titles.json ← исходники
-tools/build.py  tools/make_hanzi.py  tools/make_lessons.py  tools/fetch_hanzi_sources.py  tools/legacy/
+tools/build.py  tools/make_hanzi.py  tools/make_lessons.py  tools/fix_words.py  tools/pinyin_util.py
+tools/fetch_hanzi_sources.py  tools/fetch_strokes.py  tools/legacy/
 tests/*.mjs            ← jsdom-тесты (env.mjs — общая обвязка; 5 наборов)
 materials/             ← слова по урокам (md). PDF ДВФУ и транскрипты НЕ в репо: он публичный
 related-apps/proverochnaya-urok18/ ← исходное отдельное приложение (архив, логика перенесена в 朱)
@@ -36,13 +44,14 @@ related-apps/proverochnaya-urok18/ ← исходное отдельное пр�
 ## Цикл работы
 ```
 npm install                 # jsdom для тестов
+python3 tools/fix_words.py    # правки словаря по учебнику/списку группы (идемпотентно)
 python3 tools/make_hanzi.py   # если менялись char_ru.json / hanzi_src.json / состав слов
 python3 tools/make_lessons.py # если менялись слова уроков или примеры ex
 python3 tools/build.py      # src → index.html (+ node --check)
 npm test                    # 5 наборов: data, smoke, srs, migrate, cycle — все ✅
 npm run serve               # http://localhost:8080
 ```
-После ЛЮБОГО изменения сайта — поднять `const CACHE='hanzi-vNN'` в `service-worker.js` (сейчас **v15**),
+После ЛЮБОГО изменения сайта — поднять `const CACHE='hanzi-vNN'` в `service-worker.js` (сейчас **v16**),
 иначе установленное приложение не обновится.
 В облачной песочнице есть Chromium: Playwright (глобальный, `NODE_PATH=$(npm root -g)`) с
 `executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'`; cdnjs заблокирован — hanzi-writer
@@ -52,12 +61,13 @@ npm run serve               # http://localhost:8080
 - Навигация: Сегодня · Уроки · Проверочные · Ключи · Словарь; ⚙ — настройки. `go(name,params)` → `render()`.
   Экраны: home, lessons, lesson, card, session, draw, tests, test, keys, radical, dict, list, settings.
 - Хранилище: IndexedDB `hanzi-trainer` v1, ключи `cards`, `settings`, `meta`, `tests` (фоллбэк — память).
-- **Прогресс: `State.cards[ключ]`**: слово — его иероглифы `w.s`, ключ (радикал) — `'r:N'`. Не индексы!
+- **Прогресс: `State.cards[ключ]`**: слово — `w.key` (= иероглифы `w.s`; у омографов «还:hái», «行:xíng»),
+  ключ (радикал) — `'r:N'`. Не индексы! `BYK[key]` → слово, `BYS[s]` → первое слово с такими иероглифами.
   Старые числовые ключи мигрируют в `loadState`. Старые настройки (theme, goal, sessionCap…) игнорируются.
 - Настройки: `lesson` (урок группы, 1–30, по умолч. 18), `newPerDay` (12), `voiceName`. Удержание 0.90,
   порция 20 карточек, ключей до 5 новых в день — константы `REQ`, `SESSION_CAP`, `RAD_PER_DAY`.
-- Курс `COURSE`: уроки 1→30, внутри — порядок учебника (`LESSONS[L].o`); ключ `r:N` стоит перед первым словом
-  с ним. «Урок дня» = `dailyQueue()`: повторения + новые по курсу (после урока группы идёт дальше сам).
+- Курс `COURSE`: уроки 1→30, внутри — порядок учебника (`LESSONS[L].o`), затем доп. наборы урока
+  (`LESSONS[L].x`: список группы после 16, презентация после 17); ключ `r:N` стоит перед первым словом с ним. «Урок дня» = `dailyQueue()`: повторения + новые по курсу (после урока группы идёт дальше сам).
   `poolQueue(keys)` — урок/ключи/HSK порциями. `CHAR_L`, `RAD_L` — урок первого появления.
 - SRS: FSRS-5, стандартные веса. Оценки: «Не помню»=1 / «Помню»=3, «Уже знаю» на интро = 4.
   Объективные задания (выбор, тоны, пиньинь, прописи) оцениваются сами (прописи: 0 ошибок→3, ≤3→2, иначе 1).
@@ -74,6 +84,10 @@ npm run serve               # http://localhost:8080
 - Клавиатура (глобально, по `data-key`/`data-ch`): Пробел/Enter — показать/дальше, 1/← и 2/→ — оценка,
   1–4 — варианты, Backspace — отменить.
 - Прописи: hanzi-writer 3.7.3 с cdnjs; графика из `hanzi-data.json` → `window.HZDATA`, иначе jsdelivr.
+- Материалы курса в интерфейсе: порядок черт с названиями по таблице 24 черт (`STROKE_TABLE`, коды `STROKE_NO`;
+  e→E 横钩 и y→Y 卧钩 уточняются по геометрии черты в make_hanzi.py; 点/点2 = точка вправо/влево), экран «Черты»;
+  Палладий `palladius(p)` на карточке/интро/разборе; эволюция письма в разборе 20 знаков (`EVO`); пособие Петросяна
+  на экране ключа (`RAD2`).
 - Озвучка `Speech`: `./audio/manifest.json` + MP3 (make_audio.py) или Web Speech zh-CN; `say(text, rate)`.
 
 ### Как добавить проверочную / диктант / контрольную
@@ -104,6 +118,15 @@ npm run serve               # http://localhost:8080
 - Примеры к урокам: только иероглифы, пройденные к этому уроку. Проверяет `tests/data.mjs` (drill-lexicon);
   в v15 исправлено 12 примеров, нарушавших правило (笔, 纸, 报, 报纸, 太太, 多, 少, 杂志, 电话, 生词, 腿, 文学).
 - В тренировке тонов нейтральный тон словаря (xiūxi, péngyou) важнее механического пиньиня примера.
+
+## Проверка слов Кондрашевского (v16)
+- Слова 30 уроков распознаны в июле со скана «Кондрашевский Том 1 целиком» (770 стр., рамки «Новые слова»).
+  Скан в этой сессии загрузить не удалось → уроки 17–30 по учебнику НЕ перепроверены (только пиньинь по таблице слогов).
+- Уроки 1–16 сверены со «Списком слов уроки 1–16» группы: все слова учебника на месте; 70 слов группы, которых нет
+  в «Новых словах» учебника, добавлены набором g16; презентация 17 — набором p17.
+- Пиньинь 22 слов приведён к учебнику (fix_words.py); 254 слитные записи разбиты на слоги.
+- Опечатки в материалах: список группы — 老爷→姥爷, пиньинь 家/尺子/谢谢; Палладий — chuo «ЧОУ» (взято ЧО),
+  cuo «ЦУО» (оставлено как в таблице, стандарт — цо), нет «me» (добавлено МЭ); таблица ДВФУ — №138 gēn (оставлено gèn).
 
 ## Бэклог (на 2026-10-06)
 1. Аудио-пак не сгенерирован: пользователь не запускал `make_audio.py` (сейчас голос устройства).
