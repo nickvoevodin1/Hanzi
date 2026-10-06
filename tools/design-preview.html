@@ -1,0 +1,515 @@
+<!doctype html><meta charset="utf-8"><title>Превью дизайна</title>
+<style>
+/* ===== ТЕМА: светлая «рисовая бумага» (по умолчанию) ===== */
+:root{
+  --ink:#faf4e7;               /* фон-бумага */
+  --surface:#fffdf8;           /* карточка */
+  --surface-2:#fbf3e3;         /* лёгкий второй тон */
+  --ink2:#fffdf8;              /* = surface (алиас) */
+  --ink3:#f2e8d4;              /* вставки/инпуты */
+  --line:#e7d4ba;              /* рамки */
+  --paper:#2b211b;             /* основной текст */
+  --paper-dim:#6e5f52;         /* вторичный текст */
+  --muted:#8a7a69;             /* третичный */
+  --cinnabar:#e23d2e;          /* киноварь (primary) */
+  --cinnabar-2:#c1352a;        /* акцентный текст на светлом */
+  --cinnabar-ink:#fbe7e2;      /* фон активных чипов */
+  --gold:#9a6b06;              /* золото */
+  --jade:#0e7d5d;              /* нефрит */
+  --indigo:#2f5fa8;            /* индиго */
+  --t1:#e23d2e; --t2:#9a6b06; --t3:#0e7d5d; --t4:#2f5fa8; --t5:#8a7a69;
+  --ok:#0e7d5d; --bad:#d24a39;
+  --r:16px; --rs:11px;
+  --shadow:0 10px 26px rgba(150,100,40,.13);
+  --seal:#e23d2e;
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+/* ===== ТЕМА: тёмная тушь (по желанию) ===== */
+[data-theme="dark"]{
+  --ink:#141110; --surface:#1c1815; --surface-2:#17120f; --ink2:#1c1815; --ink3:#251f1b;
+  --line:#352c26; --paper:#ece3d4; --paper-dim:#b7ab98; --muted:#8a7f70;
+  --cinnabar:#cf4530; --cinnabar-2:#e0664e; --cinnabar-ink:#3a1712;
+  --gold:#c8a24a; --jade:#3fa25f; --indigo:#5f86df;
+  --t1:#e6504a; --t2:#d99b17; --t3:#3fa25f; --t4:#5f86df; --t5:#948b7d;
+  --ok:#3fa25f; --bad:#d15646;
+  --shadow:0 12px 30px rgba(0,0,0,.5); --seal:#cf4530;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  background:
+    radial-gradient(1100px 520px at 85% -12%, rgba(224,162,27,.16), transparent 62%),
+    radial-gradient(900px 500px at -10% 8%, rgba(21,158,118,.08), transparent 60%),
+    var(--ink);
+  color:var(--paper);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; overscroll-behavior-y:none;
+  transition:background .3s,color .3s;
+}
+.han{font-family:"Songti SC","Noto Serif SC","STSong","SimSun",serif;}
+button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:none}
+:focus-visible{outline:2px solid var(--cinnabar);outline-offset:2px;border-radius:6px}
+a{color:var(--cinnabar-2)}
+
+#app{max-width:560px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding-bottom:calc(76px + var(--safe-b))}
+.view{padding:18px 16px 8px;animation:fade .28s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* Верхняя панель */
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;
+  padding:14px 16px 12px;background:linear-gradient(var(--ink) 72%,transparent);
+  padding-top:calc(12px + env(safe-area-inset-top,0px))}
+.seal{width:40px;height:40px;border-radius:9px;background:var(--seal);color:#fff;
+  display:grid;place-items:center;font-weight:700;font-size:23px;line-height:1;
+  box-shadow:0 4px 12px rgba(226,61,46,.35);position:relative}
+.seal::after{content:"";position:absolute;inset:4px;border:1.5px solid rgba(255,255,255,.5);border-radius:6px}
+.seal.han{padding-bottom:1px}
+.top h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.2px}
+.top .sub{font-size:11px;color:var(--muted);margin-top:1px;letter-spacing:.02em}
+.top .spacer{flex:1}
+.iconbtn{width:40px;height:40px;border-radius:10px;background:var(--surface);border:1px solid var(--line);
+  display:grid;place-items:center;font-size:17px;color:var(--paper-dim);box-shadow:var(--shadow)}
+.iconbtn:active{transform:scale(.94)}
+
+/* Главная */
+.eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 10px;font-weight:700}
+.hero{background:linear-gradient(160deg,var(--surface),var(--surface-2));border:1px solid var(--line);
+  border-radius:var(--r);padding:20px 18px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;
+  background:linear-gradient(90deg,var(--cinnabar),var(--gold) 55%,var(--jade))}
+.hero::after{content:"学";position:absolute;right:-16px;bottom:-34px;font-size:158px;
+  color:var(--cinnabar);opacity:.06;font-family:"Songti SC",serif}
+.hero h2{margin:0 0 3px;font-size:16px;font-weight:700}
+.hero p{margin:0 0 15px;color:var(--paper-dim);font-size:13px}
+.duebar{display:flex;gap:10px;margin-bottom:15px}
+.duechip{flex:1;background:var(--ink);border:1px solid var(--line);border-radius:var(--rs);padding:11px 8px;text-align:center}
+.duechip b{display:block;font-size:23px;line-height:1.1;font-weight:800}
+.duechip.new b{color:var(--cinnabar)} .duechip.rev b{color:var(--gold)} .duechip.learn b{color:var(--jade)}
+.duechip span{font-size:10px;color:var(--muted);letter-spacing:.03em}
+.btn{display:block;width:100%;text-align:center;background:var(--cinnabar);color:#fff;font-weight:700;
+  padding:15px;border-radius:var(--rs);font-size:15px;box-shadow:0 8px 20px rgba(226,61,46,.30);letter-spacing:.01em}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:var(--surface);border:1px solid var(--line);color:var(--paper);box-shadow:var(--shadow)}
+.btn.mini{display:inline-block;width:auto;padding:10px 15px;font-size:13px}
+.btn[disabled]{opacity:.5;box-shadow:none;pointer-events:none;background:var(--ink3);color:var(--muted)}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:16px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:15px;text-align:left;box-shadow:var(--shadow)}
+.tile:active{transform:scale(.985)}
+.tile .ic{font-size:21px}.tile h3{margin:9px 0 2px;font-size:14px;font-weight:700}
+.tile p{margin:0;font-size:11.5px;color:var(--muted)}
+
+/* Списки */
+.rowlist{margin-top:6px;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface);box-shadow:var(--shadow)}
+.row{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--line);width:100%;text-align:left}
+.row:last-child{border-bottom:none}
+.row:active{background:var(--surface-2)}
+.row .n{width:31px;height:31px;border-radius:8px;background:var(--ink);display:grid;place-items:center;
+  font-size:12px;color:var(--paper-dim);border:1px solid var(--line);flex:none;font-weight:700}
+.row .tt{flex:1;min-width:0}
+.row .tt b{font-size:14px;font-weight:650;display:block}
+.row .tt small{color:var(--muted);font-size:11.5px}
+.row .cnt{font-size:11px;color:var(--gold);background:var(--ink);border:1px solid var(--line);border-radius:20px;padding:3px 9px;flex:none;font-weight:600}
+.row .chev{color:var(--muted);font-size:16px;flex:none}
+.pill{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;border:1px solid var(--line);color:var(--paper-dim);margin-left:6px;font-weight:600}
+.pill.hsk{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 40%,transparent);background:color-mix(in srgb,var(--gold) 9%,transparent)}
+.pill.k{color:var(--cinnabar-2);border-color:color-mix(in srgb,var(--cinnabar) 35%,transparent);background:var(--cinnabar-ink)}
+
+.tabs{display:flex;gap:8px;margin:2px 0 14px}
+.tab{flex:1;padding:10px;border-radius:10px;background:var(--surface);border:1px solid var(--line);
+  font-size:13px;color:var(--paper-dim);text-align:center;font-weight:600;box-shadow:var(--shadow)}
+.tab.on{background:var(--cinnabar-ink);border-color:color-mix(in srgb,var(--cinnabar) 40%,transparent);color:var(--cinnabar-2)}
+
+.search{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:11px;
+  padding:13px 14px;color:var(--paper);font-size:15px;margin-bottom:12px;box-shadow:var(--shadow)}
+.search::placeholder{color:var(--muted)}
+
+/* Элемент словаря */
+.witem{display:flex;align-items:center;gap:13px;padding:12px 14px;border-bottom:1px solid var(--line);width:100%;text-align:left}
+.witem:active{background:var(--surface-2)}
+.witem .hz{font-size:27px;line-height:1;min-width:36px;color:var(--paper)}
+.witem .mid{flex:1;min-width:0}
+.witem .py{font-size:13px}
+.witem .tr{font-size:12.5px;color:var(--paper-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.witem .dot{width:9px;height:9px;border-radius:50%;background:var(--line);flex:none}
+.witem .dot.seen{background:var(--indigo)} .witem .dot.due{background:var(--gold)} .witem .dot.known{background:var(--jade)}
+
+/* Карточка слова */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  padding:24px 18px 22px;box-shadow:var(--shadow);text-align:center;position:relative;overflow:hidden}
+.card::after{content:"朱";position:absolute;top:12px;right:12px;width:26px;height:26px;background:var(--seal);
+  color:#fff;border-radius:6px;display:grid;place-items:center;font-family:"Songti SC",serif;font-size:15px;
+  box-shadow:0 2px 7px rgba(226,61,46,.3)}
+.card .paperlines{position:absolute;inset:0;border-radius:var(--r);pointer-events:none;
+  background-image:linear-gradient(color-mix(in srgb,var(--paper) 5%,transparent) 1px,transparent 1px);background-size:100% 30px;opacity:.6}
+.bighz{font-size:98px;line-height:1.05;margin:6px 0 8px;letter-spacing:2px;color:var(--paper)}
+.bigpy{font-size:22px;margin-bottom:8px}
+.bigtr{font-size:16px;color:var(--paper);margin-bottom:2px;font-weight:600}
+.bigen{font-size:13px;color:var(--muted);margin-top:4px}
+.tagrow{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:13px}
+.cardbtns{display:flex;gap:10px;justify-content:center;margin-top:17px}
+.cardbtns .iconbtn{width:48px;height:48px;font-size:20px}
+.cardbtns .iconbtn.primary{background:var(--cinnabar);color:#fff;border-color:transparent;box-shadow:0 6px 16px rgba(226,61,46,.3)}
+
+.meta{margin-top:16px;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface);box-shadow:var(--shadow)}
+.meta .mr{display:flex;padding:12px 14px;border-bottom:1px solid var(--line);font-size:13px;gap:12px}
+.meta .mr:last-child{border-bottom:none}
+.meta .mr .k{color:var(--muted);width:120px;flex:none;font-weight:600}
+.meta .mr .v{flex:1}
+.strokeline{font-size:13px;line-height:1.7}
+.strokeline .num{color:var(--cinnabar-2);font-weight:700;margin-right:6px}
+
+/* Учёба */
+.qwrap{min-height:60vh;display:flex;flex-direction:column}
+.progress{height:5px;background:var(--ink3);border-radius:3px;overflow:hidden;margin-bottom:16px}
+.progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--cinnabar),var(--gold));width:0;transition:width .3s}
+.qcard{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  padding:26px 18px;text-align:center;box-shadow:var(--shadow);min-height:46vh;position:relative;overflow:hidden}
+.qcard::after{content:"朱";position:absolute;top:12px;right:12px;width:24px;height:24px;background:var(--seal);
+  color:#fff;border-radius:6px;display:grid;place-items:center;font-family:"Songti SC",serif;font-size:14px;opacity:.9}
+.qhz{font-size:106px;line-height:1;letter-spacing:2px;color:var(--paper)}
+.qsub{font-size:15px;color:var(--paper-dim);margin-top:18px}
+.qprompt{font-size:15px;color:var(--muted);margin-bottom:16px;font-weight:600}
+.qbig-tr{font-size:26px;font-weight:700;line-height:1.3}
+.reveal{margin-top:18px;border-top:1px dashed var(--line);padding-top:16px;width:100%}
+.reveal .py{font-size:20px} .reveal .tr{font-size:17px;margin-top:4px;font-weight:600}
+.reveal .en{font-size:13px;color:var(--muted);margin-top:6px}
+
+.choices{display:grid;gap:10px;margin-top:6px}
+.choice{padding:15px;border-radius:12px;background:var(--surface);border:1px solid var(--line);font-size:17px;text-align:center;box-shadow:var(--shadow)}
+.choice:active{transform:scale(.99)}
+.choice.correct{background:color-mix(in srgb,var(--jade) 16%,var(--surface));border-color:var(--jade);color:var(--jade)}
+.choice.wrong{background:color-mix(in srgb,var(--bad) 13%,var(--surface));border-color:var(--bad);color:var(--bad)}
+
+.tinput{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;
+  color:var(--paper);font-size:18px;text-align:center;letter-spacing:1px;box-shadow:var(--shadow)}
+.hintbtn{background:none;color:var(--muted);font-size:12px;margin-top:10px;text-decoration:underline}
+
+.gradebar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+.grade{padding:12px 6px;border-radius:11px;text-align:center;border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow)}
+.grade small{display:block;font-size:10px;color:var(--muted);margin-top:3px}
+.grade b{font-size:14px;font-weight:700}
+.grade.g1{border-color:color-mix(in srgb,var(--bad) 45%,transparent)}.grade.g1 b{color:var(--bad)}
+.grade.g2{border-color:color-mix(in srgb,var(--gold) 45%,transparent)}.grade.g2 b{color:var(--gold)}
+.grade.g3{border-color:color-mix(in srgb,var(--jade) 45%,transparent)}.grade.g3 b{color:var(--jade)}
+.grade.g4{border-color:color-mix(in srgb,var(--indigo) 45%,transparent)}.grade.g4 b{color:var(--indigo)}
+.grade:active{transform:translateY(1px)}
+.showbtn{margin-top:14px}
+
+.actionrow{display:flex;gap:10px;margin-top:14px}
+.actionrow .btn{margin:0}
+
+/* Прописи */
+#writer{width:260px;height:260px;margin:6px auto;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r);touch-action:none}
+.gridbg{position:relative}
+.drawhint{font-size:12.5px;color:var(--muted);text-align:center;margin-top:8px}
+
+/* Нижняя навигация */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:color-mix(in srgb,var(--ink) 90%,transparent);
+  backdrop-filter:blur(12px);border-top:1px solid var(--line);
+  display:flex;max-width:560px;margin:0 auto;padding-bottom:var(--safe-b)}
+.nav button{flex:1;padding:9px 0 8px;display:flex;flex-direction:column;align-items:center;gap:3px;
+  color:var(--muted);font-size:10px;font-weight:600}
+.nav button .ic{font-size:19px;line-height:1}
+.nav button.on{color:var(--cinnabar)}
+
+/* Прочее */
+.empty{text-align:center;color:var(--muted);padding:50px 20px;font-size:14px}
+.empty .big{font-size:48px;margin-bottom:10px;color:var(--jade)}
+.note{font-size:11.5px;color:var(--muted);line-height:1.55;margin-top:10px}
+.toast{position:fixed;left:50%;bottom:calc(90px + var(--safe-b));transform:translateX(-50%);
+  background:var(--paper);border:1px solid var(--line);color:var(--ink);padding:11px 17px;border-radius:11px;
+  font-size:13px;z-index:50;box-shadow:var(--shadow);opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%;font-weight:600}
+.toast.on{opacity:1}
+.back{font-size:14px;color:var(--paper-dim);display:inline-flex;align-items:center;gap:6px;margin-bottom:8px;font-weight:600}
+.setrow{display:flex;align-items:center;justify-content:space-between;padding:14px;border-bottom:1px solid var(--line);gap:12px}
+.setrow:last-child{border-bottom:none}
+.setrow .lab b{font-size:14px}.setrow .lab small{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}
+.stepper{display:flex;align-items:center;gap:12px}
+.stepper button{width:34px;height:34px;border-radius:9px;background:var(--ink3);border:1px solid var(--line);font-size:18px}
+.stepper b{min-width:26px;text-align:center;font-size:16px;font-weight:700}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{padding:8px 12px;font-size:12px;color:var(--paper-dim);background:var(--surface);font-weight:600}
+.seg button.on{background:var(--cinnabar-ink);color:var(--cinnabar-2)}
+
+body{background:#888!important;padding:20px;display:flex;flex-wrap:wrap;gap:26px;justify-content:center}
+.frame{width:390px;border-radius:28px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);position:relative;flex:none}
+.frame .lbl{position:absolute;top:-0px;left:0;right:0;background:#222;color:#fff;font:600 11px system-ui;padding:6px 10px;z-index:99}
+.frame .inner{height:760px;overflow:hidden;position:relative}
+.frame .inner #app{min-height:100%}
+.frame .inner .nav{position:absolute}
+</style><div class="frame"><div class="lbl">Главная · Бумага</div><div class="inner" data-theme="light" style="background:var(--ink);color:var(--paper)"><div id="app">
+  <div class="top">
+    <div class="seal han">朱</div>
+    <div><h1 id="topTitle">Тренажёр иероглифов</h1><div class="sub" id="topSub">Кондрашевский · HSK 1–5</div></div>
+    <div class="spacer"></div>
+    <button class="iconbtn" id="btnAudioTest" title="Проверить озвучку">🔊</button>
+  </div>
+  <div id="screen"><div class="view"><div>
+    <div class="hero">
+      <p class="eyebrow" style="margin-bottom:6px">Сегодня</p>
+      <h2>Готово к повторению</h2>
+      <p>Выучено слов: 0 из 4367 · новых в день: 12</p>
+      <div class="duebar">
+        <div class="duechip rev"><b>0</b><span>повторить</span></div>
+        <div class="duechip new"><b>12</b><span>новых</span></div>
+        <div class="duechip learn"><b>0</b><span>в работе</span></div>
+      </div>
+      <button class="btn" id="hStart">Начать урок (12)</button>
+    </div></div><div class="grid2"><button class="tile"><div class="ic">☰</div><h3>Словарь</h3><p>Кондрашевский и HSK</p></button><button class="tile"><div class="ic">笔</div><h3>Прописи</h3><p>Учиться писать</p></button><button class="tile"><div class="ic">✎</div><h3>Режимы</h3><p>Карточки, тоны, диктант…</p></button><button class="tile"><div class="ic">📊</div><h3>Статистика</h3><p>Прогресс и серия дней</p></button></div><p class="note">⚠︎ Это превью: прогресс хранится только в памяти. После установки на телефон/публикации на GitHub Pages он сохраняется.</p></div></div>
+</div><nav class="nav" id="nav">
+  <button data-nav="home" class="on"><span class="ic">◈</span>Главная</button>
+  <button data-nav="browse"><span class="ic">☰</span>Словарь</button>
+  <button data-nav="study"><span class="ic">✎</span>Учить</button>
+  <button data-nav="draw"><span class="ic">笔</span>Прописи</button>
+  <button data-nav="settings"><span class="ic">⚙</span>Ещё</button>
+</nav></div></div><div class="frame"><div class="lbl">Словарь (уроки) · Бумага</div><div class="inner" data-theme="light" style="background:var(--ink);color:var(--paper)"><div id="app">
+  <div class="top">
+    <div class="seal han">朱</div>
+    <div><h1 id="topTitle">Тренажёр иероглифов</h1><div class="sub" id="topSub">Кондрашевский · HSK 1–5</div></div>
+    <div class="spacer"></div>
+    <button class="iconbtn" id="btnAudioTest" title="Проверить озвучку">🔊</button>
+  </div>
+  <div id="screen"><div class="view"><div>
+    <div class="tabs">
+      <button class="tab on" data-t="kondr">Кондрашевский</button>
+      <button class="tab " data-t="hsk">HSK</button>
+      <button class="tab " data-t="search">Поиск</button>
+    </div></div><div class="rowlist"><button class="row">
+      <div class="n">1</div>
+      <div class="tt"><b>你好</b><small>2 слов</small></div>
+      <div class="cnt">0/2</div><div class="chev">›</div></button><button class="row">
+      <div class="n">2</div>
+      <div class="tt"><b>你好吗？</b><small>5 слов</small></div>
+      <div class="cnt">0/5</div><div class="chev">›</div></button><button class="row">
+      <div class="n">3</div>
+      <div class="tt"><b>你忙吗？</b><small>8 слов</small></div>
+      <div class="cnt">0/8</div><div class="chev">›</div></button><button class="row">
+      <div class="n">4</div>
+      <div class="tt"><b>这是我朋友</b><small>8 слов</small></div>
+      <div class="cnt">0/8</div><div class="chev">›</div></button><button class="row">
+      <div class="n">5</div>
+      <div class="tt"><b>你妈妈是大夫吗？</b><small>13 слов</small></div>
+      <div class="cnt">0/13</div><div class="chev">›</div></button><button class="row">
+      <div class="n">6</div>
+      <div class="tt"><b>他是哪国人？</b><small>18 слов</small></div>
+      <div class="cnt">0/18</div><div class="chev">›</div></button><button class="row">
+      <div class="n">7</div>
+      <div class="tt"><b>这是什么地图？</b><small>16 слов</small></div>
+      <div class="cnt">0/16</div><div class="chev">›</div></button><button class="row">
+      <div class="n">8</div>
+      <div class="tt"><b>请喝茶</b><small>18 слов</small></div>
+      <div class="cnt">0/18</div><div class="chev">›</div></button><button class="row">
+      <div class="n">9</div>
+      <div class="tt"><b>您贵姓？</b><small>14 слов</small></div>
+      <div class="cnt">0/14</div><div class="chev">›</div></button><button class="row">
+      <div class="n">10</div>
+      <div class="tt"><b>她住多少号？</b><small>19 слов</small></div>
+      <div class="cnt">0/19</div><div class="chev">›</div></button><button class="row">
+      <div class="n">11</div>
+      <div class="tt"><b>谢谢你</b><small>20 слов</small></div>
+      <div class="cnt">0/20</div><div class="chev">›</div></button><button class="row">
+      <div class="n">12</div>
+      <div class="tt"><b>Повторение (她们是很好的朋友)</b><small>14 слов</small></div>
+      <div class="cnt">0/14</div><div class="chev">›</div></button><button class="row">
+      <div class="n">13</div>
+      <div class="tt"><b>Давайте познакомимся</b><small>24 слов</small></div>
+      <div class="cnt">0/24</div><div class="chev">›</div></button><button class="row">
+      <div class="n">14</div>
+      <div class="tt"><b>Вы работаете или учитесь?</b><small>29 слов</small></div>
+      <div class="cnt">0/29</div><div class="chev">›</div></button><button class="row">
+      <div class="n">15</div>
+      <div class="tt"><b>Я учусь в институте</b><small>35 слов</small></div>
+      <div class="cnt">0/35</div><div class="chev">›</div></button><button class="row">
+      <div class="n">16</div>
+      <div class="tt"><b>Что мне надеть?</b><small>35 слов</small></div>
+      <div class="cnt">0/35</div><div class="chev">›</div></button><button class="row">
+      <div class="n">17</div>
+      <div class="tt"><b>В котором часу?</b><small>31 слов</small></div>
+      <div class="cnt">0/31</div><div class="chev">›</div></button><button class="row">
+      <div class="n">18</div>
+      <div class="tt"><b>Распорядок дня · Повторение</b><small>20 слов</small></div>
+      <div class="cnt">0/20</div><div class="chev">›</div></button><button class="row">
+      <div class="n">19</div>
+      <div class="tt"><b>О предпочтениях</b><small>49 слов</small></div>
+      <div class="cnt">0/49</div><div class="chev">›</div></button><button class="row">
+      <div class="n">20</div>
+      <div class="tt"><b>Я приглашаю</b><small>32 слов</small></div>
+      <div class="cnt">0/32</div><div class="chev">›</div></button><button class="row">
+      <div class="n">21</div>
+      <div class="tt"><b>С днём рождения!</b><small>31 слов</small></div>
+      <div class="cnt">0/31</div><div class="chev">›</div></button><button class="row">
+      <div class="n">22</div>
+      <div class="tt"><b>Экскурсия по дому</b><small>32 слов</small></div>
+      <div class="cnt">0/32</div><div class="chev">›</div></button><button class="row">
+      <div class="n">23</div>
+      <div class="tt"><b>Чем ты сейчас занят?</b><small>42 слов</small></div>
+      <div class="cnt">0/42</div><div class="chev">›</div></button><button class="row">
+      <div class="n">24</div>
+      <div class="tt"><b>Трудно ли учить китайский язык? · Повторение</b><small>23 слов</small></div>
+      <div class="cnt">0/23</div><div class="chev">›</div></button><button class="row">
+      <div class="n">25</div>
+      <div class="tt"><b>У нас всё получается</b><small>30 слов</small></div>
+      <div class="cnt">0/30</div><div class="chev">›</div></button><button class="row">
+      <div class="n">26</div>
+      <div class="tt"><b>Я учусь, чтобы стать…</b><small>32 слов</small></div>
+      <div class="cnt">0/32</div><div class="chev">›</div></button><button class="row">
+      <div class="n">27</div>
+      <div class="tt"><b>На киноприёме в китайском посольстве</b><small>40 слов</small></div>
+      <div class="cnt">0/40</div><div class="chev">›</div></button><button class="row">
+      <div class="n">28</div>
+      <div class="tt"><b>Спорт</b><small>51 слов</small></div>
+      <div class="cnt">0/51</div><div class="chev">›</div></button><button class="row">
+      <div class="n">29</div>
+      <div class="tt"><b>Счастливого пути!</b><small>33 слов</small></div>
+      <div class="cnt">0/33</div><div class="chev">›</div></button><button class="row">
+      <div class="n">30</div>
+      <div class="tt"><b>Расставание, проводы · Повторение</b><small>25 слов</small></div>
+      <div class="cnt">0/25</div><div class="chev">›</div></button></div></div></div>
+</div><nav class="nav" id="nav">
+  <button data-nav="home" class=""><span class="ic">◈</span>Главная</button>
+  <button data-nav="browse" class="on"><span class="ic">☰</span>Словарь</button>
+  <button data-nav="study"><span class="ic">✎</span>Учить</button>
+  <button data-nav="draw"><span class="ic">笔</span>Прописи</button>
+  <button data-nav="settings"><span class="ic">⚙</span>Ещё</button>
+</nav></div></div><div class="frame"><div class="lbl">Карточка слова · Бумага</div><div class="inner" data-theme="light" style="background:var(--ink);color:var(--paper)"><div id="app">
+  <div class="top">
+    <div class="seal han">朱</div>
+    <div><h1 id="topTitle">Тренажёр иероглифов</h1><div class="sub" id="topSub">Кондрашевский · HSK 1–5</div></div>
+    <div class="spacer"></div>
+    <button class="iconbtn" id="btnAudioTest" title="Проверить озвучку">🔊</button>
+  </div>
+  <div id="screen"><div class="view"><button class="back">‹ Назад</button><div class="card"><div class="paperlines"></div>
+    <div class="bighz han">爱好</div>
+    <div class="bigpy"><span style="color:var(--t4)">ài</span> <span style="color:var(--t4)">hào</span></div>
+    <div class="bigtr">хобби (сч. слово 个 ge)</div>
+    <div class="bigen">to like; to be fond of; to take pleasure in; to be keen on; interest; hobby</div>
+    <div class="tagrow">
+      <span class="pill hsk">HSK 1</span>
+      
+      <span class="pill">сущ.</span><span class="pill">гл.</span>
+    </div>
+    <div class="cardbtns">
+      <button class="iconbtn primary" id="cSay">🔊</button>
+      <button class="iconbtn" id="cDraw">笔</button>
+    </div></div><div class="meta"><div class="mr"><div class="k">Ключ (радикал)</div><div class="v"><span class="han" style="font-size:18px">爫</span></div></div><div class="mr"><div class="k">Счётное слово</div><div class="v"><span class="han">个</span></div></div><div class="mr"><div class="k">Состав</div><div class="v"><div class="strokeline"><span class="num">好</span>= 女 + 子</div></div></div><div class="mr"><div class="k">Порядок черт</div><div class="v"><div class="strokeline"><span class="num">爱 · 10 черт</span>撇 点 点 撇 点 横撇 横 撇 横撇 捺</div><div class="strokeline"><span class="num">好 · 6 черт</span>撇点 撇 横 横撇 竖钩 横</div></div></div><div class="mr"><div class="k">Частотность</div><div class="v">#4902 <span style="color:var(--muted)">(чем меньше — тем чаще)</span></div></div><div class="mr"><div class="k">⚠︎ Перевод</div><div class="v"><span style="color:var(--muted)">из открытого словаря — можно перепроверить</span></div></div></div></div></div>
+</div><nav class="nav" id="nav">
+  <button data-nav="home" class=""><span class="ic">◈</span>Главная</button>
+  <button data-nav="browse"><span class="ic">☰</span>Словарь</button>
+  <button data-nav="study"><span class="ic">✎</span>Учить</button>
+  <button data-nav="draw"><span class="ic">笔</span>Прописи</button>
+  <button data-nav="settings"><span class="ic">⚙</span>Ещё</button>
+</nav></div></div><div class="frame"><div class="lbl">Учить (области+режимы) · Бумага</div><div class="inner" data-theme="light" style="background:var(--ink);color:var(--paper)"><div id="app">
+  <div class="top">
+    <div class="seal han">朱</div>
+    <div><h1 id="topTitle">Тренажёр иероглифов</h1><div class="sub" id="topSub">Кондрашевский · HSK 1–5</div></div>
+    <div class="spacer"></div>
+    <button class="iconbtn" id="btnAudioTest" title="Проверить озвучку">🔊</button>
+  </div>
+  <div id="screen"><div class="view"><h2 style="margin: 2px 0px 8px; font-size: 20px;">Учить</h2><p class="eyebrow">Что учить</p><div style="display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0px 8px;"><button class="tab on" style="flex: 0 0 auto; padding: 8px 12px;">Весь словарь</button><button class="tab" style="flex: 0 0 auto; padding: 8px 12px;">Только повторение</button><button class="tab" style="flex: 0 0 auto; padding: 8px 12px;">HSK 1</button><button class="tab" style="flex: 0 0 auto; padding: 8px 12px;">HSK 2</button><button class="tab" style="flex: 0 0 auto; padding: 8px 12px;">HSK 3</button><button class="tab" style="flex: 0 0 auto; padding: 8px 12px;">HSK 4</button><button class="tab" style="flex: 0 0 auto; padding: 8px 12px;">HSK 5</button></div><details><summary style="font-size: 13px; color: var(--paper-dim); cursor: pointer; padding: 6px 0px;">Урок Кондрашевского — выбрать</summary><div style="display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0px 4px;"><button class="n">1</button><button class="n">2</button><button class="n">3</button><button class="n">4</button><button class="n">5</button><button class="n">6</button><button class="n">7</button><button class="n">8</button><button class="n">9</button><button class="n">10</button><button class="n">11</button><button class="n">12</button><button class="n">13</button><button class="n">14</button><button class="n">15</button><button class="n">16</button><button class="n">17</button><button class="n">18</button><button class="n">19</button><button class="n">20</button><button class="n">21</button><button class="n">22</button><button class="n">23</button><button class="n">24</button><button class="n">25</button><button class="n">26</button><button class="n">27</button><button class="n">28</button><button class="n">29</button><button class="n">30</button></div></details><p class="note">В наборе: 4367 · к повторению 0 · новых доступно 12</p><p class="eyebrow" style="margin-top: 14px;">Режим</p><div class="rowlist" style="margin-top: 4px;"><button class="row"><div class="n">✦</div><div class="tt"><b>Смешанный</b><small>Всё вперемешку — как в бою</small></div><div class="chev">›</div></button><button class="row"><div class="n">字</div><div class="tt"><b>Узнавание</b><small>汉字 → перевод и пиньинь</small></div><div class="chev">›</div></button><button class="row"><div class="n">◎</div><div class="tt"><b>Выбор перевода</b><small>汉字 → 4 варианта</small></div><div class="chev">›</div></button><button class="row"><div class="n">译</div><div class="tt"><b>Вспомнить иероглиф</b><small>Перевод → выбрать 汉字</small></div><div class="chev">›</div></button><button class="row"><div class="n">ā</div><div class="tt"><b>Ввод пиньиня</b><small>Печатаешь чтение</small></div><div class="chev">›</div></button><button class="row"><div class="n">🔊</div><div class="tt"><b>На слух</b><small>Аудио → что это</small></div><div class="chev">›</div></button><button class="row"><div class="n">˥</div><div class="tt"><b>Тоны</b><small>Определи тон каждого слога</small></div><div class="chev">›</div></button><button class="row"><div class="n">笔</div><div class="tt"><b>Диктант</b><small>Пишешь иероглиф на слух</small></div><div class="chev">›</div></button></div></div></div>
+</div><nav class="nav" id="nav">
+  <button data-nav="home" class=""><span class="ic">◈</span>Главная</button>
+  <button data-nav="browse"><span class="ic">☰</span>Словарь</button>
+  <button data-nav="study" class="on"><span class="ic">✎</span>Учить</button>
+  <button data-nav="draw"><span class="ic">笔</span>Прописи</button>
+  <button data-nav="settings"><span class="ic">⚙</span>Ещё</button>
+</nav></div></div><div class="frame"><div class="lbl">Сессия: выбор перевода · Бумага</div><div class="inner" data-theme="light" style="background:var(--ink);color:var(--paper)"><div id="app">
+  <div class="top">
+    <div class="seal han">朱</div>
+    <div><h1 id="topTitle">Тренажёр иероглифов</h1><div class="sub" id="topSub">Кондрашевский · HSK 1–5</div></div>
+    <div class="spacer"></div>
+    <button class="iconbtn" id="btnAudioTest" title="Проверить озвучку">🔊</button>
+  </div>
+  <div id="screen"><div class="view qwrap"><button class="back">✕ Завершить</button><div class="progress"><i style="width:0%"></i></div><div><div class="qcard"><div class="qprompt" style="color:var(--cinnabar-2);margin-bottom:6px">✦ Новое слово</div>
+    <div class="qhz han" style="font-size:82px">爱</div>
+    <div class="reveal" style="margin-top:12px"><div class="py"><span style="color:var(--t4)">ài</span></div>
+    <div class="tr">любить</div>
+    <div class="en">to love; to be fond of; to like; affection; to be inclined (to do sth); to tend to (happen)</div>
+    <div class="en" style="margin-top:8px"><span style="margin-right:12px" class="han">爱</span><span style="margin-right:14px;color:var(--muted)">10 черт</span></div></div><div id="introEx" style="margin-top:14px;border-top:1px dashed var(--line);padding-top:12px;width:100%;cursor:pointer">
+      <div class="han" style="font-size:18px;line-height:1.5">我爱爸爸妈妈。</div>
+      <div style="font-size:13px;margin-top:3px"><span style="color:var(--t3)">wǒ</span> <span style="color:var(--t4)">ài</span> <span style="color:var(--t4)">bà</span> <span style="color:var(--t5)">ba</span> <span style="color:var(--t1)">mā</span> <span style="color:var(--t5)">ma。</span></div>
+      <div style="font-size:12px;color:var(--paper-dim);margin-top:2px">Я люблю папу и маму.</div></div></div><button class="btn showbtn">Проверить себя ›</button></div></div></div>
+</div><nav class="nav" id="nav">
+  <button data-nav="home" class=""><span class="ic">◈</span>Главная</button>
+  <button data-nav="browse"><span class="ic">☰</span>Словарь</button>
+  <button data-nav="study"><span class="ic">✎</span>Учить</button>
+  <button data-nav="draw"><span class="ic">笔</span>Прописи</button>
+  <button data-nav="settings"><span class="ic">⚙</span>Ещё</button>
+</nav></div></div><div class="frame"><div class="lbl">Статистика · Бумага</div><div class="inner" data-theme="light" style="background:var(--ink);color:var(--paper)"><div id="app">
+  <div class="top">
+    <div class="seal han">朱</div>
+    <div><h1 id="topTitle">Тренажёр иероглифов</h1><div class="sub" id="topSub">Кондрашевский · HSK 1–5</div></div>
+    <div class="spacer"></div>
+    <button class="iconbtn" id="btnAudioTest" title="Проверить озвучку">🔊</button>
+  </div>
+  <div id="screen"><div class="view"><button class="back">‹ Главная</button><h2 style="margin: 2px 0px 12px; font-size: 20px;">Статистика</h2><div class="duebar" style="margin-bottom: 16px;">
+    <div class="duechip new"><b>0</b><span>дней подряд</span></div>
+    <div class="duechip learn"><b>0</b><span>изучается</span></div>
+    <div class="duechip rev"><b>0</b><span>закреплено</span></div></div><p class="note">Всего повторений: 0 · сегодня: 0 · к повторению сейчас: 0</p><p class="eyebrow" style="margin-top: 18px;">Последние 14 дней</p><div style="display: flex; align-items: flex-end; gap: 5px; height: 120px; padding: 10px; background: var(--ink2); border: 1px solid var(--line); border-radius: var(--r);"><div style="flex: 1 1 0%; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end;"><div style="width: 100%; height: 2px; border-radius: 3px; background: var(--line);" title="0 повт."></div><div style="font-size: 9px; color: var(--muted);">21</div></div><div style="flex: 1 1 0%; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end;"><div style="width: 100%; height: 2px; border-radius: 3px; background: var(--line);" title="0 повт."></div><div style="font-size: 9px; color: var(--muted);">22</div></div><div style="flex: 1 1 0%; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end;"><div style="width: 100%; height: 2px; border-radius: 3px; background: var(--line);" title="0 повт."></div><div style="font-size: 9px; color: var(--muted);">23</div></div><div style="flex: 1 1 0%; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end;"><div style="width: 100%; height: 2px; border-radius: 3px; background: var(--line);" title="0 повт."></div><div style="font-size: 9px; color: var(--muted);">24</div></div><div style="flex: 1 1 0%; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end;"><div style="width: 100%; height: 2px; border-radius: 3px; background: var(--line);" title="0 повт."></div><div style="font-size: 9px; color: var(--muted);">25</div></div><div style="flex: 1 1 0%; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end;"><div style="width: 100%; height: 2px; border-radius: 3px; background: var(--line);" title="0 повт."></div><div style="font-size: 9px; color: var(--muted);">26</div></div><div style="flex: 1 1 0%; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end;"><div style="width: 100%; height: 2px; border-radius: 3px; background: var(--line);" title="0 повт."></div><div style="font-size: 9px; color: var(--muted);">27</div></div><div style="flex: 1 1 0%; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end;"><div style="width: 100%; height: 2px; border-radius: 3px; background: var(--line);" title="0 повт."></div><div style="font-size: 9px; color: var(--muted);">28</div></div><div style="flex: 1 1 0%; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end;"><div style="width: 100%; height: 2px; border-radius: 3px; background: var(--line);" title="0 повт."></div><div style="font-size: 9px; color: var(--muted);">29</div></div><div style="flex: 1 1 0%; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end;"><div style="width: 100%; height: 2px; border-radius: 3px; background: var(--line);" title="0 повт."></div><div style="font-size: 9px; color: var(--muted);">30</div></div><div style="flex: 1 1 0%; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end;"><div style="width: 100%; height: 2px; border-radius: 3px; background: var(--line);" title="0 повт."></div><div style="font-size: 9px; color: var(--muted);">1</div></div><div style="flex: 1 1 0%; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end;"><div style="width: 100%; height: 2px; border-radius: 3px; background: var(--line);" title="0 повт."></div><div style="font-size: 9px; color: var(--muted);">2</div></div><div style="flex: 1 1 0%; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end;"><div style="width: 100%; height: 2px; border-radius: 3px; background: var(--line);" title="0 повт."></div><div style="font-size: 9px; color: var(--muted);">3</div></div><div style="flex: 1 1 0%; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end;"><div style="width: 100%; height: 2px; border-radius: 3px; background: var(--line);" title="0 повт."></div><div style="font-size: 9px; color: var(--muted);">4</div></div></div><p class="eyebrow" style="margin-top: 18px;">Прогресс по наборам</p><div class="meta"><div class="setrow"><div class="lab"><b>HSK 1</b><small>0 из 506</small></div>
+      <div style="flex:none;width:110px"><div style="height:8px;background:var(--ink3);border-radius:5px;overflow:hidden"><i style="display:block;height:100%;width:0%;background:var(--gold)"></i></div></div></div><div class="setrow"><div class="lab"><b>HSK 2</b><small>0 из 750</small></div>
+      <div style="flex:none;width:110px"><div style="height:8px;background:var(--ink3);border-radius:5px;overflow:hidden"><i style="display:block;height:100%;width:0%;background:var(--gold)"></i></div></div></div><div class="setrow"><div class="lab"><b>HSK 3</b><small>0 из 953</small></div>
+      <div style="flex:none;width:110px"><div style="height:8px;background:var(--ink3);border-radius:5px;overflow:hidden"><i style="display:block;height:100%;width:0%;background:var(--gold)"></i></div></div></div><div class="setrow"><div class="lab"><b>HSK 4</b><small>0 из 972</small></div>
+      <div style="flex:none;width:110px"><div style="height:8px;background:var(--ink3);border-radius:5px;overflow:hidden"><i style="display:block;height:100%;width:0%;background:var(--gold)"></i></div></div></div><div class="setrow"><div class="lab"><b>HSK 5</b><small>0 из 1059</small></div>
+      <div style="flex:none;width:110px"><div style="height:8px;background:var(--ink3);border-radius:5px;overflow:hidden"><i style="display:block;height:100%;width:0%;background:var(--gold)"></i></div></div></div><div class="setrow"><div class="lab"><b>Кондрашевский</b><small>0 из 696</small></div>
+      <div style="flex:none;width:110px"><div style="height:8px;background:var(--ink3);border-radius:5px;overflow:hidden"><i style="display:block;height:100%;width:0%;background:var(--gold)"></i></div></div></div></div></div></div>
+</div><nav class="nav" id="nav">
+  <button data-nav="home" class=""><span class="ic">◈</span>Главная</button>
+  <button data-nav="browse"><span class="ic">☰</span>Словарь</button>
+  <button data-nav="study"><span class="ic">✎</span>Учить</button>
+  <button data-nav="draw"><span class="ic">笔</span>Прописи</button>
+  <button data-nav="settings"><span class="ic">⚙</span>Ещё</button>
+</nav></div></div><div class="frame"><div class="lbl">Главная · Тушь</div><div class="inner" data-theme="dark" style="background:var(--ink);color:var(--paper)"><div id="app">
+  <div class="top">
+    <div class="seal han">朱</div>
+    <div><h1 id="topTitle">Тренажёр иероглифов</h1><div class="sub" id="topSub">Кондрашевский · HSK 1–5</div></div>
+    <div class="spacer"></div>
+    <button class="iconbtn" id="btnAudioTest" title="Проверить озвучку">🔊</button>
+  </div>
+  <div id="screen"><div class="view"><div>
+    <div class="hero">
+      <p class="eyebrow" style="margin-bottom:6px">Сегодня</p>
+      <h2>Готово к повторению</h2>
+      <p>Выучено слов: 0 из 4367 · новых в день: 12</p>
+      <div class="duebar">
+        <div class="duechip rev"><b>0</b><span>повторить</span></div>
+        <div class="duechip new"><b>12</b><span>новых</span></div>
+        <div class="duechip learn"><b>0</b><span>в работе</span></div>
+      </div>
+      <button class="btn" id="hStart">Начать урок (12)</button>
+    </div></div><div class="grid2"><button class="tile"><div class="ic">☰</div><h3>Словарь</h3><p>Кондрашевский и HSK</p></button><button class="tile"><div class="ic">笔</div><h3>Прописи</h3><p>Учиться писать</p></button><button class="tile"><div class="ic">✎</div><h3>Режимы</h3><p>Карточки, тоны, диктант…</p></button><button class="tile"><div class="ic">📊</div><h3>Статистика</h3><p>Прогресс и серия дней</p></button></div><p class="note">⚠︎ Это превью: прогресс хранится только в памяти. После установки на телефон/публикации на GitHub Pages он сохраняется.</p></div></div>
+</div><nav class="nav" id="nav">
+  <button data-nav="home" class="on"><span class="ic">◈</span>Главная</button>
+  <button data-nav="browse"><span class="ic">☰</span>Словарь</button>
+  <button data-nav="study"><span class="ic">✎</span>Учить</button>
+  <button data-nav="draw"><span class="ic">笔</span>Прописи</button>
+  <button data-nav="settings"><span class="ic">⚙</span>Ещё</button>
+</nav></div></div><div class="frame"><div class="lbl">Карточка слова · Тушь</div><div class="inner" data-theme="dark" style="background:var(--ink);color:var(--paper)"><div id="app">
+  <div class="top">
+    <div class="seal han">朱</div>
+    <div><h1 id="topTitle">Тренажёр иероглифов</h1><div class="sub" id="topSub">Кондрашевский · HSK 1–5</div></div>
+    <div class="spacer"></div>
+    <button class="iconbtn" id="btnAudioTest" title="Проверить озвучку">🔊</button>
+  </div>
+  <div id="screen"><div class="view"><button class="back">‹ Назад</button><div class="card"><div class="paperlines"></div>
+    <div class="bighz han">爱好</div>
+    <div class="bigpy"><span style="color:var(--t4)">ài</span> <span style="color:var(--t4)">hào</span></div>
+    <div class="bigtr">хобби (сч. слово 个 ge)</div>
+    <div class="bigen">to like; to be fond of; to take pleasure in; to be keen on; interest; hobby</div>
+    <div class="tagrow">
+      <span class="pill hsk">HSK 1</span>
+      
+      <span class="pill">сущ.</span><span class="pill">гл.</span>
+    </div>
+    <div class="cardbtns">
+      <button class="iconbtn primary" id="cSay">🔊</button>
+      <button class="iconbtn" id="cDraw">笔</button>
+    </div></div><div class="meta"><div class="mr"><div class="k">Ключ (радикал)</div><div class="v"><span class="han" style="font-size:18px">爫</span></div></div><div class="mr"><div class="k">Счётное слово</div><div class="v"><span class="han">个</span></div></div><div class="mr"><div class="k">Состав</div><div class="v"><div class="strokeline"><span class="num">好</span>= 女 + 子</div></div></div><div class="mr"><div class="k">Порядок черт</div><div class="v"><div class="strokeline"><span class="num">爱 · 10 черт</span>撇 点 点 撇 点 横撇 横 撇 横撇 捺</div><div class="strokeline"><span class="num">好 · 6 черт</span>撇点 撇 横 横撇 竖钩 横</div></div></div><div class="mr"><div class="k">Частотность</div><div class="v">#4902 <span style="color:var(--muted)">(чем меньше — тем чаще)</span></div></div><div class="mr"><div class="k">⚠︎ Перевод</div><div class="v"><span style="color:var(--muted)">из открытого словаря — можно перепроверить</span></div></div></div></div></div>
+</div><nav class="nav" id="nav">
+  <button data-nav="home" class=""><span class="ic">◈</span>Главная</button>
+  <button data-nav="browse"><span class="ic">☰</span>Словарь</button>
+  <button data-nav="study"><span class="ic">✎</span>Учить</button>
+  <button data-nav="draw"><span class="ic">笔</span>Прописи</button>
+  <button data-nav="settings"><span class="ic">⚙</span>Ещё</button>
+</nav></div></div>

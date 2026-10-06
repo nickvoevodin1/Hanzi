@@ -1,0 +1,20 @@
+import {JSDOM} from 'jsdom'; import fs from 'fs';
+const html=fs.readFileSync(new URL('../index.html', import.meta.url),'utf8');
+const dom=new JSDOM(html,{runScripts:"dangerously",pretendToBeVisual:true,beforeParse(w){
+  w.fetch=()=>Promise.reject(new Error("no-net"));
+  w.speechSynthesis={getVoices:()=>[{name:"Ting-Ting",lang:"zh-CN"}],speak(){},cancel(){},onvoiceschanged:null,addEventListener(){}};
+  w.SpeechSynthesisUtterance=function(){}; w.scrollTo=()=>{}; w.requestAnimationFrame=cb=>setTimeout(cb,0);
+}});
+const w=dom.window; await new Promise(r=>setTimeout(r,180)); const doc=w.document; const E=[];
+const txt=()=>doc.getElementById("screen").textContent;
+const T=(n,f)=>{try{f();}catch(e){E.push("["+n+"] "+(e.message||e));}};
+const clickText=re=>{const b=[...doc.querySelectorAll("button")].find(x=>re.test(x.textContent));if(b)b.click();return b;};
+T('local-date',()=>{ const s=w.eval("dstr(new Date(2026,0,5))"); if(s!=='2026-01-05') throw new Error('dstr='+s); });
+T('便宜',()=>{ const p=w.eval("WORDS.find(x=>x.s==='便宜').p"); if(p!=='pián yi') throw new Error(p); });
+T('重点',()=>{ const p=w.eval("WORDS.find(x=>x.s==='重点').p"); if(p!=='zhòng diǎn') throw new Error(p); });
+T('display-parens',()=>{ const i=w.eval("WORDS.findIndex(x=>x.d==='接(电话)')"); if(i<0) throw new Error('нет d');
+  w.eval(`go('card',{id:${i}})`); if(!txt().includes('接(电话)')) throw new Error('не показывается'); });
+T('resume-btn',()=>{ w.eval("startSession(buildQueue(allIds()).slice(0,5),'recog','t'); go('home')");
+  const b=clickText(/Продолжить сессию/); if(!b) throw new Error('нет кнопки');
+  if(!doc.querySelector('.qcard')) throw new Error('не вернулись в сессию'); });
+console.log(E.length?'❌ audit: '+E.join(' | '):'✅ audit: локальная дата, пиньинь-фиксы, пометы, резюме сессии'); process.exit(E.length?1:0);

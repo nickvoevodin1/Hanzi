@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Проверочная · урок 18</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F6F7F9; --card:#FFFFFF; --ink:#1B2233; --muted:#6B7385; --line:#E2E5EB;
+  --seal:#C8322B; --ok:#2E7D5B; --soft:#EEF0F4;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--bg:#141821;--card:#1D2230;--ink:#E9ECF2;--muted:#9AA2B4;--line:#2C3344;--seal:#E8564D;--ok:#4FBF8C;--soft:#252B3A;}
+}
+:root[data-theme="dark"]{--bg:#141821;--card:#1D2230;--ink:#E9ECF2;--muted:#9AA2B4;--line:#2C3344;--seal:#E8564D;--ok:#4FBF8C;--soft:#252B3A;}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:Manrope,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.45}
+.wrap{max-width:560px;margin:0 auto;padding:16px 16px 40px}
+header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.seal{width:42px;height:42px;border-radius:8px;background:var(--seal);color:#fff;display:grid;place-items:center;font-family:"Noto Serif SC","Songti SC",serif;font-size:24px;font-weight:700;flex:none}
+h1{font-size:18px;margin:0;line-height:1.2}
+.sub{font-size:13px;color:var(--muted)}
+nav{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--soft);padding:4px;border-radius:12px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+nav button{flex:1;border:0;background:transparent;color:var(--muted);font:600 14px Manrope,system-ui,sans-serif;padding:9px 2px;border-radius:9px;cursor:pointer}
+nav button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.opts{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);font:600 13px Manrope,system-ui,sans-serif;padding:7px 12px;border-radius:99px;cursor:pointer}
+.chip.on{border-color:var(--ink);background:var(--ink);color:var(--bg)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 18px;min-height:280px;display:flex;flex-direction:column}
+.meta{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:14px}
+.q{flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px}
+.zh{font-family:"Noto Serif SC","Songti SC","PingFang SC","Microsoft YaHei",serif;font-weight:500;line-height:1.5}
+.zh.big{font-size:56px;text-align:center;line-height:1.2}
+.zh.mid{font-size:26px}
+.py{color:var(--seal);font-size:17px}
+.py.big{text-align:center;font-size:22px}
+.ru{font-size:19px}
+.ru.big{text-align:center;font-size:22px}
+.ans{border-top:1px dashed var(--line);padding-top:14px;margin-top:6px;display:flex;flex-direction:column;gap:6px}
+.hint{font-size:13px;color:var(--muted)}
+.row{display:flex;gap:8px;margin-top:14px}
+.btn{flex:1;border:0;border-radius:12px;padding:14px;font:700 15px Manrope,system-ui,sans-serif;cursor:pointer;background:var(--soft);color:var(--ink)}
+.btn.main{background:var(--ink);color:var(--bg)}
+.btn.ok{background:var(--ok);color:#fff}
+.btn.no{background:var(--seal);color:#fff}
+.btn:focus-visible,.chip:focus-visible,nav button:focus-visible,.say:focus-visible{outline:3px solid var(--seal);outline-offset:2px}
+.say{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:99px;padding:6px 12px;font:600 13px Manrope,system-ui,sans-serif;cursor:pointer;align-self:flex-start}
+.say.c{align-self:center}
+.bar{height:4px;background:var(--soft);border-radius:4px;margin-top:12px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.done{text-align:center;margin:auto;display:flex;flex-direction:column;gap:12px;align-items:center}
+.list{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.item .src{font-size:12px;color:var(--muted);margin-bottom:4px}
+.item .zh{font-size:21px}
+.item .py{font-size:15px}
+.item .ru{font-size:15px;color:var(--muted)}
+.note{font-size:13px;color:var(--muted);margin-top:10px}
+.hide{display:none!important}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+
+.hz{cursor:pointer;border-radius:4px}
+.hz:hover{background:var(--soft)}
+.bk{border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:5px;font-size:15px;text-align:left}
+.bkh{display:flex;align-items:baseline;gap:10px}
+.bkh .zh{font-size:34px;line-height:1.1}
+.bk b.zh{font-weight:700;font-size:20px}
+.bks{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.sheet{position:fixed;inset:0;background:rgba(10,14,24,.45);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.sheet>div{background:var(--card);width:100%;max-width:560px;border-radius:18px 18px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));max-height:80vh;overflow:auto}
+.rg{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-top:12px}
+.rc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center;cursor:pointer}
+.rc .zh{font-size:30px;line-height:1.2}
+.rc .n{font-size:11px;color:var(--muted);display:flex;justify-content:space-between}
+.rc .m{font-size:12px;line-height:1.25}
+.var{font-size:.5em;color:var(--muted);margin-left:6px}
+
+nav button.wide{grid-column:1/-1;background:var(--seal);color:#fff}
+nav button.wide.on{background:var(--seal);color:#fff;box-shadow:0 0 0 2px var(--ink) inset}
+.dots{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.dot{border:1px solid var(--line);background:var(--bg);color:var(--muted);font:600 12px Manrope,system-ui,sans-serif;padding:6px 9px;border-radius:99px;cursor:pointer}
+.dot.on{background:var(--ok);border-color:var(--ok);color:#fff}
+.dot.cur{border-color:var(--seal);color:var(--seal);box-shadow:0 0 0 1px var(--seal) inset}
+.rowbtn{text-align:left;font:700 15px Manrope,system-ui,sans-serif;color:var(--ink);cursor:pointer}
+.rowbtn.ok{color:var(--ok)}
+.tbar{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;font-size:13px}
+.tip{border-left:4px solid var(--seal)}
+.parts{display:flex;flex-direction:column;gap:6px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:15px}
+.parts .zh{font-size:18px}
+.wl{display:grid;grid-template-columns:auto auto 1fr;gap:10px;align-items:baseline;padding:4px 0;border-bottom:1px solid var(--line);font-size:15px}
+.wl .zh{font-size:20px}
+.wl .py{font-size:14px}
+.tn{display:flex;flex-wrap:wrap;gap:6px}
+.tc{display:flex;flex-direction:column;align-items:center;min-width:46px;padding:6px 4px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);cursor:pointer}
+.tc .zh{font-size:24px;line-height:1.2}
+.tc .tm{font-size:20px;line-height:1;color:var(--seal);min-height:20px;font-weight:700}
+.tc .tp{font-size:12px;color:var(--muted)}
+.tc.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,transparent)}
+.tc.bad{border-color:var(--seal);background:color-mix(in srgb,var(--seal) 12%,transparent)}
+.tl{display:flex;flex-wrap:wrap;gap:8px;min-height:48px}
+.ans-area{border:1px dashed var(--line);border-radius:12px;padding:8px;align-items:center}
+.tile{font-family:"Noto Serif SC","Songti SC","PingFang SC",serif;font-size:22px;padding:6px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.tile.pool{background:var(--soft)}
+.btn:disabled{opacity:.45;cursor:default}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="seal">考</div>
+    <div><h1>Проверочная · урок 18</h1><div class="sub">Диктант 1 и перевод 3, 4, 5, 7, 10, 12, 15, 25, 29, 31</div></div>
+  </header>
+  <nav id="tabs">
+    <button data-m="test" class="wide">Проверочная: полный цикл подготовки</button>
+    <button data-m="words">Слова</button>
+    <button data-m="keys">Ключи</button>
+    <button data-m="ru2zh">РУ→中</button>
+    <button data-m="zh2ru">中→РУ</button>
+    <button data-m="dict">Диктант</button>
+    <button data-m="all">Справка</button>
+  </nav>
+  <div class="opts" id="opts"></div>
+  <div id="view"></div>
+  <div class="note" id="ttsnote"></div>
+  <div class="note">Нажмите на любой иероглиф, чтобы увидеть разбор на ключи. Ключи даны по системе Канси (214); в разных словарях ключ упрощённого иероглифа иногда указывают по-другому.</div>
+</div>
+<div id="sheet" class="sheet hide"><div id="sheetc"></div></div>
+<script>
+
+const W=[
+// урок 17
+["点","diǎn","час (сч. слово)","17"],["食堂","shítáng","столовая","17"],["差","chà","без (о времени); недоставать","17"],["分","fēn","минута","17"],["刻","kè","четверть (часа)","17"],["上课","shàngkè","идти на занятия; начинать урок","17"],["下课","xiàkè","заканчивать занятия","17"],["以后","yǐhòu","после, потом","17"],["事儿","shìr","дело","17"],["回","huí","возвращаться","17"],["跟","gēn","с (вместе с)","17"],["一起","yìqǐ","вместе","17"],["电影","diànyǐng","кино, фильм","17"],["咖啡馆","kāfēiguǎn","кафе","17"],["咖啡","kāfēi","кофе","17"],["半","bàn","половина","17"],["啊","a","мод. частица","17"],["等","děng","ждать","17"],["走","zǒu","идти (пешком)","17"],["路","lù","дорога","17"],["上班","shàngbān","идти на работу","17"],["下班","xiàbān","заканчивать работу","17"],["电影院","diànyǐngyuàn","кинотеатр","17"],["表","biǎo","часы (наручные)","17"],["钟","zhōng","часы (настенные)","17"],
+// урок 18
+["天","tiān","день","18"],["每","měi","каждый","18"],["起床","qǐchuáng","вставать (с постели)","18"],["床","chuáng","кровать","18"],["上午","shàngwǔ","первая половина дня","18"],["中午","zhōngwǔ","полдень","18"],["下午","xiàwǔ","вторая половина дня","18"],["吃","chī","есть, кушать","18"],["饭","fàn","еда; варёный рис","18"],["多","duō","много","18"],["休息","xiūxi","отдыхать","18"],["有时候","yǒu shíhou","иногда","18"],["时候","shíhou","время, пора","18"],["问题","wèntí","вопрос, проблема","18"],["睡觉","shuìjiào","спать, ложиться спать","18"],["外语系","wàiyǔxì","факультет иностранных языков","18"],["历史","lìshǐ","история","18"],["文学","wénxué","литература","18"],
+// из предложений
+["现在","xiànzài","сейчас","пр"],["几","jǐ","сколько","пр"],["张","zhāng","сч. слово (билеты, листы)","пр"],["票","piào","билет","пр"],["晚上","wǎnshang","вечер; вечером","пр"],["从","cóng","из, от","пр"],["哪儿","nǎr","где, куда","пр"],["家","jiā","дом, семья","пр"],["坐车","zuò chē","ехать (на транспорте)","пр"],["门口","ménkǒu","вход, у дверей","пр"],["再见","zàijiàn","до свидания","пр"],["认识","rènshi","знать (дорогу, человека)","пр"],["爸爸","bàba","папа, отец","пр"],["还","hái","ещё","пр"],["没","méi","не (о прошлом), нет","пр"],["妈妈","māma","мама","пр"],["商店","shāngdiàn","магазин","пр"],["以前","yǐqián","до, перед","пр"],["今天","jīntiān","сегодня","пр"],["京剧","jīngjù","пекинская опера","пр"],["弟弟","dìdi","младший брат","пр"],["大衣","dàyī","пальто","пр"],["买","mǎi","покупать","пр"],["老师","lǎoshī","преподаватель","пр"],["本","běn","сч. слово (книги, журналы)","пр"],["新","xīn","новый","пр"],["杂志","zázhì","журнал","пр"],["中文","zhōngwén","китайский язык","пр"],["看看","kànkan","посмотреть","пр"],["请","qǐng","пожалуйста; просить","пр"],["告诉","gàosu","сказать, сообщить","пр"],["先生","xiānsheng","господин","пр"],["找","zhǎo","искать; зайти за кем-то","пр"],["银行","yínháng","банк","пр"],["学院","xuéyuàn","институт","пр"],["喝","hē","пить","пр"],["吧","ba","мод. частица (давай…)","пр"]
+];
+const S=[
+{src:"Диктант",ru:"Сколько сейчас времени?",zh:"现在几点？",py:"Xiànzài jǐdiǎn?"},
+{src:"Диктант",ru:"Без четверти два. Ты во сколько идёшь на занятия?",zh:"差一刻两点，你几点上课？",py:"Chà yíkè liǎng diǎn, nǐ jǐdiǎn shàng kè?"},
+{src:"Диктант",ru:"В два двадцать, заканчиваю без десяти четыре.",zh:"两点二十分，差十分四点下课。",py:"Liǎngdiǎn èrshí fēn, chà shífēn sìdiǎn xià kè."},
+{src:"Диктант",ru:"После занятий у тебя есть дела?",zh:"下课以后你有事吗？",py:"Xià kè yǐhòu nǐ yǒu shì ma?"},
+{src:"Диктант",ru:"Нет дел.",zh:"没有事。",py:"Méiyǒu shì."},
+{src:"Диктант",ru:"У меня два билета в кино, вечером пойдём вместе в кино, хорошо?",zh:"我有两张电影票，晚上我们一起去看电影，好吗？",py:"Wǒ yǒu liǎng zhāng diànyǐng piào, wǎnshang wǒmen yìqǐ qù kàn diànyǐng, hǎo ma?",
+ parts:[["У меня два билета в кино","我有两张电影票","Wǒ yǒu liǎng zhāng diànyǐng piào"],["вечером пойдём вместе в кино, хорошо?","晚上我们一起去看电影，好吗？","wǎnshang wǒmen yìqǐ qù kàn diànyǐng, hǎo ma?"]]},
+{src:"Диктант",ru:"Хорошо, на какой сеанс (во сколько)?",zh:"好啊，看几点的？",py:"Hǎo a, kàn jǐdiǎnde?"},
+{src:"Диктант",ru:"На половину седьмого.",zh:"六点半的。",py:"Liùdiǎnbànde."},
+{src:"Диктант",ru:"Ты откуда пойдёшь?",zh:"你从哪儿去？",py:"Nǐ cóng nǎr qù?"},
+{src:"Диктант",ru:"Из дома.",zh:"从我家去。",py:"Cóng wǒ jiā qù."},
+{src:"Диктант",ru:"Ты поедешь на транспорте?",zh:"你坐车去吗？",py:"Nǐ zuò chē qù ma?"},
+{src:"Диктант",ru:"Нет, пойду пешком.",zh:"不，走路去。",py:"Bù, zǒu lù qù."},
+{src:"Диктант",ru:"В четверть седьмого я жду тебя у входа в кинотеатр.",zh:"六点一刻我在电影院门口等你。",py:"Liùdiǎn yíkè wǒ zài diànyǐngyuàn ménkǒu děng nǐ."},
+{src:"Диктант",ru:"До встречи в шесть пятнадцать.",zh:"六点十五分再见。",py:"Liùdiǎn shíwǔfēn zàijiàn."},
+{src:"Перевод 3",ru:"Пойдём вместе со мной. Я знаю дорогу.",zh:"跟我一起去吧，我认识路。",py:"Gēn wǒ yìqǐ qù ba, wǒ rènshi lù.",
+ parts:[["Пойдём вместе со мной","跟我一起去吧","Gēn wǒ yìqǐ qù ba"],["Я знаю дорогу","我认识路","Wǒ rènshi lù"]]},
+{src:"Перевод 4",ru:"— Сколько сейчас времени? — Сейчас половина восьмого, отец ещё не вернулся домой.",zh:"现在几点？——现在七点半，爸爸还没回家。",py:"Xiànzài jǐ diǎn? — Xiànzài qī diǎn bàn, bàba hái méi huí jiā.",
+ parts:[["Сколько сейчас времени?","现在几点？","Xiànzài jǐ diǎn?"],["Сейчас половина восьмого","现在七点半","Xiànzài qī diǎn bàn"],["Отец ещё не вернулся домой","爸爸还没回家","Bàba hái méi huí jiā"]]},
+{src:"Перевод 5",ru:"— В котором часу ты приходишь на занятия? — В половине десятого. А ты? — Я в четверть десятого.",zh:"你几点来上课？——九点半。你呢？——我九点一刻。",py:"Nǐ jǐ diǎn lái shàng kè? — Jiǔ diǎn bàn. Nǐ ne? — Wǒ jiǔ diǎn yí kè.",
+ parts:[["В котором часу ты приходишь на занятия?","你几点来上课？","Nǐ jǐ diǎn lái shàng kè?"],["В половине десятого. А ты?","九点半。你呢？","Jiǔ diǎn bàn. Nǐ ne?"],["Я в четверть десятого","我九点一刻","Wǒ jiǔ diǎn yí kè"]]},
+{src:"Перевод 7",ru:"Я буду пить кофе в столовой института.",zh:"我在学院食堂喝咖啡。",py:"Wǒ zài xuéyuàn shítáng hē kāfēi.",
+ parts:[["в столовой института","在学院食堂","zài xuéyuàn shítáng"],["пить кофе","喝咖啡","hē kāfēi"]]},
+{src:"Перевод 10",ru:"Моя мама перед работой пойдёт в магазин.",zh:"我妈妈上班以前去商店。",py:"Wǒ māma shàng bān yǐqián qù shāngdiàn.",
+ parts:[["перед работой","上班以前","shàng bān yǐqián"],["пойдёт в магазин","去商店","qù shāngdiàn"]]},
+{src:"Перевод 12",ru:"Мы не поедем на машине, мы пойдём пешком.",zh:"我们不坐车去，我们走路去。",py:"Wǒmen bú zuò chē qù, wǒmen zǒu lù qù.",
+ parts:[["Мы не поедем на машине","我们不坐车去","Wǒmen bú zuò chē qù"],["Мы пойдём пешком","我们走路去","Wǒmen zǒu lù qù"]]},
+{src:"Перевод 15",ru:"Сегодня после работы мы пойдём на пекинскую оперу. Пойдёшь с нами?",zh:"今天下班以后我们去看京剧，你跟我们一起去吗？",py:"Jīntiān xià bān yǐhòu wǒmen qù kàn jīngjù, nǐ gēn wǒmen yìqǐ qù ma?",
+ parts:[["Сегодня после работы","今天下班以后","Jīntiān xià bān yǐhòu"],["мы пойдём на пекинскую оперу","我们去看京剧","wǒmen qù kàn jīngjù"],["Пойдёшь с нами?","你跟我们一起去吗？","Nǐ gēn wǒmen yìqǐ qù ma?"]]},
+{src:"Перевод 25",ru:"У моего младшего брата нет пальто. Вечером он со мной пойдёт в магазин покупать пальто.",zh:"我弟弟没有大衣，晚上他跟我一起去商店买大衣。",py:"Wǒ dìdi méiyǒu dàyī, wǎnshang tā gēn wǒ yìqǐ qù shāngdiàn mǎi dàyī.",
+ parts:[["У моего младшего брата нет пальто","我弟弟没有大衣","Wǒ dìdi méiyǒu dàyī"],["Вечером он со мной пойдёт в магазин","晚上他跟我一起去商店","Wǎnshang tā gēn wǒ yìqǐ qù shāngdiàn"],["покупать пальто","买大衣","mǎi dàyī"]]},
+{src:"Перевод 29",ru:"Те два новых журнала нашего преподавателя — на китайском языке. Давай посмотрим.",zh:"我们老师的那两本新杂志是中文的，我们看看吧。",py:"Wǒmen lǎoshī de nà liǎng běn xīn zázhì shì zhōngwén de, wǒmen kànkan ba.",
+ parts:[["Те два новых журнала нашего преподавателя","我们老师的那两本新杂志","Wǒmen lǎoshī de nà liǎng běn xīn zázhì"],["на китайском языке","是中文的","shì zhōngwén de"],["Давай посмотрим","我们看看吧","Wǒmen kànkan ba"]]},
+{src:"Перевод 31",ru:"Скажи, пожалуйста, господину Вану, что я зайду за ним в четверть пятого и мы вместе пойдём в банк.",zh:"请你告诉王先生，我四点一刻去找他，我们一起去银行。",py:"Qǐng nǐ gàosu Wáng xiānsheng, wǒ sì diǎn yí kè qù zhǎo tā, wǒmen yìqǐ qù yínháng.",
+ parts:[["Скажи, пожалуйста, господину Вану","请你告诉王先生","Qǐng nǐ gàosu Wáng xiānsheng"],["я зайду за ним в четверть пятого","我四点一刻去找他","wǒ sì diǎn yí kè qù zhǎo tā"],["мы вместе пойдём в банк","我们一起去银行","wǒmen yìqǐ qù yínháng"]]}
+];
+
+
+const RAD=[{"n": 1, "c": "一", "v": "", "p": "yī", "s": 1, "m": "единица"}, {"n": 2, "c": "丨", "v": "", "p": "gǔn", "s": 1, "m": "вертикальная черта"}, {"n": 3, "c": "丶", "v": "", "p": "zhǔ", "s": 1, "m": "точка"}, {"n": 4, "c": "丿", "v": "", "p": "piě", "s": 1, "m": "откидная влево"}, {"n": 5, "c": "乙", "v": "乚", "p": "yǐ", "s": 1, "m": "второй (циклический знак)"}, {"n": 6, "c": "亅", "v": "", "p": "jué", "s": 1, "m": "вертикальная с крюком"}, {"n": 7, "c": "二", "v": "", "p": "èr", "s": 2, "m": "два"}, {"n": 8, "c": "亠", "v": "", "p": "tóu", "s": 2, "m": "горизонтальная с точкой"}, {"n": 9, "c": "人", "v": "亻", "p": "rén", "s": 2, "m": "человек"}, {"n": 10, "c": "儿", "v": "", "p": "ér", "s": 2, "m": "идущий человек"}, {"n": 11, "c": "入", "v": "", "p": "rù", "s": 2, "m": "входить"}, {"n": 12, "c": "八", "v": "丷", "p": "bā", "s": 2, "m": "восемь; делить"}, {"n": 13, "c": "冂", "v": "", "p": "jiōng", "s": 2, "m": "границы"}, {"n": 14, "c": "冖", "v": "", "p": "mì", "s": 2, "m": "крышка"}, {"n": 15, "c": "冫", "v": "", "p": "bīng", "s": 2, "m": "лёд"}, {"n": 16, "c": "几", "v": "", "p": "jī", "s": 2, "m": "столик; несколько"}, {"n": 17, "c": "凵", "v": "", "p": "kǎn", "s": 2, "m": "яма"}, {"n": 18, "c": "刀", "v": "刂", "p": "dāo", "s": 2, "m": "нож"}, {"n": 19, "c": "力", "v": "", "p": "lì", "s": 2, "m": "сила"}, {"n": 20, "c": "勹", "v": "", "p": "bāo", "s": 2, "m": "обёртывать"}, {"n": 21, "c": "匕", "v": "", "p": "bǐ", "s": 2, "m": "черпак; кинжал"}, {"n": 22, "c": "匚", "v": "", "p": "fāng", "s": 2, "m": "ящик; короб"}, {"n": 23, "c": "匸", "v": "", "p": "xì", "s": 2, "m": "прятать"}, {"n": 24, "c": "十", "v": "", "p": "shí", "s": 2, "m": "десять"}, {"n": 25, "c": "卜", "v": "", "p": "bǔ", "s": 2, "m": "гадать"}, {"n": 26, "c": "卩", "v": "⺋", "p": "jié", "s": 2, "m": "печать; власть"}, {"n": 27, "c": "厂", "v": "", "p": "hǎn", "s": 2, "m": "обрыв; круча"}, {"n": 28, "c": "厶", "v": "", "p": "sī", "s": 2, "m": "частный; личный"}, {"n": 29, "c": "又", "v": "", "p": "yòu", "s": 2, "m": "правая рука; опять"}, {"n": 30, "c": "口", "v": "", "p": "kǒu", "s": 3, "m": "рот"}, {"n": 31, "c": "囗", "v": "", "p": "wéi", "s": 3, "m": "окружать; ограда"}, {"n": 32, "c": "土", "v": "", "p": "tǔ", "s": 3, "m": "земля"}, {"n": 33, "c": "士", "v": "", "p": "shì", "s": 3, "m": "воин"}, {"n": 34, "c": "夂", "v": "", "p": "zhǐ", "s": 3, "m": "шагать вперёд; продвигаться"}, {"n": 35, "c": "夊", "v": "", "p": "suī", "s": 3, "m": "медленно идти; волочить ноги"}, {"n": 36, "c": "夕", "v": "", "p": "xī", "s": 3, "m": "вечер"}, {"n": 37, "c": "大", "v": "", "p": "dà", "s": 3, "m": "большой"}, {"n": 38, "c": "女", "v": "", "p": "nǚ", "s": 3, "m": "женщина"}, {"n": 39, "c": "子", "v": "", "p": "zǐ", "s": 3, "m": "ребёнок; сын"}, {"n": 40, "c": "宀", "v": "", "p": "mián", "s": 3, "m": "крыша с точкой; крыша"}, {"n": 41, "c": "寸", "v": "", "p": "cùn", "s": 3, "m": "вершок"}, {"n": 42, "c": "小", "v": "⺌ ⺍", "p": "xiǎo", "s": 3, "m": "маленький"}, {"n": 43, "c": "尢", "v": "尣", "p": "wāng", "s": 3, "m": "хромой"}, {"n": 44, "c": "尸", "v": "", "p": "shī", "s": 3, "m": "труп"}, {"n": 45, "c": "屮", "v": "", "p": "chè", "s": 3, "m": "росток"}, {"n": 46, "c": "山", "v": "", "p": "shān", "s": 3, "m": "гора"}, {"n": 47, "c": "巛", "v": "巜 川", "p": "chuān", "s": 3, "m": "поток; река"}, {"n": 48, "c": "工", "v": "", "p": "gōng", "s": 3, "m": "работа"}, {"n": 49, "c": "己", "v": "已 巳", "p": "jǐ", "s": 3, "m": "сам"}, {"n": 50, "c": "巾", "v": "", "p": "jīn", "s": 3, "m": "полотенце; салфетка"}, {"n": 51, "c": "干", "v": "", "p": "gān", "s": 3, "m": "щит; вмешиваться"}, {"n": 52, "c": "幺", "v": "", "p": "yāo", "s": 3, "m": "незрелый; младший"}, {"n": 53, "c": "广", "v": "", "p": "yǎn", "s": 3, "m": "навес"}, {"n": 54, "c": "廴", "v": "", "p": "yǐn", "s": 3, "m": "двигаться вперёд; тащить"}, {"n": 55, "c": "廾", "v": "", "p": "gǒng", "s": 3, "m": "соединить руки"}, {"n": 56, "c": "弋", "v": "", "p": "yì", "s": 3, "m": "стрелять из лука"}, {"n": 57, "c": "弓", "v": "", "p": "gōng", "s": 3, "m": "лук"}, {"n": 58, "c": "彐", "v": "彑", "p": "jì", "s": 3, "m": "голова свиньи"}, {"n": 59, "c": "彡", "v": "", "p": "shān", "s": 3, "m": "перья; длинная шерсть"}, {"n": 60, "c": "彳", "v": "", "p": "chì", "s": 3, "m": "шаг (левой ногой)"}, {"n": 61, "c": "心", "v": "忄 ⺗", "p": "xīn", "s": 4, "m": "сердце"}, {"n": 62, "c": "戈", "v": "", "p": "gē", "s": 4, "m": "копьё; клевец"}, {"n": 63, "c": "户", "v": "戶 戸", "p": "hù", "s": 4, "m": "двор"}, {"n": 64, "c": "手", "v": "扌", "p": "shǒu", "s": 4, "m": "рука"}, {"n": 65, "c": "支", "v": "", "p": "zhī", "s": 4, "m": "ветка"}, {"n": 66, "c": "攴", "v": "攵", "p": "pū", "s": 4, "m": "бить; ударять"}, {"n": 67, "c": "文", "v": "", "p": "wén", "s": 4, "m": "текст; письмена"}, {"n": 68, "c": "斗", "v": "", "p": "dǒu", "s": 4, "m": "ковш; хлебная мерка"}, {"n": 69, "c": "斤", "v": "", "p": "jīn", "s": 4, "m": "топор"}, {"n": 70, "c": "方", "v": "", "p": "fāng", "s": 4, "m": "квадрат; сторона"}, {"n": 71, "c": "无", "v": "", "p": "wú", "s": 4, "m": "не; без"}, {"n": 72, "c": "日", "v": "", "p": "rì", "s": 4, "m": "солнце"}, {"n": 73, "c": "曰", "v": "", "p": "yuē", "s": 4, "m": "говорить"}, {"n": 74, "c": "月", "v": "", "p": "yuè", "s": 4, "m": "луна"}, {"n": 75, "c": "木", "v": "", "p": "mù", "s": 4, "m": "дерево"}, {"n": 76, "c": "欠", "v": "", "p": "qiàn", "s": 4, "m": "недоставать"}, {"n": 77, "c": "止", "v": "", "p": "zhǐ", "s": 4, "m": "стопа; останавливаться"}, {"n": 78, "c": "歹", "v": "歺", "p": "dǎi", "s": 4, "m": "злой; плохой"}, {"n": 79, "c": "殳", "v": "", "p": "shū", "s": 4, "m": "бамбуковая пика"}, {"n": 80, "c": "毋", "v": "母", "p": "wú", "s": 4, "m": "нет; нельзя"}, {"n": 81, "c": "比", "v": "", "p": "bǐ", "s": 4, "m": "сравнивать"}, {"n": 82, "c": "毛", "v": "", "p": "máo", "s": 4, "m": "шерсть; волосы"}, {"n": 83, "c": "氏", "v": "", "p": "shì", "s": 4, "m": "род; клан"}, {"n": 84, "c": "气", "v": "", "p": "qì", "s": 4, "m": "воздух; газ"}, {"n": 85, "c": "水", "v": "氵 氺", "p": "shuǐ", "s": 4, "m": "вода"}, {"n": 86, "c": "火", "v": "灬", "p": "huǒ", "s": 4, "m": "огонь"}, {"n": 87, "c": "爪", "v": "爫", "p": "zhǎo", "s": 4, "m": "когти"}, {"n": 88, "c": "父", "v": "", "p": "fù", "s": 4, "m": "отец"}, {"n": 89, "c": "爻", "v": "", "p": "yáo", "s": 4, "m": "воздействие; влияние"}, {"n": 90, "c": "爿", "v": "丬", "p": "qiáng", "s": 4, "m": "доска; кровать"}, {"n": 91, "c": "片", "v": "", "p": "piàn", "s": 4, "m": "карточка; щепка"}, {"n": 92, "c": "牙", "v": "", "p": "yá", "s": 4, "m": "зуб"}, {"n": 93, "c": "牛", "v": "牜", "p": "niú", "s": 4, "m": "корова; бык"}, {"n": 94, "c": "犬", "v": "犭", "p": "quǎn", "s": 4, "m": "собака"}, {"n": 95, "c": "玄", "v": "", "p": "xuán", "s": 5, "m": "тёмный; тайный"}, {"n": 96, "c": "玉", "v": "王", "p": "yù", "s": 5, "m": "яшма"}, {"n": 97, "c": "瓜", "v": "", "p": "guā", "s": 5, "m": "дыня; тыква"}, {"n": 98, "c": "瓦", "v": "", "p": "wǎ", "s": 5, "m": "черепица"}, {"n": 99, "c": "甘", "v": "", "p": "gān", "s": 5, "m": "сладкий"}, {"n": 100, "c": "生", "v": "", "p": "shēng", "s": 5, "m": "рождаться; сырой"}, {"n": 101, "c": "用", "v": "", "p": "yòng", "s": 5, "m": "применять; использовать"}, {"n": 102, "c": "田", "v": "", "p": "tián", "s": 5, "m": "поле"}, {"n": 103, "c": "疋", "v": "", "p": "pǐ", "s": 5, "m": "нога; колено"}, {"n": 104, "c": "疒", "v": "", "p": "chuáng", "s": 5, "m": "болезнь"}, {"n": 105, "c": "癶", "v": "", "p": "bō", "s": 5, "m": "ноги врозь"}, {"n": 106, "c": "白", "v": "", "p": "bái", "s": 5, "m": "белый"}, {"n": 107, "c": "皮", "v": "", "p": "pí", "s": 5, "m": "кожа; шкура"}, {"n": 108, "c": "皿", "v": "", "p": "mǐn", "s": 5, "m": "блюдо; посуда"}, {"n": 109, "c": "目", "v": "", "p": "mù", "s": 5, "m": "глаз"}, {"n": 110, "c": "矛", "v": "", "p": "máo", "s": 5, "m": "копьё"}, {"n": 111, "c": "矢", "v": "", "p": "shǐ", "s": 5, "m": "стрела"}, {"n": 112, "c": "石", "v": "", "p": "shí", "s": 5, "m": "камень"}, {"n": 113, "c": "示", "v": "礻", "p": "shì", "s": 5, "m": "алтарь; демонстрировать"}, {"n": 114, "c": "禸", "v": "", "p": "róu", "s": 5, "m": "след зверя"}, {"n": 115, "c": "禾", "v": "", "p": "hé", "s": 5, "m": "хлеб на корню"}, {"n": 116, "c": "穴", "v": "", "p": "xué", "s": 5, "m": "пещера"}, {"n": 117, "c": "立", "v": "", "p": "lì", "s": 5, "m": "стоять"}, {"n": 118, "c": "竹", "v": "⺮", "p": "zhú", "s": 6, "m": "бамбук"}, {"n": 119, "c": "米", "v": "", "p": "mǐ", "s": 6, "m": "рис"}, {"n": 120, "c": "糸", "v": "纟 糹", "p": "mì", "s": 6, "m": "нить; шёлк"}, {"n": 121, "c": "缶", "v": "", "p": "fǒu", "s": 6, "m": "глиняная посуда; керамика"}, {"n": 122, "c": "网", "v": "罒 ⺳", "p": "wǎng", "s": 6, "m": "сеть"}, {"n": 123, "c": "羊", "v": "⺶ ⺷", "p": "yáng", "s": 6, "m": "баран"}, {"n": 124, "c": "羽", "v": "", "p": "yǔ", "s": 6, "m": "перья; крылья"}, {"n": 125, "c": "老", "v": "耂", "p": "lǎo", "s": 6, "m": "старый"}, {"n": 126, "c": "而", "v": "", "p": "ér", "s": 6, "m": "а; но"}, {"n": 127, "c": "耒", "v": "", "p": "lěi", "s": 6, "m": "плуг; соха"}, {"n": 128, "c": "耳", "v": "", "p": "ěr", "s": 6, "m": "ухо"}, {"n": 129, "c": "聿", "v": "⺻", "p": "yù", "s": 6, "m": "кисть для письма"}, {"n": 130, "c": "肉", "v": "月", "p": "ròu", "s": 6, "m": "мясо"}, {"n": 131, "c": "臣", "v": "", "p": "chén", "s": 6, "m": "подданный"}, {"n": 132, "c": "自", "v": "", "p": "zì", "s": 6, "m": "сам; нос"}, {"n": 133, "c": "至", "v": "", "p": "zhì", "s": 6, "m": "достигать; прибывать"}, {"n": 134, "c": "臼", "v": "", "p": "jiù", "s": 6, "m": "ступа"}, {"n": 135, "c": "舌", "v": "", "p": "shé", "s": 6, "m": "язык"}, {"n": 136, "c": "舛", "v": "", "p": "chuǎn", "s": 6, "m": "ошибка; неудача"}, {"n": 137, "c": "舟", "v": "", "p": "zhōu", "s": 6, "m": "лодка; корабль"}, {"n": 138, "c": "艮", "v": "", "p": "gēn", "s": 6, "m": "твёрдый; крепкий"}, {"n": 139, "c": "色", "v": "", "p": "sè", "s": 6, "m": "цвет"}, {"n": 140, "c": "艸", "v": "艹", "p": "cǎo", "s": 6, "m": "трава"}, {"n": 141, "c": "虍", "v": "", "p": "hū", "s": 6, "m": "тигр"}, {"n": 142, "c": "虫", "v": "", "p": "chóng", "s": 6, "m": "насекомое; ядовитая змея"}, {"n": 143, "c": "血", "v": "", "p": "xuè", "s": 6, "m": "кровь"}, {"n": 144, "c": "行", "v": "", "p": "xíng", "s": 6, "m": "идти; ряд"}, {"n": 145, "c": "衣", "v": "衤", "p": "yī", "s": 6, "m": "одежда"}, {"n": 146, "c": "襾", "v": "西 覀", "p": "yà", "s": 6, "m": "накрывать; крышка"}, {"n": 147, "c": "見", "v": "见", "p": "jiàn", "s": 7, "m": "видеть; смотреть"}, {"n": 148, "c": "角", "v": "", "p": "jiǎo", "s": 7, "m": "рог; угол"}, {"n": 149, "c": "言", "v": "讠 訁", "p": "yán", "s": 7, "m": "речь"}, {"n": 150, "c": "谷", "v": "", "p": "gǔ", "s": 7, "m": "долина"}, {"n": 151, "c": "豆", "v": "", "p": "dòu", "s": 7, "m": "бобы"}, {"n": 152, "c": "豕", "v": "", "p": "shǐ", "s": 7, "m": "свинья"}, {"n": 153, "c": "豸", "v": "", "p": "zhì", "s": 7, "m": "единорог"}, {"n": 154, "c": "貝", "v": "贝", "p": "bèi", "s": 7, "m": "раковина; сокровище"}, {"n": 155, "c": "赤", "v": "", "p": "chì", "s": 7, "m": "красный"}, {"n": 156, "c": "走", "v": "", "p": "zǒu", "s": 7, "m": "ходить; уходить"}, {"n": 157, "c": "足", "v": "⻊", "p": "zú", "s": 7, "m": "нога"}, {"n": 158, "c": "身", "v": "", "p": "shēn", "s": 7, "m": "тело (человека)"}, {"n": 159, "c": "車", "v": "车", "p": "chē", "s": 7, "m": "телега; повозка"}, {"n": 160, "c": "辛", "v": "", "p": "xīn", "s": 7, "m": "горький"}, {"n": 161, "c": "辰", "v": "", "p": "chén", "s": 7, "m": "время (циклический знак)"}, {"n": 162, "c": "辵", "v": "辶", "p": "chuò", "s": 7, "m": "идти быстро"}, {"n": 163, "c": "邑", "v": "阝", "p": "yì", "s": 7, "m": "город (阝 справа)"}, {"n": 164, "c": "酉", "v": "", "p": "yǒu", "s": 7, "m": "сосуд для вина"}, {"n": 165, "c": "釆", "v": "", "p": "biàn", "s": 7, "m": "различать; сортировать"}, {"n": 166, "c": "里", "v": "", "p": "lǐ", "s": 7, "m": "верста; деревня"}, {"n": 167, "c": "金", "v": "钅 釒", "p": "jīn", "s": 8, "m": "золото; металл"}, {"n": 168, "c": "長", "v": "长", "p": "cháng", "s": 8, "m": "длинный; старший"}, {"n": 169, "c": "門", "v": "门", "p": "mén", "s": 8, "m": "ворота"}, {"n": 170, "c": "阜", "v": "阝", "p": "fù", "s": 8, "m": "холм (阝 слева)"}, {"n": 171, "c": "隶", "v": "", "p": "lì", "s": 8, "m": "достигать; поймать"}, {"n": 172, "c": "隹", "v": "", "p": "zhuī", "s": 8, "m": "короткохвостая птица"}, {"n": 173, "c": "雨", "v": "⻗", "p": "yǔ", "s": 8, "m": "дождь"}, {"n": 174, "c": "青", "v": "", "p": "qīng", "s": 8, "m": "синий; зелёный"}, {"n": 175, "c": "非", "v": "", "p": "fēi", "s": 8, "m": "не быть; отрицать"}, {"n": 176, "c": "面", "v": "", "p": "miàn", "s": 9, "m": "лицо"}, {"n": 177, "c": "革", "v": "", "p": "gé", "s": 9, "m": "сырая кожа"}, {"n": 178, "c": "韋", "v": "韦", "p": "wéi", "s": 9, "m": "выделанная кожа"}, {"n": 179, "c": "韭", "v": "", "p": "jiǔ", "s": 9, "m": "дикий чеснок"}, {"n": 180, "c": "音", "v": "", "p": "yīn", "s": 9, "m": "звук"}, {"n": 181, "c": "頁", "v": "页", "p": "yè", "s": 9, "m": "страница"}, {"n": 182, "c": "風", "v": "风", "p": "fēng", "s": 9, "m": "ветер"}, {"n": 183, "c": "飛", "v": "飞", "p": "fēi", "s": 9, "m": "летать"}, {"n": 184, "c": "食", "v": "饣 飠", "p": "shí", "s": 9, "m": "еда; пища"}, {"n": 185, "c": "首", "v": "", "p": "shǒu", "s": 9, "m": "голова; глава"}, {"n": 186, "c": "香", "v": "", "p": "xiāng", "s": 9, "m": "аромат"}, {"n": 187, "c": "馬", "v": "马", "p": "mǎ", "s": 10, "m": "лошадь"}, {"n": 188, "c": "骨", "v": "", "p": "gǔ", "s": 10, "m": "кости"}, {"n": 189, "c": "高", "v": "", "p": "gāo", "s": 10, "m": "высокий"}, {"n": 190, "c": "髟", "v": "", "p": "biāo", "s": 10, "m": "волосы"}, {"n": 191, "c": "鬥", "v": "", "p": "dòu", "s": 10, "m": "борьба"}, {"n": 192, "c": "鬯", "v": "", "p": "chàng", "s": 10, "m": "жертвенное вино"}, {"n": 193, "c": "鬲", "v": "", "p": "lì", "s": 10, "m": "кувшин; тренога"}, {"n": 194, "c": "鬼", "v": "", "p": "guǐ", "s": 10, "m": "чёрт"}, {"n": 195, "c": "魚", "v": "鱼", "p": "yú", "s": 11, "m": "рыба"}, {"n": 196, "c": "鳥", "v": "鸟", "p": "niǎo", "s": 11, "m": "птица"}, {"n": 197, "c": "鹵", "v": "卤", "p": "lǔ", "s": 11, "m": "соляная мель; солончак"}, {"n": 198, "c": "鹿", "v": "", "p": "lù", "s": 11, "m": "олень"}, {"n": 199, "c": "麥", "v": "麦", "p": "mài", "s": 11, "m": "пшеница"}, {"n": 200, "c": "麻", "v": "", "p": "má", "s": 11, "m": "конопля"}, {"n": 201, "c": "黃", "v": "黄", "p": "huáng", "s": 12, "m": "жёлтый"}, {"n": 202, "c": "黍", "v": "", "p": "shǔ", "s": 12, "m": "просо"}, {"n": 203, "c": "黑", "v": "", "p": "hēi", "s": 12, "m": "чёрный"}, {"n": 204, "c": "黹", "v": "", "p": "zhǐ", "s": 12, "m": "вышивка"}, {"n": 205, "c": "黽", "v": "黾", "p": "mǐn", "s": 13, "m": "лягушка; жаба"}, {"n": 206, "c": "鼎", "v": "", "p": "dǐng", "s": 13, "m": "бронзовый треножник"}, {"n": 207, "c": "鼓", "v": "", "p": "gǔ", "s": 13, "m": "барабан"}, {"n": 208, "c": "鼠", "v": "", "p": "shǔ", "s": 13, "m": "мышь"}, {"n": 209, "c": "鼻", "v": "", "p": "bí", "s": 14, "m": "нос"}, {"n": 210, "c": "齊", "v": "齐", "p": "qí", "s": 14, "m": "ровный; одинаковый"}, {"n": 211, "c": "齒", "v": "齿", "p": "chǐ", "s": 15, "m": "зубы"}, {"n": 212, "c": "龍", "v": "龙", "p": "lóng", "s": 16, "m": "дракон"}, {"n": 213, "c": "龜", "v": "龟", "p": "guī", "s": 16, "m": "черепаха"}, {"n": 214, "c": "龠", "v": "", "p": "yuè", "s": 17, "m": "флейта"}];
+const C={"点": {"p": "diǎn", "r": "灬", "k": 86, "d": "⿱占灬", "t": "pictophonetic", "s": "灬", "f": "占"}, "食": {"p": "shí", "r": "食", "k": 184, "d": "⿱人良", "t": "pictographic", "s": null, "f": null}, "堂": {"p": "táng", "r": "土", "k": 32, "d": "⿱尚土", "t": "pictophonetic", "s": "土", "f": "尚"}, "差": {"p": "chà", "r": "工", "k": 48, "d": "⿸羊工", "t": "ideographic", "s": null, "f": null}, "分": {"p": "fēn", "r": "刀", "k": 18, "d": "⿱八刀", "t": "ideographic", "s": null, "f": null}, "刻": {"p": "kè", "r": "刂", "k": 18, "d": "⿰亥刂", "t": "pictophonetic", "s": "刂", "f": "亥"}, "上": {"p": "shàng", "r": "一", "k": 1, "d": "⿱⺊一", "t": "ideographic", "s": null, "f": null}, "课": {"p": "kè", "r": "讠", "k": 149, "d": "⿰讠果", "t": "pictophonetic", "s": "讠", "f": "果"}, "下": {"p": "xià", "r": "一", "k": 1, "d": "⿱一卜", "t": "ideographic", "s": null, "f": null}, "以": {"p": "yǐ", "r": "人", "k": 9, "d": "⿰？人", "t": null, "s": null, "f": null}, "后": {"p": "hòu", "r": "口", "k": 30, "d": "⿸？口", "t": null, "s": null, "f": null}, "事": {"p": "shì", "r": "亅", "k": 6, "d": "⿻⿳一口彐亅", "t": null, "s": null, "f": null}, "儿": {"p": "ér", "r": "儿", "k": 10, "d": "⿰丿乚", "t": "pictographic", "s": null, "f": null}, "回": {"p": "huí", "r": "囗", "k": 31, "d": "⿴囗口", "t": "ideographic", "s": null, "f": null}, "跟": {"p": "gēn", "r": "足", "k": 157, "d": "⿰足艮", "t": "pictophonetic", "s": "足", "f": "艮"}, "一": {"p": "yī", "r": "一", "k": 1, "d": "？", "t": "ideographic", "s": null, "f": null}, "起": {"p": "qǐ", "r": "走", "k": 156, "d": "⿺走己", "t": "pictophonetic", "s": "走", "f": "己"}, "电": {"p": "diàn", "r": "曰", "k": 73, "d": "⿻曰乚", "t": "ideographic", "s": null, "f": null}, "影": {"p": "yǐng", "r": "彡", "k": 59, "d": "⿰景彡", "t": "pictophonetic", "s": "彡", "f": "景"}, "咖": {"p": "kā", "r": "口", "k": 30, "d": "⿰口加", "t": "pictophonetic", "s": "口", "f": "加"}, "啡": {"p": "fēi", "r": "口", "k": 30, "d": "⿰口非", "t": "pictophonetic", "s": "口", "f": "非"}, "馆": {"p": "guǎn", "r": "饣", "k": 184, "d": "⿰饣官", "t": "ideographic", "s": null, "f": null}, "半": {"p": "bàn", "r": "十", "k": 24, "d": "⿻丷牛", "t": "ideographic", "s": null, "f": null}, "啊": {"p": "a", "r": "口", "k": 30, "d": "⿰口阿", "t": "pictophonetic", "s": "口", "f": "阿"}, "等": {"p": "děng", "r": "⺮", "k": 118, "d": "⿱⺮寺", "t": "ideographic", "s": null, "f": null}, "走": {"p": "zǒu", "r": "走", "k": 156, "d": "⿱土止", "t": "ideographic", "s": null, "f": null}, "路": {"p": "lù", "r": "足", "k": 157, "d": "⿰足各", "t": "pictophonetic", "s": "足", "f": "各"}, "班": {"p": "bān", "r": "王", "k": 96, "d": "⿲王刂王", "t": "ideographic", "s": null, "f": null}, "院": {"p": "yuàn", "r": "阝", "k": 170, "d": "⿰阝完", "t": "pictophonetic", "s": "阝", "f": "完"}, "表": {"p": "biǎo", "r": "衣", "k": 145, "d": "⿱毛衣", "t": "ideographic", "s": null, "f": null}, "钟": {"p": "zhōng", "r": "钅", "k": 167, "d": "⿰钅中", "t": "pictophonetic", "s": "钅", "f": "中"}, "天": {"p": "tiān", "r": "大", "k": 37, "d": "⿱一大", "t": "ideographic", "s": null, "f": null}, "每": {"p": "měi", "r": "母", "k": 80, "d": "⿱？母", "t": "pictophonetic", "s": null, "f": "母"}, "床": {"p": "chuáng", "r": "广", "k": 53, "d": "⿸广木", "t": "ideographic", "s": null, "f": null}, "午": {"p": "wǔ", "r": "十", "k": 24, "d": "⿻丿干", "t": null, "s": null, "f": null}, "中": {"p": "zhōng", "r": "丨", "k": 2, "d": "⿻口丨", "t": "ideographic", "s": null, "f": null}, "吃": {"p": "chī", "r": "口", "k": 30, "d": "⿰口乞", "t": "pictophonetic", "s": "口", "f": "乞"}, "饭": {"p": "fàn", "r": "饣", "k": 184, "d": "⿰饣反", "t": "pictophonetic", "s": "饣", "f": "反"}, "多": {"p": "duō", "r": "夕", "k": 36, "d": "⿱夕夕", "t": "ideographic", "s": null, "f": null}, "休": {"p": "xiū", "r": "亻", "k": 9, "d": "⿰亻木", "t": "ideographic", "s": null, "f": null}, "息": {"p": "xī", "r": "心", "k": 61, "d": "⿱自心", "t": "ideographic", "s": null, "f": null}, "有": {"p": "yǒu", "r": "月", "k": 74, "d": "⿸？月", "t": "pictophonetic", "s": null, "f": "月"}, "时": {"p": "shí", "r": "日", "k": 72, "d": "⿰日寸", "t": "pictophonetic", "s": "日", "f": null}, "候": {"p": "hòu", "r": "亻", "k": 9, "d": "⿰亻矦", "t": "pictophonetic", "s": "亻", "f": "矦"}, "问": {"p": "wèn", "r": "门", "k": 169, "d": "⿵门口", "t": "pictophonetic", "s": "口", "f": "门"}, "题": {"p": "tí", "r": "页", "k": 181, "d": "⿺是页", "t": "pictophonetic", "s": "页", "f": "是"}, "睡": {"p": "shuì", "r": "目", "k": 109, "d": "⿰目垂", "t": "pictophonetic", "s": "目", "f": "垂"}, "觉": {"p": "jué", "r": "见", "k": 147, "d": "⿳⺍冖见", "t": "pictophonetic", "s": "见", "f": "⺍"}, "外": {"p": "wài", "r": "夕", "k": 36, "d": "⿰夕卜", "t": "ideographic", "s": null, "f": null}, "语": {"p": "yǔ", "r": "讠", "k": 149, "d": "⿰讠吾", "t": "pictophonetic", "s": "讠", "f": "吾"}, "系": {"p": "xì", "r": "糸", "k": 120, "d": "⿱丿糸", "t": "pictophonetic", "s": "糸", "f": null}, "历": {"p": "lì", "r": "厂", "k": 27, "d": "⿸厂力", "t": "pictophonetic", "s": "厤", "f": "力"}, "史": {"p": "shǐ", "r": "口", "k": 30, "d": "⿻口乂", "t": "ideographic", "s": null, "f": null}, "文": {"p": "wén", "r": "文", "k": 67, "d": "⿱亠乂", "t": "pictographic", "s": null, "f": null}, "学": {"p": "xué", "r": "子", "k": 39, "d": "⿱⿱⺍冖子", "t": "ideographic", "s": null, "f": null}, "现": {"p": "xiàn", "r": "王", "k": 96, "d": "⿰王见", "t": "ideographic", "s": null, "f": null}, "在": {"p": "zài", "r": "土", "k": 32, "d": "⿸才土", "t": "pictophonetic", "s": "土", "f": "才"}, "几": {"p": "jǐ", "r": "几", "k": 16, "d": "⿰丿乙", "t": "pictographic", "s": null, "f": null}, "张": {"p": "zhāng", "r": "弓", "k": 57, "d": "⿰弓长", "t": "pictophonetic", "s": "弓", "f": "长"}, "票": {"p": "piào", "r": "示", "k": 113, "d": "⿱覀示", "t": "ideographic", "s": null, "f": null}, "晚": {"p": "wǎn", "r": "日", "k": 72, "d": "⿰日免", "t": "ideographic", "s": null, "f": null}, "从": {"p": "cóng", "r": "人", "k": 9, "d": "⿰人人", "t": "ideographic", "s": null, "f": null}, "哪": {"p": "nǎ", "r": "口", "k": 30, "d": "⿰口那", "t": "pictophonetic", "s": "口", "f": "那"}, "家": {"p": "jiā", "r": "宀", "k": 40, "d": "⿱宀豕", "t": "pictophonetic", "s": "宀", "f": "豕"}, "坐": {"p": "zuò", "r": "土", "k": 32, "d": "⿻从土", "t": "ideographic", "s": null, "f": null}, "车": {"p": "chē", "r": "车", "k": 159, "d": "⿻七十", "t": "pictographic", "s": null, "f": null}, "门": {"p": "mén", "r": "门", "k": 169, "d": "⿰⿱丶丨？", "t": "pictographic", "s": null, "f": null}, "口": {"p": "kǒu", "r": "口", "k": 30, "d": "⿱冂一", "t": "pictographic", "s": null, "f": null}, "再": {"p": "zài", "r": "冂", "k": 13, "d": "⿱一冉", "t": "pictographic", "s": null, "f": null}, "见": {"p": "jiàn", "r": "见", "k": 147, "d": "⿵冂儿", "t": "ideographic", "s": null, "f": null}, "认": {"p": "rèn", "r": "讠", "k": 149, "d": "⿰讠人", "t": "pictophonetic", "s": "讠", "f": "人"}, "识": {"p": "shí", "r": "讠", "k": 149, "d": "⿰讠只", "t": "pictophonetic", "s": "讠", "f": "只"}, "爸": {"p": "bà", "r": "父", "k": 88, "d": "⿱父巴", "t": "pictophonetic", "s": "父", "f": "巴"}, "还": {"p": "hái", "r": "辶", "k": 162, "d": "⿺辶不", "t": "ideographic", "s": null, "f": null}, "没": {"p": "méi", "r": "氵", "k": 85, "d": "⿰氵殳", "t": "pictophonetic", "s": "氵", "f": "殳"}, "妈": {"p": "mā", "r": "女", "k": 38, "d": "⿰女马", "t": "pictophonetic", "s": "女", "f": "马"}, "商": {"p": "shāng", "r": "口", "k": 30, "d": "⿱⿱亠丷冏", "t": "pictophonetic", "s": "冏", "f": "章"}, "店": {"p": "diàn", "r": "广", "k": 53, "d": "⿸广占", "t": "pictophonetic", "s": "广", "f": "占"}, "前": {"p": "qián", "r": "刂", "k": 18, "d": "⿱⿱丷一刖", "t": null, "s": null, "f": null}, "今": {"p": "jīn", "r": "人", "k": 9, "d": "⿱人？", "t": "ideographic", "s": null, "f": null}, "京": {"p": "jīng", "r": "亠", "k": 8, "d": "⿳亠口小", "t": "pictographic", "s": null, "f": null}, "剧": {"p": "jù", "r": "刂", "k": 18, "d": "⿰居刂", "t": "pictophonetic", "s": "刂", "f": "居"}, "弟": {"p": "dì", "r": "弓", "k": 57, "d": "⿱丷⿻弓？", "t": null, "s": null, "f": null}, "大": {"p": "dà", "r": "大", "k": 37, "d": "⿻一人", "t": "ideographic", "s": null, "f": null}, "衣": {"p": "yī", "r": "衣", "k": 145, "d": "⿱亠？", "t": "pictographic", "s": null, "f": null}, "买": {"p": "mǎi", "r": "大", "k": 37, "d": "⿱乛头", "t": null, "s": null, "f": null}, "老": {"p": "lǎo", "r": "老", "k": 125, "d": "⿱耂匕", "t": "pictographic", "s": null, "f": null}, "师": {"p": "shī", "r": "巾", "k": 50, "d": "⿰刂帀", "t": "ideographic", "s": null, "f": null}, "本": {"p": "běn", "r": "木", "k": 75, "d": "⿻木一", "t": "ideographic", "s": null, "f": null}, "新": {"p": "xīn", "r": "斤", "k": 69, "d": "⿰亲斤", "t": "ideographic", "s": null, "f": null}, "杂": {"p": "zá", "r": "木", "k": 75, "d": "⿱九木", "t": null, "s": null, "f": null}, "志": {"p": "zhì", "r": "心", "k": 61, "d": "⿱士心", "t": "ideographic", "s": null, "f": null}, "看": {"p": "kàn", "r": "目", "k": 109, "d": "⿱手目", "t": "ideographic", "s": null, "f": null}, "请": {"p": "qǐng", "r": "讠", "k": 149, "d": "⿰讠青", "t": "pictophonetic", "s": "讠", "f": "青"}, "告": {"p": "gào", "r": "口", "k": 30, "d": "⿱牛口", "t": "ideographic", "s": null, "f": null}, "诉": {"p": "sù", "r": "讠", "k": 149, "d": "⿰讠斥", "t": "ideographic", "s": null, "f": null}, "先": {"p": "xiān", "r": "儿", "k": 10, "d": "⿱⿰？土儿", "t": "ideographic", "s": null, "f": null}, "生": {"p": "shēng", "r": "生", "k": 100, "d": "⿻一土", "t": "ideographic", "s": null, "f": null}, "找": {"p": "zhǎo", "r": "扌", "k": 64, "d": "⿰扌戈", "t": "ideographic", "s": null, "f": null}, "银": {"p": "yín", "r": "钅", "k": 167, "d": "⿰钅艮", "t": "pictophonetic", "s": "钅", "f": "艮"}, "行": {"p": "xíng", "r": "行", "k": 144, "d": "⿰彳亍", "t": "ideographic", "s": null, "f": null}, "喝": {"p": "hē", "r": "口", "k": 30, "d": "⿰口曷", "t": "pictophonetic", "s": "口", "f": "曷"}, "吧": {"p": "ba", "r": "口", "k": 30, "d": "⿰口巴", "t": "pictophonetic", "s": "口", "f": "巴"}, "两": {"p": "liǎng", "r": "一", "k": 1, "d": "⿱一⿻冂从", "t": "ideographic", "s": null, "f": null}, "你": {"p": "nǐ", "r": "亻", "k": 9, "d": "⿰亻尔", "t": "ideographic", "s": null, "f": null}, "二": {"p": "èr", "r": "二", "k": 7, "d": "⿱一一", "t": "ideographic", "s": null, "f": null}, "十": {"p": "shí", "r": "十", "k": 24, "d": "⿻一丨", "t": null, "s": null, "f": null}, "四": {"p": "sì", "r": "囗", "k": 31, "d": "⿴囗儿", "t": "ideographic", "s": null, "f": null}, "吗": {"p": "ma", "r": "口", "k": 30, "d": "⿰口马", "t": "pictophonetic", "s": "口", "f": "马"}, "我": {"p": "wǒ", "r": "戈", "k": 62, "d": "⿰扌戈", "t": "ideographic", "s": null, "f": null}, "们": {"p": "men", "r": "亻", "k": 9, "d": "⿰亻门", "t": "pictophonetic", "s": "亻", "f": "门"}, "去": {"p": "qù", "r": "厶", "k": 28, "d": "⿱土厶", "t": null, "s": null, "f": null}, "好": {"p": "hǎo", "r": "女", "k": 38, "d": "⿰女子", "t": "ideographic", "s": null, "f": null}, "的": {"p": "de", "r": "白", "k": 106, "d": "⿰白勺", "t": null, "s": null, "f": null}, "六": {"p": "liù", "r": "八", "k": 12, "d": "⿱亠八", "t": null, "s": null, "f": null}, "不": {"p": "bù", "r": "一", "k": 1, "d": "⿱一？", "t": "ideographic", "s": null, "f": null}, "五": {"p": "wǔ", "r": "二", "k": 7, "d": "⿴二？", "t": "ideographic", "s": null, "f": null}, "七": {"p": "qī", "r": "一", "k": 1, "d": "⿻一乚", "t": null, "s": null, "f": null}, "来": {"p": "lái", "r": "木", "k": 75, "d": "⿻未丷", "t": "ideographic", "s": null, "f": null}, "九": {"p": "jiǔ", "r": "乙", "k": 5, "d": "⿻丿乙", "t": "pictographic", "s": null, "f": null}, "呢": {"p": "ne", "r": "口", "k": 30, "d": "⿰口尼", "t": "pictophonetic", "s": "口", "f": "尼"}, "他": {"p": "tā", "r": "亻", "k": 9, "d": "⿰亻也", "t": "ideographic", "s": null, "f": null}, "那": {"p": "nà", "r": "阝", "k": 163, "d": "⿰⿹？？阝", "t": null, "s": null, "f": null}, "是": {"p": "shì", "r": "日", "k": 72, "d": "⿱日疋", "t": "ideographic", "s": null, "f": null}, "王": {"p": "wáng", "r": "王", "k": 96, "d": "⿱一土", "t": "ideographic", "s": null, "f": null}};
+const TB=[{"id": "d1", "title": "Диктант · часть 1", "units": [{"ru": "Сколько сейчас времени?", "zh": "现在几点？", "py": "Xiànzài jǐdiǎn?", "tn": [["现", "xian", 4, "xiàn"], ["在", "zai", 4, "zài"], ["几", "ji", 3, "jǐ"], ["点", "dian", 3, "diǎn"]]}, {"ru": "Без четверти два. Ты во сколько идёшь на занятия?", "zh": "差一刻两点，你几点上课？", "py": "Chà yíkè liǎng diǎn, nǐ jǐdiǎn shàng kè?", "parts": [["Без четверти два", "差一刻两点", "Chà yíkè liǎng diǎn"], ["Ты во сколько идёшь на занятия?", "你几点上课？", "Nǐ jǐdiǎn shàng kè?"]], "tn": [["差", "cha", 4, "chà"], ["一", "yi", 2, "yí"], ["刻", "ke", 4, "kè"], ["两", "liang", 3, "liǎng"], ["点", "dian", 3, "diǎn"], ["你", "ni", 3, "nǐ"], ["几", "ji", 3, "jǐ"], ["点", "dian", 3, "diǎn"], ["上", "shang", 4, "shàng"], ["课", "ke", 4, "kè"]]}, {"ru": "В два двадцать, заканчиваю без десяти четыре.", "zh": "两点二十分，差十分四点下课。", "py": "Liǎngdiǎn èrshí fēn, chà shífēn sìdiǎn xià kè.", "parts": [["В два двадцать", "两点二十分", "Liǎngdiǎn èrshí fēn"], ["Заканчиваю без десяти четыре", "差十分四点下课", "Chà shífēn sìdiǎn xià kè"]], "tn": [["两", "liang", 3, "liǎng"], ["点", "dian", 3, "diǎn"], ["二", "er", 4, "èr"], ["十", "shi", 2, "shí"], ["分", "fen", 1, "fēn"], ["差", "cha", 4, "chà"], ["十", "shi", 2, "shí"], ["分", "fen", 1, "fēn"], ["四", "si", 4, "sì"], ["点", "dian", 3, "diǎn"], ["下", "xia", 4, "xià"], ["课", "ke", 4, "kè"]]}, {"ru": "После занятий у тебя есть дела?", "zh": "下课以后你有事吗？", "py": "Xià kè yǐhòu nǐ yǒu shì ma?", "tn": [["下", "xia", 4, "xià"], ["课", "ke", 4, "kè"], ["以", "yi", 3, "yǐ"], ["后", "hou", 4, "hòu"], ["你", "ni", 3, "nǐ"], ["有", "you", 3, "yǒu"], ["事", "shi", 4, "shì"], ["吗", "ma", 0, "ma"]]}, {"ru": "Нет дел.", "zh": "没有事。", "py": "Méiyǒu shì.", "tn": [["没", "mei", 2, "méi"], ["有", "you", 3, "yǒu"], ["事", "shi", 4, "shì"]]}], "tiles": [{"ru": "Сколько сейчас времени?", "seg": ["现在", "几", "点"], "alt": []}, {"ru": "Без четверти два", "seg": ["差", "一刻", "两", "点"], "alt": []}, {"ru": "Ты во сколько идёшь на занятия?", "seg": ["你", "几", "点", "上课"], "alt": []}, {"ru": "В два двадцать", "seg": ["两", "点", "二十", "分"], "alt": []}, {"ru": "Заканчиваю без десяти четыре", "seg": ["差", "十", "分", "四", "点", "下课"], "alt": []}, {"ru": "После занятий у тебя есть дела?", "seg": ["下课", "以后", "你", "有", "事", "吗"], "alt": []}], "words": [["现在", "xiànzài", "сейчас"], ["几", "jǐ", "сколько"], ["点", "diǎn", "час"], ["差", "chà", "без (о времени)"], ["一刻", "yí kè", "четверть часа"], ["两", "liǎng", "два (при счёте)"], ["上课", "shàngkè", "идти на занятия"], ["分", "fēn", "минута"], ["下课", "xiàkè", "заканчивать занятия"], ["以后", "yǐhòu", "после"], ["事", "shì", "дело"], ["没有", "méiyǒu", "нет, не иметь"]], "tip": "Время ставится перед глаголом. 差 + минуты + час = «без … …»: 差一刻两点 — без четверти два, 差十分四点 — без десяти четыре. Перед 点 говорят 两, а не 二: 两点. Но двадцать — 二十."}, {"id": "d2", "title": "Диктант · часть 2", "units": [{"ru": "У меня два билета в кино, вечером пойдём вместе в кино, хорошо?", "zh": "我有两张电影票，晚上我们一起去看电影，好吗？", "py": "Wǒ yǒu liǎng zhāng diànyǐng piào, wǎnshang wǒmen yìqǐ qù kàn diànyǐng, hǎo ma?", "parts": [["У меня два билета в кино", "我有两张电影票", "Wǒ yǒu liǎng zhāng diànyǐng piào"], ["Вечером пойдём вместе в кино, хорошо?", "晚上我们一起去看电影，好吗？", "Wǎnshang wǒmen yìqǐ qù kàn diànyǐng, hǎo ma?"]], "tn": [["我", "wo", 3, "wǒ"], ["有", "you", 3, "yǒu"], ["两", "liang", 3, "liǎng"], ["张", "zhang", 1, "zhāng"], ["电", "dian", 4, "diàn"], ["影", "ying", 3, "yǐng"], ["票", "piao", 4, "piào"], ["晚", "wan", 3, "wǎn"], ["上", "shang", 0, "shang"], ["我", "wo", 3, "wǒ"], ["们", "men", 0, "men"], ["一", "yi", 4, "yì"], ["起", "qi", 3, "qǐ"], ["去", "qu", 4, "qù"], ["看", "kan", 4, "kàn"], ["电", "dian", 4, "diàn"], ["影", "ying", 3, "yǐng"], ["好", "hao", 3, "hǎo"], ["吗", "ma", 0, "ma"]]}, {"ru": "Хорошо, на какой сеанс?", "zh": "好啊，看几点的？", "py": "Hǎo a, kàn jǐdiǎnde?", "tn": [["好", "hao", 3, "hǎo"], ["啊", "a", 0, "a"], ["看", "kan", 4, "kàn"], ["几", "ji", 3, "jǐ"], ["点", "dian", 3, "diǎn"], ["的", "de", 0, "de"]]}, {"ru": "На половину седьмого.", "zh": "六点半的。", "py": "Liùdiǎnbànde.", "tn": [["六", "liu", 4, "liù"], ["点", "dian", 3, "diǎn"], ["半", "ban", 4, "bàn"], ["的", "de", 0, "de"]]}], "tiles": [{"ru": "У меня два билета в кино", "seg": ["我", "有", "两", "张", "电影", "票"], "alt": []}, {"ru": "Вечером пойдём вместе в кино, хорошо?", "seg": ["晚上", "我们", "一起", "去", "看", "电影", "好", "吗"], "alt": ["我们晚上一起去看电影好吗"]}, {"ru": "Хорошо, на какой сеанс?", "seg": ["好", "啊", "看", "几", "点", "的"], "alt": []}, {"ru": "На половину седьмого", "seg": ["六", "点", "半", "的"], "alt": []}], "words": [["张", "zhāng", "сч. слово (билеты, листы)"], ["电影", "diànyǐng", "кино, фильм"], ["票", "piào", "билет"], ["晚上", "wǎnshang", "вечером"], ["一起", "yìqǐ", "вместе"], ["看", "kàn", "смотреть"], ["啊", "a", "мод. частица"], ["半", "bàn", "половина"], ["六点半", "liù diǎn bàn", "половина седьмого (6:30)"]], "tip": "两张电影票: число + счётное слово 张 + предмет. 看几点的 — «на какой сеанс» (的 заменяет слово «сеанс»). 六点半 — это 6:30, то есть «половина седьмого»."}, {"id": "d3", "title": "Диктант · часть 3", "units": [{"ru": "Ты откуда пойдёшь?", "zh": "你从哪儿去？", "py": "Nǐ cóng nǎr qù?", "tn": [["你", "ni", 3, "nǐ"], ["从", "cong", 2, "cóng"], ["哪", "na", 3, "nǎ"], ["儿", "r", 0, "r"], ["去", "qu", 4, "qù"]]}, {"ru": "Из дома.", "zh": "从我家去。", "py": "Cóng wǒ jiā qù.", "tn": [["从", "cong", 2, "cóng"], ["我", "wo", 3, "wǒ"], ["家", "jia", 1, "jiā"], ["去", "qu", 4, "qù"]]}, {"ru": "Ты поедешь на транспорте?", "zh": "你坐车去吗？", "py": "Nǐ zuò chē qù ma?", "tn": [["你", "ni", 3, "nǐ"], ["坐", "zuo", 4, "zuò"], ["车", "che", 1, "chē"], ["去", "qu", 4, "qù"], ["吗", "ma", 0, "ma"]]}, {"ru": "Нет, пойду пешком.", "zh": "不，走路去。", "py": "Bù, zǒu lù qù.", "tn": [["不", "bu", 4, "bù"], ["走", "zou", 3, "zǒu"], ["路", "lu", 4, "lù"], ["去", "qu", 4, "qù"]]}, {"ru": "В четверть седьмого я жду тебя у входа в кинотеатр.", "zh": "六点一刻我在电影院门口等你。", "py": "Liùdiǎn yíkè wǒ zài diànyǐngyuàn ménkǒu děng nǐ.", "parts": [["В четверть седьмого", "六点一刻", "Liùdiǎn yíkè"], ["Я жду тебя у входа в кинотеатр", "我在电影院门口等你", "Wǒ zài diànyǐngyuàn ménkǒu děng nǐ"]], "tn": [["六", "liu", 4, "liù"], ["点", "dian", 3, "diǎn"], ["一", "yi", 2, "yí"], ["刻", "ke", 4, "kè"], ["我", "wo", 3, "wǒ"], ["在", "zai", 4, "zài"], ["电", "dian", 4, "diàn"], ["影", "ying", 3, "yǐng"], ["院", "yuan", 4, "yuàn"], ["门", "men", 2, "mén"], ["口", "kou", 3, "kǒu"], ["等", "deng", 3, "děng"], ["你", "ni", 3, "nǐ"]]}, {"ru": "До встречи в шесть пятнадцать.", "zh": "六点十五分再见。", "py": "Liùdiǎn shíwǔfēn zàijiàn.", "tn": [["六", "liu", 4, "liù"], ["点", "dian", 3, "diǎn"], ["十", "shi", 2, "shí"], ["五", "wu", 3, "wǔ"], ["分", "fen", 1, "fēn"], ["再", "zai", 4, "zài"], ["见", "jian", 4, "jiàn"]]}], "tiles": [{"ru": "Ты откуда пойдёшь?", "seg": ["你", "从", "哪儿", "去"], "alt": []}, {"ru": "Из дома", "seg": ["从", "我", "家", "去"], "alt": []}, {"ru": "Ты поедешь на транспорте?", "seg": ["你", "坐", "车", "去", "吗"], "alt": []}, {"ru": "Нет, пойду пешком", "seg": ["不", "走", "路", "去"], "alt": []}, {"ru": "Я жду тебя у входа в кинотеатр", "seg": ["我", "在", "电影院", "门口", "等", "你"], "alt": []}, {"ru": "До встречи в шесть пятнадцать", "seg": ["六", "点", "十五", "分", "再见"], "alt": []}], "words": [["从", "cóng", "из, от"], ["哪儿", "nǎr", "где, куда, откуда"], ["家", "jiā", "дом"], ["坐车", "zuò chē", "ехать (на транспорте)"], ["走路", "zǒu lù", "идти пешком"], ["在", "zài", "в, на (место)"], ["电影院", "diànyǐngyuàn", "кинотеатр"], ["门口", "ménkǒu", "вход, у дверей"], ["等", "děng", "ждать"], ["再见", "zàijiàn", "до свидания"], ["六点一刻", "liù diǎn yí kè", "четверть седьмого (6:15)"]], "tip": "从 + место + 去: 从我家去 — «из дома». Способ передвижения стоит перед глаголом: 坐车去, 走路去. Место с 在 — перед глаголом: 在电影院门口等你. 六点一刻 — это 6:15, «четверть седьмого»."}, {"id": "p3", "title": "Перевод 3", "units": [{"ru": "Пойдём вместе со мной. Я знаю дорогу.", "zh": "跟我一起去吧，我认识路。", "py": "Gēn wǒ yìqǐ qù ba, wǒ rènshi lù.", "parts": [["Пойдём вместе со мной", "跟我一起去吧", "Gēn wǒ yìqǐ qù ba"], ["Я знаю дорогу", "我认识路", "Wǒ rènshi lù"]], "tn": [["跟", "gen", 1, "gēn"], ["我", "wo", 3, "wǒ"], ["一", "yi", 4, "yì"], ["起", "qi", 3, "qǐ"], ["去", "qu", 4, "qù"], ["吧", "ba", 0, "ba"], ["我", "wo", 3, "wǒ"], ["认", "ren", 4, "rèn"], ["识", "shi", 0, "shi"], ["路", "lu", 4, "lù"]]}], "tiles": [{"ru": "Пойдём вместе со мной", "seg": ["跟", "我", "一起", "去", "吧"], "alt": []}, {"ru": "Я знаю дорогу", "seg": ["我", "认识", "路"], "alt": []}], "words": [["跟", "gēn", "с (вместе с)"], ["一起", "yìqǐ", "вместе"], ["吧", "ba", "давай (частица)"], ["认识", "rènshi", "знать (дорогу, человека)"], ["路", "lù", "дорога"]], "tip": "跟 + кто + 一起 + глагол: 跟我一起去. 吧 в конце — «давай». «Знать дорогу» — 认识路 (знать, потому что знаком)."}, {"id": "p4", "title": "Перевод 4", "units": [{"ru": "— Сколько сейчас времени? — Сейчас половина восьмого, отец ещё не вернулся домой.", "zh": "现在几点？——现在七点半，爸爸还没回家。", "py": "Xiànzài jǐ diǎn? — Xiànzài qī diǎn bàn, bàba hái méi huí jiā.", "parts": [["Сколько сейчас времени?", "现在几点？", "Xiànzài jǐ diǎn?"], ["Сейчас половина восьмого", "现在七点半", "Xiànzài qī diǎn bàn"], ["Отец ещё не вернулся домой", "爸爸还没回家", "Bàba hái méi huí jiā"]], "tn": [["现", "xian", 4, "xiàn"], ["在", "zai", 4, "zài"], ["几", "ji", 3, "jǐ"], ["点", "dian", 3, "diǎn"], ["现", "xian", 4, "xiàn"], ["在", "zai", 4, "zài"], ["七", "qi", 1, "qī"], ["点", "dian", 3, "diǎn"], ["半", "ban", 4, "bàn"], ["爸", "ba", 4, "bà"], ["爸", "ba", 0, "ba"], ["还", "hai", 2, "hái"], ["没", "mei", 2, "méi"], ["回", "hui", 2, "huí"], ["家", "jia", 1, "jiā"]]}], "tiles": [{"ru": "Сейчас половина восьмого", "seg": ["现在", "七", "点", "半"], "alt": []}, {"ru": "Отец ещё не вернулся домой", "seg": ["爸爸", "还", "没", "回", "家"], "alt": []}], "words": [["现在", "xiànzài", "сейчас"], ["七点半", "qī diǎn bàn", "половина восьмого (7:30)"], ["爸爸", "bàba", "папа, отец"], ["还没", "hái méi", "ещё не"], ["回家", "huí jiā", "вернуться домой"]], "tip": "Ловушка: «половина восьмого» = 7:30 = 七点半, а не 八点半. «Ещё не сделал» = 还没 + глагол: 还没回家."}, {"id": "p5", "title": "Перевод 5", "units": [{"ru": "— В котором часу ты приходишь на занятия? — В половине десятого. А ты? — Я в четверть десятого.", "zh": "你几点来上课？——九点半。你呢？——我九点一刻。", "py": "Nǐ jǐ diǎn lái shàng kè? — Jiǔ diǎn bàn. Nǐ ne? — Wǒ jiǔ diǎn yí kè.", "parts": [["В котором часу ты приходишь на занятия?", "你几点来上课？", "Nǐ jǐ diǎn lái shàng kè?"], ["В половине десятого. А ты?", "九点半。你呢？", "Jiǔ diǎn bàn. Nǐ ne?"], ["Я в четверть десятого", "我九点一刻", "Wǒ jiǔ diǎn yí kè"]], "tn": [["你", "ni", 3, "nǐ"], ["几", "ji", 3, "jǐ"], ["点", "dian", 3, "diǎn"], ["来", "lai", 2, "lái"], ["上", "shang", 4, "shàng"], ["课", "ke", 4, "kè"], ["九", "jiu", 3, "jiǔ"], ["点", "dian", 3, "diǎn"], ["半", "ban", 4, "bàn"], ["你", "ni", 3, "nǐ"], ["呢", "ne", 0, "ne"], ["我", "wo", 3, "wǒ"], ["九", "jiu", 3, "jiǔ"], ["点", "dian", 3, "diǎn"], ["一", "yi", 2, "yí"], ["刻", "ke", 4, "kè"]]}], "tiles": [{"ru": "В котором часу ты приходишь на занятия?", "seg": ["你", "几", "点", "来", "上课"], "alt": []}, {"ru": "В половине десятого. А ты?", "seg": ["九", "点", "半", "你", "呢"], "alt": []}, {"ru": "Я в четверть десятого", "seg": ["我", "九", "点", "一刻"], "alt": []}], "words": [["来", "lái", "приходить"], ["上课", "shàngkè", "идти на занятия"], ["九点半", "jiǔ diǎn bàn", "половина десятого (9:30)"], ["呢", "ne", "а …? (частица)"], ["九点一刻", "jiǔ diǎn yí kè", "четверть десятого (9:15)"]], "tip": "Ловушка: «в половине десятого» = 9:30 = 九点半, «в четверть десятого» = 9:15 = 九点一刻. Время стоит перед глаголом: 你几点来上课？ «А ты?» = 你呢？"}, {"id": "p7", "title": "Перевод 7", "units": [{"ru": "Я буду пить кофе в столовой института.", "zh": "我在学院食堂喝咖啡。", "py": "Wǒ zài xuéyuàn shítáng hē kāfēi.", "parts": [["В столовой института", "在学院食堂", "zài xuéyuàn shítáng"], ["Пить кофе", "喝咖啡", "hē kāfēi"]], "tn": [["我", "wo", 3, "wǒ"], ["在", "zai", 4, "zài"], ["学", "xue", 2, "xué"], ["院", "yuan", 4, "yuàn"], ["食", "shi", 2, "shí"], ["堂", "tang", 2, "táng"], ["喝", "he", 1, "hē"], ["咖", "ka", 1, "kā"], ["啡", "fei", 1, "fēi"]]}], "tiles": [{"ru": "Я буду пить кофе в столовой института", "seg": ["我", "在", "学院", "食堂", "喝", "咖啡"], "alt": []}], "words": [["在", "zài", "в, на (место)"], ["学院", "xuéyuàn", "институт"], ["食堂", "shítáng", "столовая"], ["喝", "hē", "пить"], ["咖啡", "kāfēi", "кофе"]], "tip": "Место с 在 стоит перед глаголом: 在学院食堂喝咖啡. Будущее время отдельным словом не выражается. Вариант 学院的食堂 тоже возможен."}, {"id": "p10", "title": "Перевод 10", "units": [{"ru": "Моя мама перед работой пойдёт в магазин.", "zh": "我妈妈上班以前去商店。", "py": "Wǒ māma shàng bān yǐqián qù shāngdiàn.", "parts": [["Перед работой", "上班以前", "shàng bān yǐqián"], ["Пойдёт в магазин", "去商店", "qù shāngdiàn"]], "tn": [["我", "wo", 3, "wǒ"], ["妈", "ma", 1, "mā"], ["妈", "ma", 0, "ma"], ["上", "shang", 4, "shàng"], ["班", "ban", 1, "bān"], ["以", "yi", 3, "yǐ"], ["前", "qian", 2, "qián"], ["去", "qu", 4, "qù"], ["商", "shang", 1, "shāng"], ["店", "dian", 4, "diàn"]]}], "tiles": [{"ru": "Моя мама перед работой пойдёт в магазин", "seg": ["我", "妈妈", "上班", "以前", "去", "商店"], "alt": ["上班以前我妈妈去商店"]}], "words": [["妈妈", "māma", "мама"], ["上班", "shàngbān", "идти на работу"], ["以前", "yǐqián", "до, перед"], ["去", "qù", "идти"], ["商店", "shāngdiàn", "магазин"]], "tip": "«Перед работой» = 上班以前 (действие + 以前), «после работы» = 下班以后. Слова 以前 нет в списке уроков 1–17, такой вариант лучше подтвердить у преподавателя."}, {"id": "p12", "title": "Перевод 12", "units": [{"ru": "Мы не поедем на машине, мы пойдём пешком.", "zh": "我们不坐车去，我们走路去。", "py": "Wǒmen bú zuò chē qù, wǒmen zǒu lù qù.", "parts": [["Мы не поедем на машине", "我们不坐车去", "Wǒmen bú zuò chē qù"], ["Мы пойдём пешком", "我们走路去", "Wǒmen zǒu lù qù"]], "tn": [["我", "wo", 3, "wǒ"], ["们", "men", 0, "men"], ["不", "bu", 2, "bú"], ["坐", "zuo", 4, "zuò"], ["车", "che", 1, "chē"], ["去", "qu", 4, "qù"], ["我", "wo", 3, "wǒ"], ["们", "men", 0, "men"], ["走", "zou", 3, "zǒu"], ["路", "lu", 4, "lù"], ["去", "qu", 4, "qù"]]}], "tiles": [{"ru": "Мы не поедем на машине", "seg": ["我们", "不", "坐", "车", "去"], "alt": []}, {"ru": "Мы пойдём пешком", "seg": ["我们", "走", "路", "去"], "alt": []}], "words": [["不", "bù", "не"], ["坐车", "zuò chē", "ехать (на машине, транспорте)"], ["走路", "zǒu lù", "идти пешком"]], "tip": "Отрицание 不 ставится перед способом передвижения: 不坐车去. 不 перед 4-м тоном читается bú: bú zuò."}, {"id": "p15", "title": "Перевод 15", "units": [{"ru": "Сегодня после работы мы пойдём на пекинскую оперу. Пойдёшь с нами?", "zh": "今天下班以后我们去看京剧，你跟我们一起去吗？", "py": "Jīntiān xià bān yǐhòu wǒmen qù kàn jīngjù, nǐ gēn wǒmen yìqǐ qù ma?", "parts": [["Сегодня после работы", "今天下班以后", "Jīntiān xià bān yǐhòu"], ["Мы пойдём на пекинскую оперу", "我们去看京剧", "wǒmen qù kàn jīngjù"], ["Пойдёшь с нами?", "你跟我们一起去吗？", "Nǐ gēn wǒmen yìqǐ qù ma?"]], "tn": [["今", "jin", 1, "jīn"], ["天", "tian", 1, "tiān"], ["下", "xia", 4, "xià"], ["班", "ban", 1, "bān"], ["以", "yi", 3, "yǐ"], ["后", "hou", 4, "hòu"], ["我", "wo", 3, "wǒ"], ["们", "men", 0, "men"], ["去", "qu", 4, "qù"], ["看", "kan", 4, "kàn"], ["京", "jing", 1, "jīng"], ["剧", "ju", 4, "jù"], ["你", "ni", 3, "nǐ"], ["跟", "gen", 1, "gēn"], ["我", "wo", 3, "wǒ"], ["们", "men", 0, "men"], ["一", "yi", 4, "yì"], ["起", "qi", 3, "qǐ"], ["去", "qu", 4, "qù"], ["吗", "ma", 0, "ma"]]}], "tiles": [{"ru": "Сегодня после работы мы пойдём на пекинскую оперу", "seg": ["今天", "下班", "以后", "我们", "去", "看", "京剧"], "alt": ["我们今天下班以后去看京剧"]}, {"ru": "Пойдёшь с нами?", "seg": ["你", "跟", "我们", "一起", "去", "吗"], "alt": []}], "words": [["今天", "jīntiān", "сегодня"], ["下班", "xiàbān", "заканчивать работу"], ["以后", "yǐhòu", "после"], ["京剧", "jīngjù", "пекинская опера"], ["看京剧", "kàn jīngjù", "смотреть пекинскую оперу"]], "tip": "«После работы» = 下班以后 (действие + 以后). На оперу «идут смотреть»: 去看京剧. «Пойдёшь с нами?» = 你跟我们一起去吗？"}, {"id": "p25", "title": "Перевод 25", "units": [{"ru": "У моего младшего брата нет пальто. Вечером он со мной пойдёт в магазин покупать пальто.", "zh": "我弟弟没有大衣，晚上他跟我一起去商店买大衣。", "py": "Wǒ dìdi méiyǒu dàyī, wǎnshang tā gēn wǒ yìqǐ qù shāngdiàn mǎi dàyī.", "parts": [["У моего младшего брата нет пальто", "我弟弟没有大衣", "Wǒ dìdi méiyǒu dàyī"], ["Вечером он со мной пойдёт в магазин", "晚上他跟我一起去商店", "Wǎnshang tā gēn wǒ yìqǐ qù shāngdiàn"], ["Покупать пальто", "买大衣", "mǎi dàyī"]], "tn": [["我", "wo", 3, "wǒ"], ["弟", "di", 4, "dì"], ["弟", "di", 0, "di"], ["没", "mei", 2, "méi"], ["有", "you", 3, "yǒu"], ["大", "da", 4, "dà"], ["衣", "yi", 1, "yī"], ["晚", "wan", 3, "wǎn"], ["上", "shang", 0, "shang"], ["他", "ta", 1, "tā"], ["跟", "gen", 1, "gēn"], ["我", "wo", 3, "wǒ"], ["一", "yi", 4, "yì"], ["起", "qi", 3, "qǐ"], ["去", "qu", 4, "qù"], ["商", "shang", 1, "shāng"], ["店", "dian", 4, "diàn"], ["买", "mai", 3, "mǎi"], ["大", "da", 4, "dà"], ["衣", "yi", 1, "yī"]]}], "tiles": [{"ru": "У моего младшего брата нет пальто", "seg": ["我", "弟弟", "没有", "大衣"], "alt": []}, {"ru": "Вечером он со мной пойдёт в магазин покупать пальто", "seg": ["晚上", "他", "跟", "我", "一起", "去", "商店", "买", "大衣"], "alt": ["他晚上跟我一起去商店买大衣"]}], "words": [["弟弟", "dìdi", "младший брат"], ["没有", "méiyǒu", "нет, не иметь"], ["大衣", "dàyī", "пальто"], ["晚上", "wǎnshang", "вечером"], ["商店", "shāngdiàn", "магазин"], ["买", "mǎi", "покупать"]], "tip": "«Нет» при обладании = 没有, никогда не 不有. Цель ставится после места: 去商店买大衣 — пойти в магазин купить пальто."}, {"id": "p29", "title": "Перевод 29", "units": [{"ru": "Те два новых журнала нашего преподавателя — на китайском языке. Давай посмотрим.", "zh": "我们老师的那两本新杂志是中文的，我们看看吧。", "py": "Wǒmen lǎoshī de nà liǎng běn xīn zázhì shì zhōngwén de, wǒmen kànkan ba.", "parts": [["Те два новых журнала нашего преподавателя", "我们老师的那两本新杂志", "Wǒmen lǎoshī de nà liǎng běn xīn zázhì"], ["На китайском языке", "是中文的", "shì zhōngwén de"], ["Давай посмотрим", "我们看看吧", "Wǒmen kànkan ba"]], "tn": [["我", "wo", 3, "wǒ"], ["们", "men", 0, "men"], ["老", "lao", 3, "lǎo"], ["师", "shi", 1, "shī"], ["的", "de", 0, "de"], ["那", "na", 4, "nà"], ["两", "liang", 3, "liǎng"], ["本", "ben", 3, "běn"], ["新", "xin", 1, "xīn"], ["杂", "za", 2, "zá"], ["志", "zhi", 4, "zhì"], ["是", "shi", 4, "shì"], ["中", "zhong", 1, "zhōng"], ["文", "wen", 2, "wén"], ["的", "de", 0, "de"], ["我", "wo", 3, "wǒ"], ["们", "men", 0, "men"], ["看", "kan", 4, "kàn"], ["看", "kan", 0, "kan"], ["吧", "ba", 0, "ba"]]}], "tiles": [{"ru": "Те два новых журнала нашего преподавателя", "seg": ["我们", "老师", "的", "那", "两", "本", "新", "杂志"], "alt": []}, {"ru": "На китайском языке", "seg": ["是", "中文", "的"], "alt": []}, {"ru": "Давай посмотрим", "seg": ["我们", "看看", "吧"], "alt": []}], "words": [["老师", "lǎoshī", "преподаватель"], ["那", "nà", "тот, те"], ["本", "běn", "сч. слово (книги, журналы)"], ["新", "xīn", "новый"], ["杂志", "zázhì", "журнал"], ["中文", "zhōngwén", "китайский язык"], ["看看", "kànkan", "посмотреть"]], "tip": "Порядок: чей + 的 + 那 + число + счётное + прилагательное + предмет: 我们老师的那两本新杂志. «На китайском» = 是中文的. «Давай посмотрим» = 看看吧 (удвоение = «немного, разок»)."}, {"id": "p31", "title": "Перевод 31", "units": [{"ru": "Скажи, пожалуйста, господину Вану, что я зайду за ним в четверть пятого и мы вместе пойдём в банк.", "zh": "请你告诉王先生，我四点一刻去找他，我们一起去银行。", "py": "Qǐng nǐ gàosu Wáng xiānsheng, wǒ sì diǎn yí kè qù zhǎo tā, wǒmen yìqǐ qù yínháng.", "parts": [["Скажи, пожалуйста, господину Вану", "请你告诉王先生", "Qǐng nǐ gàosu Wáng xiānsheng"], ["Я зайду за ним в четверть пятого", "我四点一刻去找他", "wǒ sì diǎn yí kè qù zhǎo tā"], ["Мы вместе пойдём в банк", "我们一起去银行", "wǒmen yìqǐ qù yínháng"]], "tn": [["请", "qing", 3, "qǐng"], ["你", "ni", 3, "nǐ"], ["告", "gao", 4, "gào"], ["诉", "su", 0, "su"], ["王", "wang", 2, "wáng"], ["先", "xian", 1, "xiān"], ["生", "sheng", 0, "sheng"], ["我", "wo", 3, "wǒ"], ["四", "si", 4, "sì"], ["点", "dian", 3, "diǎn"], ["一", "yi", 2, "yí"], ["刻", "ke", 4, "kè"], ["去", "qu", 4, "qù"], ["找", "zhao", 3, "zhǎo"], ["他", "ta", 1, "tā"], ["我", "wo", 3, "wǒ"], ["们", "men", 0, "men"], ["一", "yi", 4, "yì"], ["起", "qi", 3, "qǐ"], ["去", "qu", 4, "qù"], ["银", "yin", 2, "yín"], ["行", "hang", 2, "háng"]]}], "tiles": [{"ru": "Скажи, пожалуйста, господину Вану", "seg": ["请", "你", "告诉", "王", "先生"], "alt": []}, {"ru": "Я зайду за ним в четверть пятого", "seg": ["我", "四", "点", "一刻", "去", "找", "他"], "alt": ["四点一刻我去找他"]}, {"ru": "Мы вместе пойдём в банк", "seg": ["我们", "一起", "去", "银行"], "alt": []}], "words": [["请", "qǐng", "пожалуйста"], ["告诉", "gàosu", "сказать, сообщить"], ["王先生", "Wáng xiānsheng", "господин Ван"], ["四点一刻", "sì diǎn yí kè", "четверть пятого (4:15)"], ["找", "zhǎo", "искать; зайти за кем-то"], ["银行", "yínháng", "банк"]], "tip": "Ловушка: «четверть пятого» = 4:15 = 四点一刻, а не 五点一刻. «Зайду за ним» = 去找他. Фамилия стоит перед обращением: 王先生."}];
+const CR={"点": "точка; час", "食": "еда, пища", "堂": "зал", "差": "недоставать; без (о времени)", "分": "делить; минута", "刻": "вырезать; четверть часа", "上": "верх; на; подниматься", "课": "урок, занятие", "下": "низ; под; спускаться", "以": "посредством (служебный знак)", "后": "после; сзади", "事": "дело", "儿": "сын; суффикс -р", "回": "возвращаться", "跟": "с, вместе с; следовать за", "一": "один", "起": "вставать, подниматься", "电": "электричество", "影": "тень; изображение", "咖": "знак для звука «ка» (кофе)", "啡": "знак для звука «фэй» (кофе)", "馆": "здание, заведение", "半": "половина", "啊": "модальная частица", "等": "ждать", "走": "идти (пешком)", "路": "дорога", "班": "смена; группа", "院": "двор; учреждение", "表": "часы (наручные); таблица", "钟": "часы (настенные); колокол", "天": "небо; день", "每": "каждый", "床": "кровать", "午": "полдень", "中": "середина; Китай", "吃": "есть, кушать", "饭": "еда; варёный рис", "多": "много", "休": "отдыхать", "息": "дыхание; отдых", "有": "иметь; есть", "时": "время", "候": "время, пора; ждать", "问": "спрашивать", "题": "тема; вопрос, задача", "睡": "спать", "觉": "сон (jiào); чувствовать (jué)", "外": "внешний; иностранный", "语": "язык, речь", "系": "факультет; система", "历": "проходить; прошлое", "史": "история", "文": "письменность; язык", "学": "учиться", "现": "появляться; нынешний", "在": "находиться; в", "几": "сколько", "张": "сч. слово (листы, билеты)", "票": "билет", "晚": "вечер; поздний", "从": "из, от", "哪": "какой; где (в 哪儿)", "家": "дом, семья", "坐": "сидеть; ехать (на транспорте)", "车": "машина, транспорт", "门": "дверь, ворота", "口": "рот; вход", "再": "снова", "见": "видеть", "认": "узнавать", "识": "знать", "爸": "папа", "还": "ещё (hái); возвращать (huán)", "没": "не, нет", "妈": "мама", "商": "торговля", "店": "магазин, лавка", "前": "перед, впереди", "今": "нынешний, сегодняшний", "京": "столица", "剧": "пьеса, драма", "弟": "младший брат", "大": "большой", "衣": "одежда", "买": "покупать", "老": "старый", "师": "учитель, мастер", "本": "корень; сч. слово (книги)", "新": "новый", "杂": "смешанный, разный", "志": "записи; стремление", "看": "смотреть; читать", "请": "просить; пожалуйста", "告": "сообщать", "诉": "рассказывать", "先": "сначала, раньше", "生": "рождаться; жизнь", "找": "искать", "银": "серебро", "行": "ряд; фирма (háng); идти (xíng)", "喝": "пить", "吧": "модальная частица (давай…)", "两": "два", "你": "ты", "二": "два", "十": "десять", "四": "четыре", "吗": "вопросительная частица", "我": "я", "们": "суффикс множественного числа", "去": "идти, уходить", "好": "хороший", "的": "частица принадлежности", "六": "шесть", "不": "не", "五": "пять", "七": "семь", "来": "приходить", "九": "девять", "呢": "модальная частица", "他": "он", "那": "тот", "是": "быть, являться", "王": "князь; фамилия Ван"};
+const CM={"占": "zhàn · гадать; занимать", "良": "liáng · хороший", "尚": "shàng · ещё; почитать", "亥": "hài · 12-й циклический знак", "⺊": "форма 卜 «гадать»", "果": "guǒ · плод; результат", "景": "jǐng · пейзаж, вид", "加": "jiā · добавлять", "官": "guān · чиновник", "阿": "ā · префикс а-", "寺": "sì · храм", "各": "gè · каждый", "完": "wán · заканчивать", "中": "zhōng · середина", "乞": "qǐ · просить", "反": "fǎn · обратный, против", "矦": "hóu · мишень", "是": "shì · быть, являться", "垂": "chuí · свисать", "吾": "wú · я (книжн.)", "乂": "yì · управлять", "才": "cái · талант; только", "免": "miǎn · избегать", "那": "nà · тот", "从": "cóng · из, от", "七": "qī · семь", "冉": "rǎn · постепенно", "只": "zhī · только", "巴": "bā · надеяться", "不": "bù · не", "冏": "jiǒng · светлый", "刖": "yuè · отрубать ноги", "居": "jū · жить, проживать", "乛": "черта (форма 乙)", "头": "tóu · голова", "帀": "zā · обходить кругом", "亲": "qīn · родной, близкий", "九": "jiǔ · девять", "斥": "chì · порицать", "亍": "chù · шаг правой ногой", "曷": "hé · что, почему (книжн.)", "尔": "ěr · ты (книжн.)", "勺": "sháo · ложка, черпак", "未": "wèi · ещё не", "尼": "ní · монахиня", "也": "yě · тоже", "厤": "lì · упорядочивать", "章": "zhāng · глава"};
+
+
+const LS="k18v2";
+let saved={};try{saved=JSON.parse(localStorage.getItem(LS)||"{}")}catch(e){}
+const st=Object.assign({mode:"test",wdir:"zh",wset:"all",kdir:"char",kset:"lesson",scope:"whole",ref:"sent",only:"all"},saved.st||{},{deck:[],i:0,open:false,bad:[],good:0});
+const hard=saved.hard||{};
+const tp=saved.tp||{};
+function save(){try{const {deck,i,open,bad,good,autoplay,...s}=st;localStorage.setItem(LS,JSON.stringify({st:s,hard,tp}))}catch(e){}}
+const $=s=>document.querySelector(s);
+const sh=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const wrap=t=>esc(t).replace(/[\u4e00-\u9fff]/g,c=>C[c]?`<span class="hz" data-c="${c}">${c}</span>`:c);
+
+// ---- радикалы
+const RF={};RAD.forEach(r=>{if(!RF[r.c])RF[r.c]=r;r.v.split(" ").filter(Boolean).forEach(v=>{if(!RF[v])RF[v]=r})});
+RF["阝"]=RAD[169];
+const LESSON_R=new Set(Object.values(C).map(i=>i.k));
+const radHtml=r=>`${r.c}${r.v?`<span class="var">${r.v}</span>`:""}`;
+const IDC=/[⿰⿱⿲⿳⿴⿵⿶⿷⿸⿹⿺⿻]/g;
+function comp(x,c){
+  if(x==="？")return "часть без отдельного названия";
+  let r=RF[x];
+  if(x==="阝"){r=C[c].d.startsWith("⿰阝")?RAD[169]:RAD[162]}
+  if(r)return `<b class="zh">${x}</b> (ключ ${r.n}, ${esc(r.m)})`;
+  if(CM[x])return `<b class="zh">${x}</b> (${esc(CM[x])})`;
+  if(C[x])return `<b class="zh">${x}</b> (${C[x].p})`;
+  return `<b class="zh">${x}</b>`;
+}
+const PY={"觉":"jiào / jué","行":"háng / xíng"};
+const TYPES={pictophonetic:"смысл + звук",ideographic:"составной по смыслу",pictographic:"рисунок (пиктограмма)"};
+function brk(c){
+  const i=C[c];if(!i)return "";
+  const r=RAD[i.k-1];
+  const self=RF[c]&&RF[c].n===i.k;
+  const parts=(i.d||"").replace(IDC,"").split("");
+  let sostav;
+  if(self&&(i.d==="？"||parts.every(p=>p==="？")))sostav="сам является ключом, не делится";
+  else if(i.d==="？")sostav="не делится";
+  else sostav=parts.map(p=>comp(p,c)).join(" + ");
+  let sp="";
+  if(i.t==="pictophonetic"&&(i.s||i.f))sp=`<div class="hint">Смысловая часть: <span class="zh">${i.s||"—"}</span>, звуковая: <span class="zh">${i.f||"—"}</span></div>`;
+  return `<div class="bk"><div class="bkh"><span class="zh">${c}</span><span class="py">${PY[c]||i.p}</span>${i.t?`<span class="hint">${TYPES[i.t]||""}</span>`:""}</div>
+  ${CR[c]?`<div class="ru" style="font-size:17px;font-weight:600">${esc(CR[c])}</div>`:""}
+  <div>Ключ: <b class="zh">${i.r}</b> — № ${r.n} <span class="zh">${r.c}</span> ${r.p}, «${esc(r.m)}»${self?" (сам является ключом)":""}</div>
+  <div>Состав: ${sostav}</div>${sp}</div>`;
+}
+function brkWord(w){return `<div class="bks">${[...new Set(w.replace(/[^\u4e00-\u9fff]/g,""))].map(brk).join("")}</div>`}
+function openSheet(html){$("#sheetc").innerHTML=html+`<div class="row"><button class="btn" id="cls">Закрыть</button></div>`;$("#sheet").classList.remove("hide");$("#cls").onclick=closeSheet;bindHz($("#sheetc"))}
+function closeSheet(){$("#sheet").classList.add("hide")}
+$("#sheet").onclick=e=>{if(e.target.id==="sheet")closeSheet()};
+function bindHz(root){root.querySelectorAll(".hz").forEach(s=>s.onclick=e=>{e.stopPropagation();openSheet(brk(s.dataset.c))})}
+function radCard(r){
+  const used=Object.entries(C).filter(([c,i])=>i.k===r.n).map(([c])=>c);
+  return `<div class="bk"><div class="bkh"><span class="zh">${radHtml(r)}</span><span class="py">${r.p}</span></div>
+  <div>№ ${r.n}, черт: ${r.s}</div><div>«${esc(r.m)}»</div>
+  ${used.length?`<div>В ваших иероглифах: <span class="zh" style="font-size:20px">${used.map(c=>`<span class="hz" data-c="${c}">${c}</span>`).join(" ")}</span></div>`:""}</div>`;
+}
+
+// ---- озвучка
+let zhVoice=null;
+function loadVoices(){try{const v=speechSynthesis.getVoices();zhVoice=v.find(x=>/zh[-_]CN/i.test(x.lang))||v.find(x=>/^zh/i.test(x.lang))||null;$("#ttsnote").textContent=v.length&&!zhVoice?"На устройстве не найден китайский голос — озвучка может не работать.":"";}catch(e){$("#ttsnote").textContent="Озвучка недоступна в этом браузере.";}}
+if("speechSynthesis" in window){loadVoices();speechSynthesis.onvoiceschanged=loadVoices}
+function say(t,rate){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.replace(/——/g,"，"));u.lang="zh-CN";if(zhVoice)u.voice=zhVoice;u.rate=rate||.8;speechSynthesis.speak(u)}catch(e){}}
+
+// ---- колоды
+function sentItems(){const out=[];S.forEach(s=>{if(st.scope==="parts"&&s.parts)s.parts.forEach(p=>out.push({src:s.src+", отрывок",ru:p[0],zh:p[1],py:p[2]}));else out.push(s)});return out}
+function keyOf(c){return st.mode==="words"?"w:"+c.zh:st.mode==="keys"?"r:"+c.n:"s:"+c.zh}
+function hset(){return new Set(hard[st.mode]||[])}
+function inKset(r){const s=st.kset;return s==="all"||(s==="lesson"&&LESSON_R.has(r.n))||(s==="12"&&r.s<=2)||(s==="3"&&r.s===3)||(s==="4"&&r.s===4)||(s==="56"&&(r.s===5||r.s===6))||(s==="7"&&r.s>=7)}
+function build(){
+  if(st.mode==="test"){save();T.view="home";return tRender()}
+  st.i=0;st.open=false;st.bad=[];st.good=0;st.autoplay=-1;
+  let d;
+  if(st.mode==="words")d=W.filter(w=>st.wset==="all"||w[3]===st.wset).map(w=>({zh:w[0],py:w[1],ru:w[2]}));
+  else if(st.mode==="keys")d=RAD.filter(inKset);
+  else d=sentItems();
+  if(st.only==="hard"){const h=hset();d=d.filter(x=>h.has(keyOf(x)))}
+  st.deck=sh(d);save();render();
+}
+function chip(k,v,l){return `<button class="chip${st[k]===v?" on":""}" data-k="${k}" data-v="${v}">${l}</button>`}
+function opts(){
+  let h="";const m=st.mode;
+  if(m==="test"){$("#opts").innerHTML="";return}
+  if(m==="words")h+=chip("wdir","zh","中 → перевод")+chip("wdir","ru","Перевод → 中")+chip("wset","all","Все")+chip("wset","17","Урок 17")+chip("wset","18","Урок 18")+chip("wset","пр","Из предложений");
+  else if(m==="keys")h+=chip("kdir","char","Ключ → значение")+chip("kdir","mean","Значение → ключ")+chip("kset","lesson",`Из ваших слов (${LESSON_R.size})`)+chip("kset","all","Все 214")+chip("kset","12","1–2 черты")+chip("kset","3","3 черты")+chip("kset","4","4 черты")+chip("kset","56","5–6 черт")+chip("kset","7","7+ черт");
+  else if(m==="all")h+=chip("ref","sent","Предложения")+chip("ref","chars","Разбор иероглифов")+chip("ref","table","Таблица ключей");
+  else h+=chip("scope","whole","Целиком")+chip("scope","parts","Отрывки");
+  if(m!=="all"){const n=(hard[m]||[]).length;h+=chip("only","all","Все карточки")+chip("only","hard",`Трудные (${n})`)}
+  $("#opts").innerHTML=h;
+  $("#opts").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{st[b.dataset.k]=b.dataset.v;opts();build()});
+}
+function mark(c,ok){const k=keyOf(c);const h=hset();ok?h.delete(k):h.add(k);hard[st.mode]=[...h]}
+
+function renderRef(v){
+  if(st.ref==="sent")v.innerHTML=`<div class="list">${S.map(s=>`<div class="item"><div class="src">${esc(s.src)}</div><div class="zh">${wrap(s.zh)}</div><div class="py">${esc(s.py)}</div><div class="ru">${esc(s.ru)}</div><button class="say" data-t="${esc(s.zh)}" style="margin-top:8px">▶ Слушать</button></div>`).join("")}</div>`;
+  else if(st.ref==="chars")v.innerHTML=`<div class="bks">${Object.keys(C).map(brk).join("")}</div>`;
+  else{v.innerHTML=`<div class="rg">${RAD.map(r=>`<div class="rc" data-n="${r.n}"><div class="n"><span>${r.n}</span><span>${r.s}</span></div><div class="zh">${r.c}</div><div class="py" style="font-size:13px">${r.p}</div><div class="m">${esc(r.m)}</div></div>`).join("")}</div>`;
+    v.querySelectorAll(".rc").forEach(e=>e.onclick=()=>openSheet(radCard(RAD[e.dataset.n-1])))}
+  v.querySelectorAll(".say").forEach(b=>b.onclick=()=>say(b.dataset.t));bindHz(v);
+}
+function render(){
+  const v=$("#view");
+  if(st.mode==="test")return tRender();
+  if(st.mode==="all")return renderRef(v);
+  const n=st.deck.length;
+  if(!n){v.innerHTML=`<div class="card"><div class="done"><div class="ru">Здесь пока пусто. Трудные карточки появляются, когда вы нажимаете «Ещё раз».</div></div></div>`;return}
+  if(st.i>=n){
+    const bad=st.bad.length;
+    v.innerHTML=`<div class="card"><div class="done"><div class="zh big">${bad?"再":"好"}</div><div class="ru">Знаю: ${st.good} из ${n}</div>${bad?`<button class="btn main" id="rep">Повторить ошибки (${bad})</button>`:""}<button class="btn" id="again">Заново</button></div></div>`;
+    if(bad)$("#rep").onclick=()=>{st.deck=sh(st.bad);st.bad=[];st.good=0;st.i=0;st.open=false;render()};
+    $("#again").onclick=build;opts();return;
+  }
+  const c=st.deck[st.i];let q="",a="",src="Слово";
+  if(st.mode==="words"){
+    if(st.wdir==="zh"){q=`<div class="zh big">${esc(c.zh)}</div>`;a=`<div class="py big">${esc(c.py)}</div><div class="ru big">${esc(c.ru)}</div>`}
+    else{q=`<div class="ru big">${esc(c.ru)}</div><div class="hint" style="text-align:center">Напишите иероглифы на бумаге</div>`;a=`<div class="zh big">${esc(c.zh)}</div><div class="py big">${esc(c.py)}</div>`}
+    a+=`<button class="say c" data-t="${esc(c.zh)}">▶ Слушать</button>${brkWord(c.zh)}`;
+  }else if(st.mode==="keys"){
+    src="Ключ № "+c.n;
+    if(st.kdir==="char"){q=`<div class="zh big">${radHtml(c)}</div>`;a=`<div class="py big">${c.p}</div><div class="ru big">${esc(c.m)}</div><div class="hint" style="text-align:center">черт: ${c.s}</div>`}
+    else{q=`<div class="ru big">${esc(c.m)}</div><div class="hint" style="text-align:center">черт: ${c.s}</div>`;a=`<div class="zh big">${radHtml(c)}</div><div class="py big">${c.p}</div>`}
+    const used=Object.entries(C).filter(([ch,i])=>i.k===c.n).map(([ch])=>ch);
+    if(used.length)a+=`<div class="hint" style="text-align:center">В ваших иероглифах: <span class="zh" style="font-size:22px">${used.map(ch=>`<span class="hz" data-c="${ch}">${ch}</span>`).join(" ")}</span></div>`;
+  }else if(st.mode==="ru2zh"){
+    src=c.src;q=`<div class="ru">${esc(c.ru)}</div><div class="hint">Напишите иероглифами с тонами</div>`;
+    a=`<div class="zh mid">${wrap(c.zh)}</div><div class="py">${esc(c.py)}</div><button class="say" data-t="${esc(c.zh)}">▶ Слушать</button>`;
+  }else if(st.mode==="zh2ru"){
+    src=c.src;q=`<div class="zh mid">${wrap(c.zh)}</div><button class="say" data-t="${esc(c.zh)}">▶ Слушать</button>`;
+    a=`<div class="py">${esc(c.py)}</div><div class="ru">${esc(c.ru)}</div>`;
+  }else{
+    src=c.src;q=`<div class="hint">Слушайте и записывайте иероглифами, ставьте тоны</div><div class="row" style="margin-top:0"><button class="btn main" id="p1">▶ Слушать</button><button class="btn" id="p2">🐢 Медленно</button></div>`;
+    a=`<div class="zh mid">${wrap(c.zh)}</div><div class="py">${esc(c.py)}</div><div class="ru" style="font-size:15px;color:var(--muted)">${esc(c.ru)}</div>`;
+  }
+  v.innerHTML=`<div class="card"><div class="meta"><span>${esc(src)}</span><span>${st.i+1} / ${n}</span></div><div class="q">${q}${st.open?`<div class="ans">${a}</div>`:""}</div>
+  <div class="row">${st.open?`<button class="btn no" id="no">Ещё раз</button><button class="btn ok" id="ok">Знаю</button>`:`<button class="btn main" id="show">Показать ответ</button>`}</div>
+  <div class="bar"><i style="width:${st.i/n*100}%"></i></div></div>`;
+  v.querySelectorAll(".say").forEach(b=>b.onclick=()=>say(b.dataset.t));bindHz(v);
+  if($("#p1")){$("#p1").onclick=()=>say(c.zh,.8);$("#p2").onclick=()=>say(c.zh,.5);if(!st.open&&st.autoplay!==st.i){st.autoplay=st.i;say(c.zh,.8)}}
+  if(st.open){$("#no").onclick=()=>{st.bad.push(c);mark(c,false);next()};$("#ok").onclick=()=>{st.good++;mark(c,true);next()}}
+  else $("#show").onclick=()=>{st.open=true;render()};
+}
+function next(){st.i++;st.open=false;st.autoplay=-1;save();render()}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeSheet();if(st.mode==="test"||st.mode==="all"||!$("#sheet").classList.contains("hide"))return;if(e.key===" "||e.key==="Enter"){const b=$("#show");if(b){e.preventDefault();b.click()}}if(st.open){if(e.key==="ArrowRight")$("#ok")?.click();if(e.key==="ArrowLeft")$("#no")?.click()}});
+// ======== ПРОВЕРОЧНАЯ: полный цикл ========
+const TSTEPS=[["learn","Разбор"],["words","Слова"],["tones","Тоны"],["tiles","Порядок слов"],["hear","На слух → РУ"],["write","РУ → 中"],["dict","Диктант"]];
+const TPATH=[];
+TB.forEach((b,bi)=>{TSTEPS.forEach(([s,n])=>TPATH.push({id:b.id+":"+s,b:bi,s,n}));if([2,5,8,12].includes(bi))TPATH.push({id:"rev"+bi,s:"review",upto:bi,n:"Повторение: блоки 1–"+(bi+1)})});
+TPATH.push({id:"exam",s:"exam",n:"Пробная контрольная"},{id:"final",s:"final",n:"Финальная проверка"});
+const T={view:"home",p:null,q:[],total:0,err:0,first:0,firstOk:0,played:null};
+const tDone=id=>!!tp[id];
+const tNext=()=>TPATH.findIndex(p=>!tDone(p.id));
+const TONE=["·","ˉ","ˊ","ˇ","ˋ"];
+function tFrags(b){const o=[];b.units.forEach(u=>{(u.parts||[]).forEach(p=>o.push({ru:p[0],zh:p[1],py:p[2],src:b.title+", отрывок"}));o.push({ru:u.ru,zh:u.zh,py:u.py,src:b.title})});return o}
+function tWholes(b){return b.units.map(u=>({ru:u.ru,zh:u.zh,py:u.py,src:b.title}))}
+function tTasks(p){
+  const b=TB[p.b];
+  if(p.s==="words")return [...sh(b.words).map(w=>({k:"flash",dir:"zh",w})),...sh(b.words).map(w=>({k:"flash",dir:"ru",w}))];
+  if(p.s==="tones")return b.units.map(u=>({k:"tone",u}));
+  if(p.s==="tiles")return sh(b.tiles).map(t=>({k:"tiles",t}));
+  if(p.s==="hear"||p.s==="write"||p.s==="dict")return tFrags(b).map(f=>({k:p.s,f}));
+  if(p.s==="review"){const o=[];for(let i=0;i<=p.upto;i++)tWholes(TB[i]).forEach((f,j)=>o.push({k:j%2?"hear":"write",f}));return sh(o)}
+  if(p.s==="exam"){const o=[];TB.forEach(b=>tFrags(b).forEach(f=>o.push({k:Math.random()<.5?"write":"hear",f})));return sh(o)}
+  if(p.s==="final"){const o=[];TB.forEach(b=>tWholes(b).forEach(f=>{o.push({k:"write",f});o.push({k:"hear",f})}));return sh(o)}
+  return [];
+}
+function tStart(i){
+  const p=TPATH[i];T.p=i;T.err=0;T.first=0;T.firstOk=0;T.played=null;T.open=false;
+  if(p.s==="learn"){T.view="learn";T.q=[];}else{T.view="run";T.q=tTasks(p);T.total=T.q.length;T.q.forEach(t=>t.tries=0)}
+  tRender();window.scrollTo(0,0);
+}
+function tFinishStep(){const p=TPATH[T.p];tp[p.id]=true;if(p.s==="final")tp.finalScore=[T.firstOk,T.first];save();T.view="stepdone";tRender();window.scrollTo(0,0)}
+function tAnswer(ok){
+  const t=T.q.shift();
+  if(!t.tries){T.first++;if(ok)T.firstOk++}
+  t.tries++;
+  const strict=["exam","final"].includes(TPATH[T.p].s);
+  if(ok){t.need=(t.need||1)-1;if(t.need>0)T.q.splice(Math.min(T.q.length,4),0,t)}
+  else{T.err++;t.need=strict?2:1;t.sel=null;t.pick=null;t.checked=null;T.q.splice(Math.min(T.q.length,3),0,t)}
+  T.open=false;T.played=null;
+  if(!T.q.length)tFinishStep();else tRender();
+}
+function tHome(v){
+  const n=tNext(),done=TPATH.filter(p=>tDone(p.id)).length;
+  const fs=tp.finalScore;
+  let h=`<div class="card" style="min-height:0;gap:10px">
+    <div class="ru" style="font-weight:700">Подготовка к проверочной</div>
+    <div class="hint">Цикл для каждого блока: разбор → слова → тоны → порядок слов → перевод на слух → перевод с русского → диктант. Каждые 3 блока повторение пройденного, в конце пробная контрольная и финальная проверка. Ошибки возвращаются, пока не ответите верно.</div>
+    <div class="bar" style="margin-top:0"><i style="width:${done/TPATH.length*100}%"></i></div>
+    <div class="hint">Пройдено шагов: ${done} из ${TPATH.length}</div>
+    ${fs?`<div class="ru" style="font-size:15px;color:${fs[0]===fs[1]?"var(--ok)":"var(--seal)"}">Финальная проверка: с первого раза ${fs[0]} из ${fs[1]}. ${fs[0]===fs[1]?"Вы готовы к проверочной.":"Пройдите её ещё раз, цель — всё с первого раза."}</div>`:""}
+    ${n>=0?`<button class="btn main" id="tgo">${done?"Продолжить":"Начать"}: ${esc(TPATH[n].n)}${TPATH[n].b!=null?" · "+esc(TB[TPATH[n].b].title):""}</button>`:`<button class="btn main" id="tfin">Пройти финальную проверку ещё раз</button>`}
+  </div><div class="list">`;
+  TB.forEach((b,bi)=>{
+    h+=`<div class="item"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div><div style="font-weight:700">${bi+1}. ${esc(b.title)}</div><div class="hint zh" style="font-size:14px">${esc(b.units[0].zh.slice(0,16))}${b.units[0].zh.length>16||b.units.length>1?"…":""}</div></div></div>
+    <div class="dots">${TSTEPS.map(([s,nm])=>{const i=TPATH.findIndex(p=>p.id===b.id+":"+s);return `<button class="dot${tDone(b.id+":"+s)?" on":""}${i===n?" cur":""}" data-i="${i}">${nm}</button>`}).join("")}</div></div>`;
+    const ri=TPATH.findIndex(p=>p.id==="rev"+bi);
+    if(ri>=0)h+=`<button class="item rowbtn${tDone(TPATH[ri].id)?" ok":""}" data-i="${ri}">${tDone(TPATH[ri].id)?"✓ ":""}${esc(TPATH[ri].n)}</button>`;
+  });
+  ["exam","final"].forEach(id=>{const i=TPATH.findIndex(p=>p.id===id);h+=`<button class="item rowbtn${tDone(id)?" ok":""}" data-i="${i}">${tDone(id)?"✓ ":""}${esc(TPATH[i].n)}</button>`});
+  h+=`</div><button class="btn" id="treset" style="margin-top:14px;width:100%">Сбросить прогресс подготовки</button>`;
+  v.innerHTML=h;
+  if($("#tgo"))$("#tgo").onclick=()=>tStart(n);
+  if($("#tfin"))$("#tfin").onclick=()=>tStart(TPATH.length-1);
+  v.querySelectorAll("[data-i]").forEach(e=>e.onclick=()=>tStart(+e.dataset.i));
+  $("#treset").onclick=()=>{if(confirm("Сбросить весь прогресс подготовки?")){Object.keys(tp).forEach(k=>delete tp[k]);save();tRender()}};
+}
+function tTop(extra){const p=TPATH[T.p];return `<div class="tbar"><button class="chip" id="thome">← План</button><div class="hint" style="text-align:right">${p.b!=null?esc(TB[p.b].title)+"<br>":""}<b style="color:var(--ink)">${esc(p.n)}</b>${extra||""}</div></div>`}
+function tLearn(v){
+  const b=TB[TPATH[T.p].b];
+  v.innerHTML=tTop()+`<div class="list">
+    <div class="item tip"><div style="font-weight:700;margin-bottom:4px">Главное в этом блоке</div><div style="font-size:15px">${wrap(b.tip)}</div></div>
+    ${b.units.map(u=>`<div class="item"><div class="zh">${wrap(u.zh)}</div><div class="py">${esc(u.py)}</div><div class="ru">${esc(u.ru)}</div>
+      ${u.parts?`<div class="parts">${u.parts.map(p=>`<div><span class="zh">${wrap(p[1])}</span> <span class="hint">${esc(p[2])}</span><br>${esc(p[0])}</div>`).join("")}</div>`:""}
+      <div class="row" style="margin-top:8px"><button class="say" data-t="${esc(u.zh)}">▶ Слушать</button><button class="say" data-t="${esc(u.zh)}" data-r=".5">🐢 Медленно</button></div></div>`).join("")}
+    <div class="item"><div style="font-weight:700;margin-bottom:6px">Слова блока</div>${b.words.map(w=>`<div class="wl"><span class="zh">${wrap(w[0])}</span><span class="py">${esc(w[1])}</span><span>${esc(w[2])}</span></div>`).join("")}<div class="hint" style="margin-top:6px">Нажмите на иероглиф, чтобы увидеть ключ, состав и перевод.</div></div>
+  </div><div class="row"><button class="btn main" id="tok">Прочитал, понял — дальше</button></div>`;
+  v.querySelectorAll(".say").forEach(e=>e.onclick=()=>say(e.dataset.t,+(e.dataset.r||.8)));bindHz(v);
+  $("#thome").onclick=()=>{T.view="home";tRender()};
+  $("#tok").onclick=tFinishStep;
+}
+function tRun(v){
+  const t=T.q[0],left=T.q.length;
+  let body="",foot="";
+  const sg=`<button class="btn no" id="tno">Ошибся</button><button class="btn ok" id="tyes">Верно</button>`;
+  const show=`<button class="btn main" id="tshow">Показать ответ</button>`;
+  const audio=f=>`<div class="row" style="margin-top:0"><button class="btn main" id="tp1">▶ Слушать</button><button class="btn" id="tp2">🐢 Медленно</button></div><button class="say" id="ttext">Нет звука? Показать иероглифы</button><div class="zh mid hide" id="ttx">${wrap(f.zh)}</div>`;
+  if(t.k==="flash"){
+    const w=t.w;
+    if(t.dir==="zh"){body=`<div class="zh big">${esc(w[0])}</div>`+(T.open?`<div class="ans"><div class="py big">${esc(w[1])}</div><div class="ru big">${esc(w[2])}</div>${brkWord(w[0])}</div>`:"")}
+    else{body=`<div class="ru big">${esc(w[2])}</div><div class="hint" style="text-align:center">Напишите иероглифы на бумаге</div>`+(T.open?`<div class="ans"><div class="zh big">${esc(w[0])}</div><div class="py big">${esc(w[1])}</div>${brkWord(w[0])}</div>`:"")}
+    foot=T.open?sg:show;
+  }else if(t.k==="tone"){
+    if(!t.sel)t.sel=t.u.tn.map(()=>null);
+    const ch=t.checked;
+    body=`<div class="hint">Нажимайте на слог, чтобы выбрать тон: ˉ ˊ ˇ ˋ или · (лёгкий). Тоны как в учебнике: 一 и 不 меняют тон.</div><div class="ru" style="font-size:16px">${esc(t.u.ru)}</div>
+    <div class="tn">${t.u.tn.map((c,i)=>{const s=t.sel[i];const cls=ch?(s===c[2]?" ok":" bad"):"";return `<button class="tc${cls}" data-i="${i}"${ch?" disabled":""}><span class="zh">${c[0]}</span><span class="tm">${s==null?"?":TONE[s]}</span><span class="tp">${ch?c[3]:c[1]}</span></button>`}).join("")}</div>
+    <button class="say" data-t="${esc(t.u.zh)}">▶ Послушать</button>`;
+    if(ch){const ok=t.u.tn.every((c,i)=>t.sel[i]===c[2]);body+=`<div class="ans"><div class="py">${esc(t.u.py)}</div><div class="ru" style="font-size:16px;color:${ok?"var(--ok)":"var(--seal)"}">${ok?"Все тоны верны":"Есть ошибки — этот пример вернётся"}</div></div>`;foot=`<button class="btn main" id="tnext" data-ok="${ok?1:0}">Дальше</button>`}
+    else foot=`<button class="btn main" id="tcheck">Проверить</button>`;
+  }else if(t.k==="tiles"){
+    if(!t.pick){t.pick=[];t.pool=sh(t.t.seg.map((x,i)=>({x,i})))}
+    const ch=t.checked;
+    body=`<div class="hint">Соберите фразу по-китайски в правильном порядке</div><div class="ru">${esc(t.t.ru)}</div>
+    <div class="tl ans-area">${t.pick.map((o,j)=>`<button class="tile" data-j="${j}"${ch?" disabled":""}>${o.x}</button>`).join("")||`<span class="hint">нажимайте на слова ниже</span>`}</div>
+    <div class="tl">${t.pool.filter(o=>!t.pick.includes(o)).map(o=>`<button class="tile pool" data-i="${o.i}"${ch?" disabled":""}>${o.x}</button>`).join("")}</div>`;
+    if(ch){const got=t.pick.map(o=>o.x).join("");const ok=[t.t.seg.join(""),...t.t.alt].includes(got);body+=`<div class="ans"><div class="ru" style="font-size:16px;color:${ok?"var(--ok)":"var(--seal)"}">${ok?"Верно":"Неверно. Правильно:"}</div>${ok?"":`<div class="zh mid">${wrap(t.t.seg.join(""))}</div>`}${t.t.alt.length?`<div class="hint">Также верно: ${t.t.alt.map(esc).join(", ")}</div>`:""}</div>`;foot=`<button class="btn main" id="tnext" data-ok="${ok?1:0}">Дальше</button>`}
+    else foot=`<button class="btn" id="tclr">Очистить</button><button class="btn main" id="tcheck"${t.pick.length===t.t.seg.length?"":" disabled"}>Проверить</button>`;
+  }else if(t.k==="hear"){
+    body=`<div class="hint">Послушайте и переведите на русский (вслух или на бумаге)</div>`+audio(t.f)+(T.open?`<div class="ans"><div class="zh mid">${wrap(t.f.zh)}</div><div class="py">${esc(t.f.py)}</div><div class="ru">${esc(t.f.ru)}</div></div>`:"");
+    foot=T.open?sg:show;
+  }else if(t.k==="write"){
+    body=`<div class="hint">Напишите по-китайски иероглифами на бумаге</div><div class="ru">${esc(t.f.ru)}</div>`+(T.open?`<div class="ans"><div class="zh mid">${wrap(t.f.zh)}</div><div class="py">${esc(t.f.py)}</div><div class="hint">Сверьте каждый иероглиф и порядок слов. Хотя бы одна ошибка — нажмите «Ошибся».</div></div>`:"");
+    foot=T.open?sg:show;
+  }else if(t.k==="dict"){
+    body=`<div class="hint">Диктант: запишите иероглифами и поставьте тоны</div>`+audio(t.f)+(T.open?`<div class="ans"><div class="zh mid">${wrap(t.f.zh)}</div><div class="py">${esc(t.f.py)}</div><div class="ru" style="font-size:15px;color:var(--muted)">${esc(t.f.ru)}</div></div>`:"");
+    foot=T.open?sg:show;
+  }
+  v.innerHTML=tTop(`<br>осталось: ${left}${T.err?` · ошибок: ${T.err}`:""}`)+`<div class="card"><div class="meta"><span>${esc(t.f?t.f.src:t.k==="flash"?"Слово":t.k==="tone"?"Тоны":"Порядок слов")}</span><span>${Math.max(0,T.total-left)+1} / ${T.total}</span></div><div class="q">${body}</div><div class="row">${foot}</div><div class="bar"><i style="width:${(T.total-left)/Math.max(1,T.total)*100}%"></i></div></div>`;
+  $("#thome").onclick=()=>{T.view="home";try{window.speechSynthesis.cancel()}catch(e){};tRender()};
+  v.querySelectorAll(".say[data-t]").forEach(e=>e.onclick=()=>say(e.dataset.t));
+  bindHz(v);
+  if($("#tshow"))$("#tshow").onclick=()=>{T.open=true;tRender()};
+  if($("#tyes"))$("#tyes").onclick=()=>tAnswer(true);
+  if($("#tno"))$("#tno").onclick=()=>tAnswer(false);
+  if($("#tnext"))$("#tnext").onclick=e=>tAnswer(e.currentTarget.dataset.ok==="1");
+  if(t.k==="tone"&&!t.checked){v.querySelectorAll(".tc").forEach(e=>e.onclick=()=>{const i=+e.dataset.i,s=t.sel[i];t.sel[i]=s==null?1:s===4?0:s===0?1:s+1;tRender()});$("#tcheck").onclick=()=>{t.checked=true;tRender()}}
+  if(t.k==="tiles"&&!t.checked){
+    v.querySelectorAll(".tile.pool").forEach(e=>e.onclick=()=>{t.pick.push(t.pool.find(o=>o.i===+e.dataset.i));tRender()});
+    v.querySelectorAll(".tile[data-j]").forEach(e=>e.onclick=()=>{t.pick.splice(+e.dataset.j,1);tRender()});
+    $("#tclr").onclick=()=>{t.pick=[];tRender()};
+    $("#tcheck").onclick=()=>{t.checked=true;tRender()};
+  }
+  if($("#tp1")){
+    $("#tp1").onclick=()=>say(t.f.zh,.8);$("#tp2").onclick=()=>say(t.f.zh,.5);
+    $("#ttext").onclick=()=>$("#ttx").classList.toggle("hide");
+    if(!T.open&&T.played!==t){T.played=t;say(t.f.zh,.8)}
+  }
+}
+function tStepDone(v){
+  const p=TPATH[T.p],n=tNext();
+  const acc=T.first?`С первого раза верно: ${T.firstOk} из ${T.first}.`:"";
+  let msg="Шаг пройден.";
+  if(p.s==="final")msg=T.firstOk===T.first?"Всё с первого раза. Вы готовы к проверочной.":"Финальная проверка закончена. Пройдите её ещё раз, пока всё не будет верно с первого раза.";
+  else if(p.s==="exam")msg="Пробная контрольная пройдена.";
+  v.innerHTML=`<div class="card"><div class="done"><div class="zh big">${p.s==="final"&&T.firstOk!==T.first?"再":"好"}</div><div class="ru">${esc(msg)}</div><div class="hint">${acc}</div>
+  ${n>=0?`<button class="btn main" id="tgo">Дальше: ${esc(TPATH[n].n)}${TPATH[n].b!=null?" · "+esc(TB[TPATH[n].b].title):""}</button>`:""}
+  ${p.s==="final"?`<button class="btn${n<0?" main":""}" id="tagain">Пройти финальную проверку ещё раз</button>`:""}
+  <button class="btn" id="th2">К плану</button></div></div>`;
+  if($("#tgo"))$("#tgo").onclick=()=>tStart(n);
+  if($("#tagain"))$("#tagain").onclick=()=>tStart(TPATH.length-1);
+  $("#th2").onclick=()=>{T.view="home";tRender()};
+}
+function tRender(){
+  const v=$("#view");if(st.mode!=="test")return;
+  if(T.view==="home")return tHome(v);
+  if(T.view==="learn")return tLearn(v);
+  if(T.view==="stepdone")return tStepDone(v);
+  return tRun(v);
+}
+
+const tabs=$("#tabs").querySelectorAll("button");
+function setTab(m){tabs.forEach(b=>b.classList.toggle("on",b.dataset.m===m));st.mode=m}
+tabs.forEach(b=>b.onclick=()=>{setTab(b.dataset.m);opts();build()});
+setTab(st.mode);opts();build();
+</script>
+</body>
+</html>
