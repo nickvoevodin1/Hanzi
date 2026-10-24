@@ -377,6 +377,7 @@ for(let L=1;L<=NL;L++){
   lessonExtras(L).forEach(x=>x.words.forEach(w=>{ if(!(w.key in EXTRA_OF)) EXTRA_OF[w.key]=x.title; add(w); }));   // после урока — слова группы
 }
 
+
 /*==================================================================
   ХРАНИЛИЩЕ: IndexedDB (в превью без хранилища — память)
 ==================================================================*/
@@ -577,6 +578,7 @@ function daysTo(s){ const p=(s||'').split('-').map(Number); if(p.length!==3) ret
 function whenText(d){ return d===0?'сегодня':d===1?'завтра':d>1?'через '+d+' '+plural(d,'день','дня','дней'):d<0?'прошла':''; }
 function plural(n,a,b,c){ n=Math.abs(n)%100; const n1=n%10; return n>10&&n<20?c:n1>1&&n1<5?b:n1===1?a:c; }
 
+
 /*==================================================================
   РАЗБОР ИЕРОГЛИФА: ключ, состав, смысл/звук
 ==================================================================*/
@@ -642,6 +644,7 @@ document.addEventListener('click',e=>{
   const db=e.target.closest('[data-draw]'); if(db){ closeSheet(); go('draw',{chars:[db.dataset.draw], title:db.dataset.draw, back:State.route}); }
 },true);
 
+
 /*==================================================================
   РОУТЕР И НАВИГАЦИЯ
 ==================================================================*/
@@ -669,6 +672,7 @@ document.addEventListener('keydown',e=>{
     if(k) b=scr.querySelector('[data-key="'+k+'"]'); }
   if(b&&!b.disabled){ e.preventDefault(); if(document.activeElement&&document.activeElement.blur) document.activeElement.blur(); b.click(); }
 });
+
 
 /*==================================================================
   СЕГОДНЯ (главная)
@@ -743,6 +747,7 @@ function viewHome(s){
   if(!Store.persistent()) v.appendChild(el('p','note','⚠︎ Превью без постоянного хранилища: прогресс живёт до перезагрузки. В установленном приложении / на GitHub Pages сохраняется.'));
   s.appendChild(v);
 }
+
 
 /*==================================================================
   УРОКИ
@@ -856,6 +861,7 @@ function viewCard(s){
   $('#cDraw').onclick=()=>go('draw',{chars:hanOf(w.s),title:w.d||w.s,back:{name:'card',id:w.id,from}});
 }
 function mr(k,v){ return el('div','mr',`<div class="k">${k}</div><div class="v">${v}</div>`); }
+
 
 /*==================================================================
   СЕССИЯ ЗАУЧИВАНИЯ
@@ -1140,6 +1146,7 @@ function sessionDone(s){
   s.appendChild(v);
 }
 
+
 /*==================================================================
   ПРОПИСИ
 ==================================================================*/
@@ -1188,6 +1195,7 @@ function viewDraw(s){
   $('#dRedo').onclick=mount; $('#dOut').onclick=()=>{ outline=!outline; mount(); };
   mount();
 }
+
 
 /*==================================================================
   ПРОВЕРОЧНЫЕ: полный цикл подготовки
@@ -1428,6 +1436,7 @@ function tStepDone(v,t){
   const h=el('button','btn ghost','К плану'); h.style.marginTop='10px'; h.onclick=()=>tGo('home'); v.appendChild(h);
 }
 
+
 /*==================================================================
   КЛЮЧИ (214, названия — из таблицы ДВФУ)
 ==================================================================*/
@@ -1498,6 +1507,7 @@ function viewRadical(s){
   s.appendChild(v);
 }
 
+
 /*==================================================================
   СЛОВАРЬ: поиск + HSK
 ==================================================================*/
@@ -1536,6 +1546,7 @@ function viewList(s){
   if(!State.route.all&&ws.length>150){ const m=el('button','btn ghost','Показать все '+ws.length); m.style.marginTop='10px'; m.onclick=()=>go('list',{hsk:l,all:1}); v.appendChild(m); }
   s.appendChild(v);
 }
+
 
 /*==================================================================
   НАСТРОЙКИ
@@ -1578,6 +1589,7 @@ function viewSettings(s){
   s.appendChild(v);
 }
 
+
 /*==================================================================
   СТАРТ
 ==================================================================*/
@@ -1589,6 +1601,7 @@ function viewSettings(s){
   if('serviceWorker' in navigator){ try{ navigator.serviceWorker.register('./service-worker.js'); }catch(e){} }
   go('home');
 })();
+
 </script>
 </body>
 </html>

@@ -19,6 +19,11 @@ SRC, DATA, APP = ROOT / "src", ROOT / "src" / "data", ROOT
 
 def main():
     tpl = (SRC / "template.html").read_text(encoding="utf-8")
+    # интерфейс — модули src/js/*.js (по порядку имён) → в <script> шаблона
+    js_parts = sorted((SRC / "js").glob("*.js"))
+    if tpl.count("/*__JS__*/") != 1:
+        sys.exit("Плейсхолдер /*__JS__*/ должен встречаться ровно 1 раз")
+    tpl = tpl.replace("/*__JS__*/", "\n".join(p.read_text(encoding="utf-8") for p in js_parts))
     parts = {
         "/*__DATA__*/": (DATA / "app_data.json").read_text(encoding="utf-8"),
         "/*__HANZI__*/": (DATA / "hanzi.json").read_text(encoding="utf-8"),

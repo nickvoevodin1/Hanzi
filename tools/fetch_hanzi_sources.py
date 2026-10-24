@@ -23,12 +23,13 @@ def main(mm_path, db_path):
         d = json.loads(line); mm[d["character"]] = d
     app = json.loads((DATA / "app_data.json").read_text(encoding="utf-8"))
     want = list(app["chars"].keys())
-    # компоненты первого уровня тоже нужны (их чтение / тип)
     comps = []
-    for ch in want:
+    stack = list(want)
+    while stack:                      # компоненты всех уровней (для полного разложения на ключи)
+        ch = stack.pop()
         for p in (mm.get(ch, {}).get("decomposition") or ""):
             if p not in IDC and p not in app["chars"] and p not in comps:
-                comps.append(p)
+                comps.append(p); stack.append(p)
     db = sqlite3.connect(db_path)
     out = {}
     for ch in want + comps:
