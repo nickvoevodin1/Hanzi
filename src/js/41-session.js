@@ -1,5 +1,5 @@
 /*==================================================================
-  СЕССИЯ ЗАУЧИВАНИЯ
+  КАРТОЧКИ (классика): самопроверка с 4 кнопками оценки FSRS.
   Режим «Авто» подбирает задание по прочности памяти (S, дни):
   новое → знакомство; слабое → узнавание/выбор/на слух; среднее → вспомнить,
   тоны, пиньинь; прочное → написать иероглиф, диктант.
@@ -12,7 +12,6 @@ function startSession(queue,mode,title,more){
   go('session');
 }
 function nextItem(){ return SESSION.queue.length?SESSION.queue.shift():SESSION.again.length?SESSION.again.shift():null; }
-function canWrite(w){ return typeof HanziWriter!=='undefined' && hanOf(w.s).length>0 && hanOf(w.s).length<=4 && hanOf(w.s).every(c=>CHARS[c]); }
 function pickMode(w){
   let m=SESSION.mode;
   if(m==='auto'){
@@ -26,13 +25,13 @@ function pickMode(w){
   return m;
 }
 function viewSession(s){
-  if(!SESSION){ go('home'); return; }
+  if(!SESSION){ go('practice'); return; }
   let key=SESSION.current!=null?SESSION.current:nextItem();
   if(key==null) return sessionDone(s);
   if(SESSION.current!==key){ SESSION.current=key; SESSION.cur=null; }
   const v=el('div','view qwrap');
   const hdr=el('div',''); hdr.style.cssText='display:flex;align-items:center;justify-content:space-between';
-  const back=el('button','back','✕ '+esc(SESSION.title||'Завершить')); back.onclick=()=>{ SESSION.finished=true; go('home'); }; hdr.appendChild(back);
+  const back=el('button','back','✕ '+esc(SESSION.title||'Завершить')); back.onclick=()=>{ SESSION.finished=true; go('practice'); }; hdr.appendChild(back);
   if(SESSION.last){ const ub=el('button','back','↩ Отменить'); ub.dataset.key='undo'; ub.onclick=undoLast; hdr.appendChild(ub); }
   v.appendChild(hdr);
   v.appendChild(el('div','progress',`<i style="width:${Math.min(100,SESSION.done/Math.max(1,SESSION.total)*100)|0}%"></i>`));
@@ -48,11 +47,12 @@ function viewSession(s){
   if(!SESSION.cur) SESSION.cur=pickMode(w);
   ({recog:qRecog,choice:qChoice,produce:qProduce,recall:qRecall,pinyin:qPinyin,listen:qListen,tones:qTones,write:qWrite,dictate:qDictate}[SESSION.cur]||qRecog)(stage,w);
 }
-function gradeSelf(stage,okText,badText){
-  const bar=el('div','gradebar');
-  const b1=el('button','grade g1',(badText||'Не помню')+'<small>1 · ←</small>'); b1.dataset.key='1'; b1.onclick=()=>afterGrade(1);
-  const b2=el('button','grade g3',(okText||'Помню')+'<small>2 · →</small>'); b2.dataset.key='2'; b2.onclick=()=>afterGrade(3);
-  bar.appendChild(b1); bar.appendChild(b2); stage.appendChild(bar);
+function gradeSelf(stage){
+  const bar=el('div','gradebar four');
+  [['Не помню',1,'g1','1'],['Трудно',2,'g2',''],['Помню',3,'g3','2'],['Легко',4,'g4','']].forEach(([t,g,cl,k],i)=>{
+    const b=el('button','grade '+cl,`${t}<small>${i+1}${k==='1'?' · ←':k==='2'?' · →':''}</small>`); b.dataset.ch=String(i+1); if(k) b.dataset.key=k;
+    b.onclick=()=>afterGrade(g); bar.appendChild(b); });
+  stage.appendChild(bar);
 }
 function gradeAuto(stage,g){
   const b=el('button','btn showbtn','Дальше ›'); b.dataset.key='space'; b.onclick=()=>afterGrade(g); stage.appendChild(b);
@@ -67,7 +67,8 @@ function afterGrade(g){
   const key=SESSION.current, wasNew=isNew(key);
   SESSION.last={key,wasNew,g,prev:cardOf(key)?JSON.parse(JSON.stringify(cardOf(key))):null,hadFail:!!SESSION.fails[key]};
   State.cards[key]=FSRS.review(cardOf(key)||{},g,REQ);
-  if(wasNew){ if(isRad(key)) State.meta.radToday=(State.meta.radToday||0)+1; else State.meta.newToday=(State.meta.newToday||0)+1; }
+  const dd=D(); dd.t++; if(g>=3) dd.ok++; if(g>=2) addXP(XP.task);
+  if(wasNew){ if(isRad(key)) dd.keys++; else if(inSem(key)) dd.new++; } else dd.rv++;
   const d=todayStr(); State.meta.rev[d]=(State.meta.rev[d]||0)+1;
   if(g===1){ SESSION.again.push(key); SESSION.fails[key]=1; }
   SESSION.done++; SESSION.current=null; SESSION.cur=null;
@@ -76,7 +77,8 @@ function afterGrade(g){
 function undoLast(){
   const L=SESSION&&SESSION.last; if(!L) return;
   if(L.prev) State.cards[L.key]=L.prev; else delete State.cards[L.key];
-  if(L.wasNew){ if(isRad(L.key)) State.meta.radToday=Math.max(0,(State.meta.radToday||0)-1); else State.meta.newToday=Math.max(0,(State.meta.newToday||0)-1); }
+  const dd=D(); dd.t=Math.max(0,dd.t-1); if(L.g>=3) dd.ok=Math.max(0,dd.ok-1); if(L.g>=2) dd.xp=Math.max(0,dd.xp-XP.task);
+  if(L.wasNew){ if(isRad(L.key)) dd.keys=Math.max(0,dd.keys-1); else if(inSem(L.key)) dd.new=Math.max(0,dd.new-1); } else dd.rv=Math.max(0,dd.rv-1);
   const d=todayStr(); if(State.meta.rev[d]>0) State.meta.rev[d]--;
   if(L.g===1){ const i=SESSION.again.lastIndexOf(L.key); if(i>-1) SESSION.again.splice(i,1); if(!L.hadFail) delete SESSION.fails[L.key]; }
   if(SESSION.current!=null && SESSION.current!==L.key) SESSION.queue.unshift(SESSION.current);
@@ -108,7 +110,6 @@ function qRecog(stage,w){
   showBtn(stage,rev);
 }
 // — 汉字 → 4 перевода
-function distractWords(w){ const L=WORD_L[w.key]; const near=WORDS.filter(x=>x!==w&&x.ru&&(L?WORD_L[x.key]&&Math.abs(WORD_L[x.key]-L)<=6:x.hsk===w.hsk)); return near.length>=8?near:WORDS; }
 function qChoice(stage,w){
   stage.appendChild(el('div','qprompt','Выбери перевод'));
   const c=el('div','qcard'); c.style.minHeight='24vh'; c.innerHTML=`<div class="qhz han">${esc(w.d||w.s)}</div>`; stage.appendChild(c);
@@ -138,7 +139,7 @@ function choiceBox(stage,opts,right,done){
 function qRecall(stage,w){
   stage.appendChild(el('div','qprompt','Вспомни и напиши иероглифами'));
   const c=el('div','qcard'); c.style.minHeight='28vh'; c.innerHTML=`<div class="qbig">${esc(meaning(w))}</div><div class="qsub">напиши на бумаге или в уме, потом сверь</div>`; stage.appendChild(c);
-  showBtn(stage,()=>{ c.innerHTML=`<div class="qbig">${esc(meaning(w))}</div><div class="qhz han" style="font-size:72px;margin-top:8px">${wrapHz(w.d||w.s)}</div>`+answerHTML(w); Speech.has()&&Speech.say(w.s); gradeSelf(stage,'Написал верно','Ошибся'); stage.appendChild(el('div','',breakdown(w.s))); });
+  showBtn(stage,()=>{ c.innerHTML=`<div class="qbig">${esc(meaning(w))}</div><div class="qhz han" style="font-size:72px;margin-top:8px">${wrapHz(w.d||w.s)}</div>`+answerHTML(w); Speech.has()&&Speech.say(w.s); gradeSelf(stage); stage.appendChild(el('div','',breakdown(w.s))); });
 }
 // — ввод пиньиня
 function qPinyin(stage,w){
@@ -232,9 +233,9 @@ function qDictate(stage,w){
 // — ключи
 function radChars(n,limit){ const lc=Object.keys(CHAR_L).filter(c=>radOf(c)===n).sort((a,b)=>CHAR_L[a]-CHAR_L[b]); return limit?lc.slice(0,limit):lc; }
 function radIntro(stage,n){
-  const r=RADS[n-1], ex=radChars(n,8);
+  const r=RADS[n-1], ex=(KEY_CHARS[n]||[]).slice(0,8);
   const c=el('div','qcard');
-  c.innerHTML=`<div class="qprompt" style="color:var(--cinnabar-2)">✦ Новый ключ №${n}${RAD_L[n]?' · урок '+RAD_L[n]:''}</div>
+  c.innerHTML=`<div class="qprompt" style="color:var(--cinnabar-2)">✦ Новый ключ №${n}${KEY_L[n]?' · урок '+KEY_L[n]:''}</div>
     <div class="qhz han" style="font-size:80px">${esc(r[4][0])}</div>
     ${r[4].length>1?`<div class="han" style="font-size:22px;color:var(--paper-dim)">другие формы: ${esc([...r[4]].slice(1).join(' '))}</div>`:''}
     <div class="reveal"><div class="py">${pinyinHTML(r[2])}</div><div class="tr">${esc(r[3])}</div><div class="en">${r[1]} ${plural(r[1],'черта','черты','черт')}</div>
@@ -246,8 +247,7 @@ function radIntro(stage,n){
   const g=el('button','btn','Запомнил → проверить'); g.dataset.key='space'; g.onclick=()=>{ SESSION.intro['r:'+n]=1; render(); };
   row.appendChild(known); row.appendChild(g); stage.appendChild(row);
 }
-function radNear(n){ const k=RAD_L[n]?Object.keys(RAD_L).map(Number):RADS.map(r=>r[0]); return k.filter(x=>x!==n); }
-function radAnswer(n){ const r=RADS[n-1], ex=radChars(n,6);
+function radAnswer(n){ const r=RADS[n-1], ex=(KEY_CHARS[n]||[]).slice(0,6);
   return `<div class="reveal"><div class="qhz han" style="font-size:56px">${esc([...r[4]].join(' '))}</div><div class="py">${pinyinHTML(r[2])}</div><div class="tr">№${n} · ${esc(r[3])}</div>${ex.length?`<div class="en han" style="font-size:20px">${ex.map(ch=>`<span class="hz" data-c="${ch}">${ch}</span>`).join(' ')}</div>`:''}</div>`; }
 function qRadName(stage,n){
   const r=RADS[n-1];
@@ -265,7 +265,7 @@ function qRadForm(stage,n){
 }
 function sessionDone(s){
   const fails=Object.keys(SESSION.fails), title=SESSION.title, more=SESSION.more, done=SESSION.done;
-  SESSION.finished=true;
+  SESSION.finished=true; D().ls++; checkDay(); checkQuests(); checkAch(); save('meta');
   const v=el('div','view');
   v.appendChild(el('div','empty',`<div class="big">✓</div>Готово: ${done} ${plural(done,'карточка','карточки','карточек')}<br><span style="font-size:13px">${esc(title||'')}</span>`));
   if(fails.length){
@@ -277,7 +277,7 @@ function sessionDone(s){
   }
   const nx=more?more().filter(validKey):[];
   if(nx.length){ const mb=el('button','btn','Ещё порция ('+nx.length+')'); mb.style.marginTop='12px'; mb.onclick=()=>startSession(more(),SESSION.mode,title,more); v.appendChild(mb); }
-  const b=el('button','btn ghost','На главную'); b.style.marginTop='12px'; b.onclick=()=>go('home'); v.appendChild(b);
+  const b=el('button','btn ghost','К повторению'); b.style.marginTop='12px'; b.onclick=()=>go('practice'); v.appendChild(b);
   s.appendChild(v);
 }
 

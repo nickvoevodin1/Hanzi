@@ -8,6 +8,10 @@ function viewDict(s){
   const run=()=>{
     const q=inp.value.trim().toLowerCase(); State.route.q=inp.value; res.innerHTML='';
     if(!q){
+      const top=el('div','rowlist');
+      [['课','Уроки 1–30','Кондрашевский, том 1: слова, иероглифы, ключи урока','lessons'],['部','Ключи','214 ключей: формы, названия, примеры','keys'],['丿','Черты','таблица 24 черт курса','strokes']].forEach(([ic,t,sub,r])=>{
+        const b=el('button','row',`<span class="ri han">${ic}</span><div class="tt"><b>${t}</b><small>${sub}</small></div><span class="chev">›</span>`); b.onclick=()=>go(r); top.appendChild(b); });
+      res.appendChild(top);
       res.appendChild(el('p','eyebrow','HSK 3.0 — дополнительно к урокам'));
       const list=el('div','rowlist');
       [1,2,3,4,5,6].forEach(l=>{ const ws=WORDS.filter(w=>w.hsk===l);

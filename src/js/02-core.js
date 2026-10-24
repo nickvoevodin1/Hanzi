@@ -62,16 +62,36 @@ const FSRS = (()=>{
 /*==================================================================
   СОСТОЯНИЕ
 ==================================================================*/
-const REQ=0.90, SESSION_CAP=20, RAD_PER_DAY=5;
+const REQ=0.90;
+// Семестр: даты, которых нет в материалах, — настройки (ТЗ, раздел 10)
+const DEF_SEM={on:true,endDate:'2027-01-31',targetLesson:30,groupLesson:18,
+  holidays:{from:'2026-12-31',to:'2027-01-10',capacity:0.3},awayDays:[],newWordsUntil:'2026-12-28',
+  keysPerDay:10,exams:[],minutesNormal:40};
+const clone=o=>JSON.parse(JSON.stringify(o));
+const DEF_SETTINGS={semester:clone(DEF_SEM),newPerDay:12,voiceName:null,xpGoal:50,sound:true,vibrate:false,
+  decomp:'keys',mockMin:40,scale:[90,75,60]};
 const State = {
-  cards:{},                                  // ключ (иероглифы слова или 'r:N') → карточка FSRS
-  settings:{ newPerDay:12, lesson:18, voiceName:null },
-  meta:{ day:'', newToday:0, radToday:0, rev:{} },
+  cards:{},                                  // ключ → карточка FSRS: слово (w.key), ключ 'r:N', разбор знака 'key:<иероглиф>'
+  settings:clone(DEF_SETTINGS),
+  meta:{},                                   // см. freshMeta()
   tp:{},                                     // прогресс подготовки к проверочным: id → {done:{шаг:1}, final:[a,b], date}
-  route:{ name:'home' }, tab:'home',
+  sets:[],                                   // свои наборы предложений: {id,title,lessons:[],items:[[zh,py,ru]]}
+  route:{ name:'path' }, tab:'path',
 };
+// daily[дата] = {xp, t задания с 1-й попытки, ok верно, new слова, keys ключи, dec разбор, sent предложения, mock, rv повторения,
+//                ls уроков, met день серии засчитан, fz заморозка, more «учить больше», q бонус заданий}
+function freshMeta(){ return {day:todayStr(),rev:{},daily:{},ach:{},nodes:{},jumps:{},mocks:[],reports:[],sentErr:{},fz:{n:0,day:''},chest:{}}; }
+State.meta=freshMeta();
 function dstr(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function todayStr(){ return dstr(new Date()); }
+function mergeSemester(x){
+  const s=Object.assign(clone(DEF_SEM),x||{});
+  s.holidays=Object.assign(clone(DEF_SEM.holidays),(x&&x.holidays)||{});
+  s.awayDays=Array.isArray(s.awayDays)?s.awayDays.filter(d=>/^\d{4}-\d\d-\d\d$/.test(d)).sort():[];
+  s.exams=Array.isArray(s.exams)?s.exams.filter(e=>e&&e.date):[];
+  s.groupLesson=Math.min(NL,Math.max(1,+s.groupLesson||18)); s.targetLesson=Math.min(NL,Math.max(1,+s.targetLesson||30));
+  return s;
+}
 async function loadState(){
   await Store.open();
   const c=await Store.get('cards'); if(c) State.cards=c;
@@ -81,57 +101,65 @@ async function loadState(){
     State.cards=nc; await Store.set('cards',nc);
   }
   const s=await Store.get('settings');
-  if(s){ ['newPerDay','lesson','voiceName'].forEach(k=>{ if(s[k]!==undefined) State.settings[k]=s[k]; }); }
-  State.settings.lesson=Math.min(NL,Math.max(1,+State.settings.lesson||18));
-  const m=await Store.get('meta'); if(m) Object.assign(State.meta,m);
-  State.meta.rev=State.meta.rev||{};
-  if(State.meta.day!==todayStr()){ State.meta.day=todayStr(); State.meta.newToday=0; State.meta.radToday=0; await save('meta'); }
+  if(s){
+    ['newPerDay','voiceName','xpGoal','sound','vibrate','decomp','mockMin','scale'].forEach(k=>{ if(s[k]!==undefined) State.settings[k]=s[k]; });
+    // миграция: старые «урок группы» (lesson) и цель (goal) → семестр; прогресс не трогаем
+    const sem=s.semester||{}; if(!s.semester&&s.lesson) sem.groupLesson=s.lesson;
+    State.settings.semester=mergeSemester(sem);
+    if(!s.semester||s.goal||s.lesson!==undefined) await Store.set('settings',State.settings);
+  }
+  if(![30,50,80,120].includes(State.settings.xpGoal)) State.settings.xpGoal=50;
+  const m=await Store.get('meta');
+  State.meta=Object.assign(freshMeta(),m||{});
+  ['rev','daily','ach','nodes','jumps','sentErr','chest'].forEach(k=>{ if(!State.meta[k]||typeof State.meta[k]!=='object') State.meta[k]={}; });
+  ['mocks','reports'].forEach(k=>{ if(!Array.isArray(State.meta[k])) State.meta[k]=[]; });
+  if(!State.meta.fz) State.meta.fz={n:0,day:''};
+  if(m&&m.day===todayStr()&&(m.newToday||m.radToday)){ const d=D(); d.new=Math.max(d.new,m.newToday||0); d.keys=Math.max(d.keys,m.radToday||0); }
+  const rt=State.meta.rev[todayStr()]; if(rt&&!(State.meta.daily[todayStr()]||{}).rv) D().rv=rt;     // повторения сегодня до обновления
+  delete State.meta.newToday; delete State.meta.radToday;
+  State.meta.day=todayStr();
   const tp=await Store.get('tests'); if(tp) State.tp=tp;
+  const st=await Store.get('sentences'); if(Array.isArray(st)) State.sets=st;
 }
 async function save(what){
   if(!what||what==='cards') await Store.set('cards',State.cards);
   if(!what||what==='settings') await Store.set('settings',State.settings);
   if(!what||what==='meta') await Store.set('meta',State.meta);
   if(!what||what==='tests') await Store.set('tests',State.tp);
+  if(!what||what==='sentences') await Store.set('sentences',State.sets);
 }
+function D(day){ day=day||todayStr(); const m=State.meta.daily;
+  return m[day]||(m[day]={xp:0,t:0,ok:0,new:0,keys:0,dec:0,sent:0,mock:0,rv:0,ls:0}); }
+const SEM=()=>State.settings.semester;
+const groupL=()=>SEM().groupLesson;
 
 /*==================================================================
   КАРТОЧКИ И ОЧЕРЕДИ
 ==================================================================*/
 const isRad = k => typeof k==='string' && k.startsWith('r:');
 const radNum = k => +k.slice(2);
-const validKey = k => isRad(k) ? (radNum(k)>=1&&radNum(k)<=214) : (k in BYK);
+const isKC = k => typeof k==='string' && k.startsWith('key:');      // разбор иероглифа на ключи
+const kcChar = k => k.slice(4);
+const validKey = k => isRad(k) ? (radNum(k)>=1&&radNum(k)<=214) : isKC(k) ? keysOf(kcChar(k)).length>0 : (k in BYK);
 const cardOf = k => State.cards[k];
 const isNew = k => { const c=cardOf(k); return !c||!c.state; };
 const isDue = k => { const c=cardOf(k); return !!(c&&c.state&&c.due<=Date.now()); };
+const stab = k => { const c=cardOf(k); return c&&c.state ? c.S : 0; };
 function statusOf(k){ const c=cardOf(k); if(!c||!c.state) return 'new'; if(c.due<=Date.now()) return 'due'; return c.S>=21?'known':'seen'; }
 function learnedCount(keys){ return keys.filter(k=>!isNew(k)).length; }
 function dueKeys(filter){
   return Object.keys(State.cards).filter(k=>validKey(k)&&isDue(k)&&(!filter||filter(k))).sort((a,b)=>cardOf(a).due-cardOf(b).due);
 }
-// Урок дня: повторения + новые по курсу (уроки по порядку, ключ — перед первым словом с ним)
-function dailyQueue(){
-  const due=dueKeys();
-  let wb=Math.max(0,State.settings.newPerDay-(State.meta.newToday||0));
-  let rb=wb>0 ? Math.max(0,RAD_PER_DAY-(State.meta.radToday||0)) : 0;
-  const fresh=[];
-  for(const k of COURSE){
-    if(!wb && !rb) break;
-    if(!isNew(k)) continue;
-    if(isRad(k)){ if(rb){ fresh.push(k); rb--; } }
-    else if(wb){ fresh.push(k); wb--; }
-  }
-  return due.concat(fresh).slice(0,SESSION_CAP);
-}
-// Очередь по набору (урок, ключи, HSK): повторения набора + все новые по порядку, порциями
-function poolQueue(keys){
+// Очередь по набору (урок, ключи, HSK): повторения набора + новые по порядку, порциями
+const SESSION_CAP=20;
+function poolQueue(keys,cap){
   const set=new Set(keys);
   const due=dueKeys(k=>set.has(k));
   const fresh=keys.filter(isNew);
-  return due.concat(fresh).slice(0,SESSION_CAP);
+  return due.concat(fresh).slice(0,cap||SESSION_CAP);
 }
-function lessonKeys(L){ return LESSON_RADS[L].map(n=>'r:'+n).concat(lessonWords(L).map(w=>w.key)); }
-function courseKeys(N){ const o=[]; for(let L=1;L<=N;L++){ o.push(...lessonKeys(L)); lessonExtras(L).forEach(x=>o.push(...x.words.map(w=>w.key))); } return [...new Set(o)]; }
+function lessonKeys(L){ return COURSE.filter(k=>WORD_L[k]===L); }
+function courseKeys(N){ return COURSE.filter(k=>WORD_L[k]<=N); }
 
 /*==================================================================
   ПИНЬИНЬ

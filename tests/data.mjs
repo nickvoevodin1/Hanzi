@@ -1,3 +1,4 @@
+import fs from 'fs';
 // Целостность данных: слова уроков, разбор иероглифов, блоки тренировки, проверочные.
 import {load} from './env.mjs';
 const A=await load(); const {T,ev,ok}=A;
@@ -27,9 +28,11 @@ await T('hanzi-kangxi',()=>{
   ok(ev("HZ.c['都'][0]")===163&&ev("HZ.c['院'][0]")===170,'阝 справа/слева');
   ok(ev("HZ.c['语'][0]")===149&&ev("HZ.c['语'][1]")==='讠','语 → 讠 №149');
   ok(ev("HZ.c['好'][2]")==='⿰女子','состав 好'); ok(ev("HZ.c['点'][3]")==='p'&&ev("HZ.c['点'][4]")==='灬','点 смысл+звук'); });
-await T('radicals-before-word',()=>{
-  ok(ev(`COURSE.every((k,i)=>!isRad(k)||COURSE.slice(i+1).some(x=>!isRad(x)&&hanOf(x).some(c=>radOf(c)===radNum(k))))`),'ключ без последующего слова');
-  ok(ev(`COURSE.filter(k=>!isRad(k)).every(s=>hanOf(s).every(c=>{ const i=COURSE.indexOf('r:'+radOf(c)); return i>=0&&i<COURSE.indexOf(s); }))`),'ключ после слова'); });
+await T('keys-deck',()=>{
+  const ord=JSON.parse(fs.readFileSync(new URL('../src/data/kondr_1-30.json',import.meta.url),'utf8')).keys_study_order;
+  ok(ev("KEY_ORDER.join()")===ord.join(),'порядок ключей ≠ keys_study_order'); ok(new Set(ord).size===214&&ord.every(n=>n>=1&&n<=214),'214 разных ключей');
+  ok(ev("KEY_UNITS.length")===11&&ev("KEY_UNITS.flat().join()")===ord.join(),'11 юнитов ключей');
+  ok(ev("COURSE.every(k=>!isRad(k))"),'в COURSE остались ключи'); });
 await T('drill-units',()=>{
   ok(ev("Object.values(LESSONS).every(l=>l.b.length>0)"),'урок без блоков');
   const bad=ev(`Object.entries(LESSONS).flatMap(([L,l])=>l.b.flatMap(b=>b.u.filter(u=>u.sy&&u.sy.split(' ').length!==hanOf(u.zh).length).map(u=>L+':'+u.zh))).join(' ')`);

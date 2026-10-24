@@ -59,6 +59,7 @@ def main(mm_path):
             out[ch] = keys(ch); auto.append(ch)
     empty = [c for c, v in out.items() if not v]
     res = {"c": out, "order": src["keys_study_order"],
+           "py": {c["c"]: c["py"] for c in src["chars"]}, "ru": {c["c"]: c["ru"] for c in src["chars"]},
            "freq": {str(k["n"]): k["freq_in_lessons"] for k in src["keys"]}, "auto": "".join(auto)}
     (DATA / "kondr_chars.json").write_text(json.dumps(res, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     print(f"kondr_chars.json: из JSON {len(given)}, посчитано тем же алгоритмом {len(auto)}, без разбора {len(empty)}: {''.join(empty)}")

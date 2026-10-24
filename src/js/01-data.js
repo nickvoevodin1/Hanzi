@@ -59,21 +59,41 @@ function lessonWords(L){ return ((LESSONS[L]||{}).o||[]).map(k=>BYK[k]).filter(B
 function lessonExtras(L){ return ((LESSONS[L]||{}).x||[]).map(x=>({...x,words:x.o.map(k=>BYK[k]).filter(Boolean)})); }   // список группы, презентации
 function lessonTitle(L){ return (LESSONS[L]&&LESSONS[L].t) || ('Урок '+L); }
 
-// Где иероглиф и ключ появляются впервые; общий порядок изучения курса
-const CHAR_L={}, RAD_L={}, LESSON_CHARS={}, LESSON_RADS={}, WORD_L={}, EXTRA_OF={};
-const COURSE=[];                    // ключи карточек: слово или 'r:N' — ключ №N
+// Разбор на ключи (kondr_chars.json): KC.c[знак]=[[форма,№],…], KC.order — порядок изучения 214 ключей
+const KC = /*__KCHARS__*/;
+function keysOf(ch){ return (KC.c[ch]&&KC.c[ch].length) ? KC.c[ch] : (HZ.c[ch]?[[HZ.c[ch][1],HZ.c[ch][0]]]:[]); }
+// Пиньинь иероглифа — словарный (587 знаков уроков — из kondr_1-30.json), перевод — из разбора приложения
+function charPy(ch){ return (KC.py&&KC.py[ch]) || (HZ.c[ch]&&HZ.c[ch][7]) || ''; }
+function charRu(ch){ return (HZ.c[ch]&&HZ.c[ch][6]) || (KC.ru&&KC.ru[ch]) || ''; }
+// чтение знака в слове w (если в слове он читается иначе, чем в словаре: 乐 yuè в 音乐, lè в 快乐); 一/不 и лёгкий тон — словарное
+function charPyIn(ch,w){
+  const d=charPy(ch); if(!w) return d;
+  const cs=hanOf(w.s), sy=w.p.trim().split(/\s+/); if(sy.length!==cs.length) return d;
+  const y=sy[cs.indexOf(ch)]; if(!y||'一不'.includes(ch)||syllTone(y)===5||toneless(y)===toneless(d)) return d;
+  return y;
+}
+
+// Где иероглиф и ключ появляются впервые; порядок новых слов курса (уроки 1→30, затем наборы группы урока)
+const CHAR_L={}, RAD_L={}, KEY_L={}, LESSON_CHARS={}, LESSON_RADS={}, LESSON_KEYS={}, WORD_L={}, EXTRA_OF={};
+const COURSE=[];                    // ключи карточек слов в порядке курса
 for(let L=1;L<=NL;L++){
-  LESSON_CHARS[L]=[]; LESSON_RADS[L]=[];
+  LESSON_CHARS[L]=[]; LESSON_RADS[L]=[]; LESSON_KEYS[L]=[];
   const add=w=>{
     hanOf(w.s).forEach(c=>{
       if(c in CHAR_L) return;
       CHAR_L[c]=L; LESSON_CHARS[L].push(c);
       const k=radOf(c);
-      if(k && !(k in RAD_L)){ RAD_L[k]=L; LESSON_RADS[L].push(k); COURSE.push('r:'+k); }   // ключ — перед первым словом с ним
+      if(k && !(k in RAD_L)){ RAD_L[k]=L; LESSON_RADS[L].push(k); }
+      keysOf(c).forEach(([,n])=>{ if(n&&!(n in KEY_L)){ KEY_L[n]=L; LESSON_KEYS[L].push(n); } });
     });
     if(!(w.key in WORD_L)){ WORD_L[w.key]=L; COURSE.push(w.key); }
   };
   lessonWords(L).forEach(add);
   lessonExtras(L).forEach(x=>x.words.forEach(w=>{ if(!(w.key in EXTRA_OF)) EXTRA_OF[w.key]=x.title; add(w); }));   // после урока — слова группы
 }
-
+const KEY_ORDER = (KC.order&&KC.order.length===214) ? KC.order.slice() : RADS.map(r=>r[0]);   // колода «Ключи»: все 214
+// Иероглифы уроков, в которых встречается ключ (для карточки ключа)
+const KEY_CHARS = {};
+Object.keys(CHAR_L).sort((a,b)=>CHAR_L[a]-CHAR_L[b]).forEach(c=>keysOf(c).forEach(([,n])=>{ (KEY_CHARS[n]=KEY_CHARS[n]||[]); if(!KEY_CHARS[n].includes(c)) KEY_CHARS[n].push(c); }));
+// Путь, раздел «Ключи»: 11 юнитов по ~20 ключей в порядке изучения
+const KEY_UNITS=[]; for(let i=0;i<11;i++) KEY_UNITS.push(KEY_ORDER.slice(Math.round(i*214/11),Math.round((i+1)*214/11)));

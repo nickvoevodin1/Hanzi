@@ -31,7 +31,8 @@ function testStats(t){ const P=testPath(t), tp=State.tp[t.id]||{done:{}}; const 
   return {done,total:P.length,pct:Math.round(done/P.length*100),final:tp.final}; }
 let T=null;   // текущий прогон: {tid, view, p, q, total, err, first, firstOk, open}
 function viewTests(s){
-  const v=el('div','view'), N=State.settings.lesson;
+  const v=el('div','view'), N=groupL();
+  const back=el('button','back','‹ Повторение'); back.onclick=()=>go('practice'); v.appendChild(back);
   v.appendChild(el('h2','title','Проверочные'));
   v.appendChild(el('p','note','Полный цикл подготовки: разбор → слова → тоны → порядок слов → перевод на слух → перевод с русского → диктант, затем пробная и финальная проверка.'));
   v.appendChild(el('p','eyebrow','Проверочные, диктанты, контрольные'));

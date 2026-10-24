@@ -60,5 +60,7 @@ await T('alt-order',()=>{ const i=ev("testPath(getTest('L18')).findIndex(p=>p.s=
   for(const s of order){ const b=[...doc.querySelectorAll('.ptile.pool')].find(y=>y.textContent===s); b.click(); }
   click(/^Проверить$/); ok(/Верно/.test(txt())&&/Также верно/.test(txt()),'альтернативный порядок не принят'); });
 await T('reset',()=>{ ev("go('test',{home:1,tid:'pr18'})"); click(/Сбросить прогресс/); click(/Точно сбросить/); ok(/Пройдено шагов: 0 из 98/.test(txt()),'сброс'); ok(ev("State.tp.pr18.date")===ev("dstr(new Date(Date.now()+14*864e5))"),'дата пропала при сбросе'); });
-await T('home-card',()=>{ ev("go('home')"); ok(/Проверочная · урок 18/.test(txt())&&/через 14 дней/.test(txt()),'карточка проверочной на главной: '+txt().slice(0,300)); });
+await T('tests-list',()=>{ ev("go('tests')"); ok(/Проверочная · урок 18/.test(txt())&&/через 14 дней/.test(txt()),'проверочная в списке: '+txt().slice(0,300)); });
+await T('path-node',()=>{ ev("UNITS=null"); const n=ev("pathUnits().find(u=>u.id==='L18').nodes.find(n=>n.type==='test')"); ok(n&&n.tid==='pr18','нет узла проверочной в юните 18');
+  ev("openNode(pathUnits().find(u=>u.id==='L18'),pathUnits().find(u=>u.id==='L18').nodes.find(n=>n.type==='test'),'avail')"); ok(ev("State.route.name")==='test'&&ev("State.route.tid")==='pr18','узел не открыл проверочную'); });
 A.finish('cycle: план, разбор, слова, тоны, плитки, перевод, диктант, финал, автотренировка, дата, сброс');

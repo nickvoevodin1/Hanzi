@@ -63,3 +63,37 @@ document.addEventListener('click',e=>{
   const db=e.target.closest('[data-draw]'); if(db){ closeSheet(); go('draw',{chars:[db.dataset.draw], title:db.dataset.draw, back:State.route}); }
 },true);
 
+
+/*==================================================================
+  РАЗБОР НА КЛЮЧИ (формат контрольной): 谢 xiè — благодарить = 讠 (149, yán, «речь») + …
+  Режим «до ключей» (по умолчанию) — kondr_chars.json; «первый уровень» — состав IDS.
+==================================================================*/
+function keyStr(f,n){ const r=RADS[n-1]; return r?`<span class="han">${esc(f)}</span> (${n}, ${esc(r[2])}, «${esc(r[3])}»)`:`<span class="han">${esc(f)}</span>`; }
+function idsParts(ch){ const h=HZ.c[ch]; return ((h&&h[2])||'').replace(IDC,'').split('').filter(p=>p&&p!=='？'); }
+function partStr(p,ch){
+  let n=null;
+  if(p==='阝'){ const h=HZ.c[ch]; n=h&&(h[0]===163||h[0]===170)?h[0]:(h&&h[2].startsWith('⿰阝')?170:163); }
+  else if(RIDX[p]!=null) n=RADS[RIDX[p]][0];
+  if(n) return keyStr(p,n);
+  if(HZ.c[p]) return `<span class="han">${esc(p)}</span> (${esc(charPy(p))}${charRu(p)?', «'+esc(charRu(p))+'»':''})`;
+  const c=HZ.p[p]; if(c) return `<span class="han">${esc(p)}</span> (${esc(c[0])}${c[1]?', «'+esc(c[1])+'»':''})`;
+  return `<span class="han">${esc(p)}</span>`;
+}
+function decompHTML(ch,o){
+  o=o||{}; const h=HZ.c[ch], mode=o.mode||State.settings.decomp;
+  const keysLine=keysOf(ch).map(([f,n])=>keyStr(f,n)).join(' + ');
+  const ip=idsParts(ch), idsLine=ip.length?ip.map(p=>partStr(p,ch)).join(' + '):'';
+  const main=mode==='ids'?(idsLine||'не делится'):(keysLine||'не делится');
+  const meta=[h&&h[2]?'состав: <span class="han">'+esc(h[2])+'</span>':'',h?'ключ Канси: <span class="han">'+esc(h[1])+'</span> ('+h[0]+')':''].filter(Boolean).join(' · ');
+  const other=mode==='ids'?(keysLine?'до ключей: '+keysLine:''):(idsLine&&idsLine!==keysLine&&!o.short?'первый уровень: '+idsLine:'');
+  const py=charPyIn(ch,o.w), alt=py!==charPy(ch)?' <span class="lbl">(в словаре: '+esc(charPy(ch))+')</span>':'';
+  if(o.plain) return `<span class="han">${esc(ch)}</span> ${esc(py)} — ${esc(charRu(ch))}<br>= ${main}`;
+  return `<div class="dec"><div class="dh"><span class="han hz" data-c="${ch}">${ch}</span><b>${pinyinHTML(py)}</b>${alt}<span>— ${esc(charRu(ch))}</span></div>
+    <div class="dk">= ${main}</div><div class="ds">${meta}${other?'<br>'+other:''}</div></div>`;
+}
+// «Сообщить об ошибке разбора» — список хранится в meta.reports, виден в Повторении
+function reportDecomp(ch){
+  openSheet(`<h2 class="title">Ошибка в разборе ${esc(ch)}</h2>${decompHTML(ch)}<p class="note">Что не так? (например: «喝 = 口 + 曷, а не 口 + 日»)</p><textarea class="tinput" id="repTx" placeholder="комментарий"></textarea>
+    <div class="actionrow"><button class="btn" id="repOk">Сохранить</button></div>`);
+  $('#repOk').onclick=()=>{ State.meta.reports.push({ch,date:todayStr(),mode:State.settings.decomp,note:$('#repTx').value.trim()}); save('meta'); closeSheet(); toast('Сохранено — список в «Повторении»'); };
+}

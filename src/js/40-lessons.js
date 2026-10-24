@@ -2,7 +2,8 @@
   УРОКИ
 ==================================================================*/
 function viewLessons(s){
-  const v=el('div','view'), N=State.settings.lesson;
+  const v=el('div','view'), N=groupL();
+  const back=el('button','back','‹ Словарь'); back.onclick=()=>go('dict'); v.appendChild(back);
   v.appendChild(el('h2','title','Уроки'));
   v.appendChild(el('p','note','Кондрашевский, том 1. Красным — текущий урок группы ('+N+'). Цифра справа — слов в работе.'));
   const list=el('div','rowlist'); list.style.marginTop='10px';
@@ -28,7 +29,7 @@ function viewExtra(s){
   v.appendChild(el('h2','title',esc(x.title)));
   v.appendChild(el('p','note',`${x.words.length} слов, в работе ${learnedCount(keys)} · в «Уроке дня» идут после урока ${L}.<br>${esc(x.note||'')}<br>Источник: ${esc(x.src||'')}`));
   const act=el('div','actionrow');
-  const b1=el('button','btn','▶ Учить'); b1.onclick=()=>startSession(poolQueue(keys),'auto',x.title,()=>poolQueue(keys));
+  const b1=el('button','btn','▶ Учить'); b1.onclick=()=>playStart(poolQueue(keys,8),{title:x.title,kind:'learn',more:()=>poolQueue(keys,8)});
   const b2=el('button','btn ghost','笔 Прописи'); b2.onclick=()=>go('draw',{chars,title:x.title,back:{name:'extra',L,id}});
   act.appendChild(b1); act.appendChild(b2); v.appendChild(act);
   const b3=el('button','btn mini ghost','🔊 Прослушать'); b3.style.marginTop='10px'; b3.onclick=()=>playAll(x.words); v.appendChild(b3);
@@ -42,18 +43,19 @@ function viewLesson(s){
   const v=el('div','view');
   const back=el('button','back','‹ Уроки'); back.onclick=()=>go('lessons'); v.appendChild(back);
   v.appendChild(el('h2','title','Урок '+L+' · '+esc(lessonTitle(L))));
-  v.appendChild(el('p','note',`<span class="han" style="font-size:15px;color:var(--paper)">${esc(LESSONS[L].sub||'')}</span> · ${ws.length} слов, в работе ${learnedCount(ws.map(w=>w.key))} · новых иероглифов ${LESSON_CHARS[L].length} · новых ключей ${LESSON_RADS[L].length}`));
+  v.appendChild(el('p','note',`<span class="han" style="font-size:15px;color:var(--paper)">${esc(LESSONS[L].sub||'')}</span> · ${ws.length} слов, в работе ${learnedCount(ws.map(w=>w.key))} · новых иероглифов ${LESSON_CHARS[L].length} · новых ключей в разборе ${LESSON_KEYS[L].length}`));
   const act=el('div','actionrow');
-  const b1=el('button','btn','▶ Учить урок'); b1.onclick=()=>startSession(poolQueue(keys),mode,'Урок '+L,()=>poolQueue(keys));
+  const b1=el('button','btn','▶ Учить урок'); b1.onclick=()=>playStart(poolQueue(keys,8),{title:'Урок '+L,kind:'learn',more:()=>poolQueue(keys,8)});
   const real=TESTS.find(t=>t.lesson===L);
   const b2=el('button','btn ghost','考 '+(real?'Проверочная':'К проверочной')); b2.onclick=()=>go('test',{home:1,tid:(real||autoTest(L)).id});
   act.appendChild(b1); act.appendChild(b2); v.appendChild(act);
   const act2=el('div','actionrow');
+  const b0=el('button','btn mini ghost','🃏 Карточки'); b0.onclick=()=>startSession(poolQueue(keys),mode,'Урок '+L,()=>poolQueue(keys)); act2.appendChild(b0);
   const b3=el('button','btn mini ghost','笔 Прописи урока'); b3.onclick=()=>go('draw',{chars:LESSON_CHARS[L].slice(),title:'Урок '+L+' · новые иероглифы',back:{name:'lesson',L}});
   const b4=el('button','btn mini ghost','🔊 Прослушать'); b4.onclick=()=>playAll(ws);
   act2.appendChild(b3); act2.appendChild(b4); v.appendChild(act2);
   lessonExtras(L).forEach(x=>{ const xb=el('button','item rowbtn','＋ '+esc(x.title)+' · '+x.words.length+' слов ›'); xb.style.marginTop='10px'; xb.onclick=()=>go('extra',{L,id:x.id}); v.appendChild(xb); });
-  const mc=el('div','chips'); mc.appendChild(el('span','note','Режим:')).style.margin='6px 4px 0 0';
+  const mc=el('div','chips'); mc.appendChild(el('span','note','Режим карточек:')).style.margin='6px 4px 0 0';
   MODES.forEach(([id,t])=>{ const c=el('button','chip'+(mode===id?' on':''),t); c.onclick=()=>go('lesson',{L,tab,mode:id}); mc.appendChild(c); });
   v.appendChild(mc);
   const tabs=el('div','tabs');
@@ -68,8 +70,9 @@ function viewLesson(s){
     v.appendChild(g);
     v.appendChild(el('div','',`<div class="bks">${LESSON_CHARS[L].map(c=>charBox(c)).join('')}</div>`));
   }else{
-    if(!LESSON_RADS[L].length) v.appendChild(el('p','note','Новых ключей в этом уроке нет — все уже встречались раньше.'));
-    v.appendChild(radGrid(LESSON_RADS[L]));
+    v.appendChild(el('p','note','Ключи из разбора иероглифов урока, которые встречаются впервые.'));
+    if(!LESSON_KEYS[L].length) v.appendChild(el('p','note','Новых ключей в этом уроке нет — все уже встречались раньше.'));
+    v.appendChild(radGrid(LESSON_KEYS[L]));
   }
   s.appendChild(v);
 }
@@ -87,7 +90,7 @@ function playAll(ws){ let i=0; clearTimeout(playT); (function nxt(){ if(i>=ws.le
 function viewCard(s){
   const w=WORDS[State.route.id], from=State.route.from;
   const v=el('div','view');
-  const back=el('button','back','‹ Назад'); back.onclick=()=>from?go(from.name,from):go('dict'); v.appendChild(back);
+  const back=el('button','back','‹ Назад'); back.onclick=()=>from?go(from.name,from):go(State.tab||'dict'); v.appendChild(back);
   const card=el('div','card');
   card.innerHTML=`<div class="bighz han">${esc(w.d||w.s)}</div>
     <div class="bigpy">${pinyinHTML(w.p)}</div>
@@ -103,6 +106,8 @@ function viewCard(s){
   if(w.alt&&w.alt.length) meta.appendChild(mr('Ещё чтение',w.alt.map(a=>pinyinHTML(a.p)+(a.en&&a.en[0]?' — '+esc(a.en[0]):'')).join('<br>')));
   if(w.ra) meta.appendChild(mr('Перевод','<span style="color:var(--muted)">из открытого словаря — можно перепроверить</span>'));
   if(meta.children.length) v.appendChild(meta);
+  v.appendChild(el('p','eyebrow','Разбор на ключи'));
+  v.appendChild(el('div','',hanOf(w.s).filter(c=>keysOf(c).length).map(c=>decompHTML(c,{w})).join('')));
   v.appendChild(el('p','eyebrow','Разбор по иероглифам'));
   v.appendChild(el('div','',breakdown(w.s)));
   s.appendChild(v);
