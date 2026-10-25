@@ -101,6 +101,6 @@ function viewSettings(s){
   const learned=Object.keys(State.cards).filter(k=>validKey(k)&&!isNew(k));
   v.appendChild(el('p','note',`В работе: ${learned.filter(k=>BYK[k]).length} слов, ${learned.filter(isRad).length} ключей, ${learned.filter(isKC).length} разборов · всего повторений: ${Object.values(State.meta.rev||{}).reduce((a,b)=>a+b,0)}.<br>
     Хранилище: ${Store.persistent()?'на устройстве (IndexedDB) — прогресс у каждого браузера свой':'в памяти (превью)'}.<br>
-    Данные: Кондрашевский, том 1 (30 уроков, ${COURSE.length} слов, из них ${COURSE.filter(k=>EXTRA_OF[k]).length} — из списка группы и презентации) + HSK 1–6. Тип иероглифа и ключ — по «Пособию по иероглифике» А.Ф. Кондрашевского (ч. 1; 456 из 587 знаков уроков), строение и остальные знаки — 汉典 («Шовэнь») и Make Me a Hanzi; ключ Канси — Unihan, названия ключей — таблица ДВФУ. Озвучка — записи носителей из открытой базы audio-cmn (H. Lopez; слоги — Chen Wang, слова — Yue Tan; CC BY-SA). Интервалы — FSRS-5.`));
+    Данные: Кондрашевский, том 1 (30 уроков, ${COURSE.length} слов, из них ${COURSE.filter(k=>EXTRA_OF[k]).length} — из списка группы и презентации) + HSK 1–6. Тип иероглифа и ключ — по «Пособию по иероглифике» А.Ф. Кондрашевского (ч. 1; 456 из 587 знаков уроков), строение и остальные знаки — 汉典 («Шовэнь») и Make Me a Hanzi; ключ Канси — Unihan, названия ключей — таблица ДВФУ. Озвучка — записи носителей из открытой базы audio-cmn (H. Lopez; слоги — Chen Wang, слова — Yue Tan; CC BY-SA). Интервалы — FSRS-5.<br>Версия приложения: <b>${APP_VER}</b>.`));
   s.appendChild(v);
 }

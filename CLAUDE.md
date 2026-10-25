@@ -87,8 +87,13 @@ python3 tools/build.py      # src → index.html (+ node --check)
 npm test                    # 7 наборов: data, smoke, srs, migrate, cycle, accept, v19 — все ✅
 npm run serve               # http://localhost:8080
 ```
-После ЛЮБОГО изменения сайта — поднять `const CACHE='hanzi-vNN'` в `service-worker.js` (сейчас **v19**),
-иначе установленное приложение не обновится.
+После ЛЮБОГО изменения сайта — поднять `const CACHE='hanzi-vNN'` в `service-worker.js` и `APP_VER` в `99-start.js`
+(сейчас **v20**; версия видна внизу Настроек), иначе установленное приложение не обновится.
+Service worker (v20): страница — сначала из сети (условный запрос `no-cache`, без сети или >4 с — из кэша), остальное — из
+кэша; установка качает файлы мимо HTTP-кэша (`cache:'reload'`); при замене старой версии (`hanzi-*` кэши) SW сам
+перезагружает открытые окна (не внутри waitUntil — иначе взаимная блокировка); страница проверяет обновления при запуске,
+при возвращении в приложение и раз в 30 мин. До v20 обновление включалось только со второго полного запуска
+(жалоба «ничего не поменялось»). Проверено имитацией v19→v20→v21 и без сети (Playwright, свой сервер).
 В облачной песочнице есть Chromium: Playwright (глобальный, `NODE_PATH=$(npm root -g)`) с
 `executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'`; cdnjs заблокирован — hanzi-writer
 подставлять через `page.route` из npm-пакета hanzi-writer@3.7.3.
