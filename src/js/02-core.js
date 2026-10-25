@@ -68,7 +68,7 @@ const DEF_SEM={on:true,endDate:'2027-01-31',targetLesson:30,groupLesson:18,
   holidays:{from:'2026-12-31',to:'2027-01-10',capacity:0.3},awayDays:[],newWordsUntil:'2026-12-28',
   keysPerDay:10,exams:[],minutesNormal:40};
 const clone=o=>JSON.parse(JSON.stringify(o));
-const DEF_SETTINGS={semester:clone(DEF_SEM),newPerDay:12,voiceName:null,xpGoal:50,sound:true,vibrate:false,
+const DEF_SETTINGS={semester:clone(DEF_SEM),newPerDay:12,voiceName:null,voiceRec:true,xpGoal:50,sound:true,vibrate:false,
   mockMin:40,scale:[90,75,60]};
 const State = {
   cards:{},                                  // ключ → карточка FSRS: слово (w.key), ключ 'r:N', разбор знака 'key:<иероглиф>'
@@ -102,7 +102,7 @@ async function loadState(){
   }
   const s=await Store.get('settings');
   if(s){
-    ['newPerDay','voiceName','xpGoal','sound','vibrate','mockMin','scale'].forEach(k=>{ if(s[k]!==undefined) State.settings[k]=s[k]; });
+    ['newPerDay','voiceName','voiceRec','xpGoal','sound','vibrate','mockMin','scale'].forEach(k=>{ if(s[k]!==undefined) State.settings[k]=s[k]; });
     // миграция: старые «урок группы» (lesson) и цель (goal) → семестр; прогресс не трогаем
     const sem=s.semester||{}; if(!s.semester&&s.lesson) sem.groupLesson=s.lesson;
     State.settings.semester=mergeSemester(sem);
@@ -176,34 +176,75 @@ function pinyinHTML(py){
 function wordSylls(w){ const s=w.p.trim().split(/\s+/); return s.length===hanOf(w.s).length ? s : null; }
 
 /*==================================================================
-  ОЗВУЧКА: аудио-пак ./audio (если выложен) или голос устройства
+  ОЗВУЧКА: живые записи носителей (audio/, tools/make_audio_pack.py) — чёткие тоны;
+  предложения и слова без записи — голос устройства (Web Speech, zh-CN).
+  Слово с записью → audio/w/<коды>.mp3 (диктор Yue Tan); односложное слово и знак → слог audio/s/<слог><тон>.mp3
+  (диктор Chen Wang; тон всегда как в учебнике); нет записи слова → по слогам; «медленно» — по слогам с паузами.
 ==================================================================*/
+const AUD=(()=>{ const a=/*__AUDIO__*/; return {s:new Set(a.s||[]),w:new Set(a.w||[])}; })();
 const Speech=(()=>{
-  let voices=[], chosen=null, prefName=null, pack=null;
+  let voices=[], chosen=null, prefName=null, pack=null, seq=0, cur=null;
   fetch('./audio/manifest.json').then(r=>r.ok?r.json():null).then(j=>{ if(Array.isArray(j)&&j.length) pack=new Set(j); }).catch(()=>{});
-  function refresh(){ voices=speechSynthesis.getVoices()||[];
+  function refresh(){ voices=('speechSynthesis' in window)?(speechSynthesis.getVoices()||[]):[];
     const zh=voices.filter(v=>/zh|cmn|chinese/i.test(v.lang+v.name));
     chosen=(prefName&&zh.find(v=>v.name===prefName))||zh.find(v=>/CN|Hans|普通话|Ting|Mandarin/i.test(v.name+v.lang))||zh[0]||null; }
   if('speechSynthesis' in window){ refresh(); speechSynthesis.onvoiceschanged=refresh; }
+  const rec=()=>State.settings.voiceRec!==false;
   function tts(text,rate){
     if(!('speechSynthesis' in window)){ toast('Озвучка недоступна в этом браузере'); return; }
     if(!chosen) refresh();
     try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text.replace(/——/g,'，'));
       u.lang='zh-CN'; if(chosen) u.voice=chosen; u.rate=rate||.82; speechSynthesis.speak(u); }catch(e){}
   }
-  function say(text,rate){
-    if(!text) return;
+  // слог пиньиня → имя файла «xie4» (ü → v); лёгкий тон и эрхуа — нет записи
+  function sylName(p){ const t=syllTone(p), b=toneless(p); if(t>4||!b) return null; return b==='er'||!/r$/.test(b)?b+t:null; }
+  function sylls(text,py){
+    const hz=hanOf(text); if(!hz.length) return null;
+    if(!py){ const w=BYS[text]; py=w?w.p:(hz.length===1?charPy(hz[0]).split(' / ')[0]:''); }
+    const ps=(py||'').trim().split(/\s+/).filter(Boolean); if(ps.length!==hz.length) return null;
+    const ns=ps.map(sylName); return ns.every(n=>n&&AUD.s.has(n))?ns:null;
+  }
+  const url=n=>'./audio/'+n+'.mp3';
+  const wid=t=>[...t].map(c=>c.codePointAt(0).toString(16)).join('-');
+  function playList(list,gap,rate,onFail){
+    const my=++seq; let i=0;
+    (function next(){
+      if(my!==seq||i>=list.length) return;
+      try{ const a=new Audio(url(list[i++])); cur=a; if(rate&&rate<1) a.playbackRate=Math.max(.7,rate);
+        a.onended=()=>{ if(my===seq) setTimeout(next,gap); };
+        a.play().catch(()=>{ if(my===seq&&i===1&&onFail) onFail(); });
+      }catch(e){ if(onFail) onFail(); }
+    })();
+  }
+  // источник для текста: {list:[файлы], gap} или null (тогда синтез)
+  function plan(text,py,slow){
+    if(!rec()) return null;
+    const ss=sylls(text,py), hz=hanOf(text), t=text.trim();
+    if(slow&&ss) return {list:ss.map(n=>'s/'+n),gap:420};
+    if(hz.length>1&&AUD.w.has(t)&&[...t].every(isHan)) return {list:['w/'+wid(t)],gap:0};
+    if(hz.length===1&&!ss&&AUD.w.has(t)) return {list:['w/'+wid(t)],gap:0};          // лёгкий тон: 吗 呢 了…
+    if(ss&&hz.length<=4) return {list:ss.map(n=>'s/'+n),gap:hz.length>1?60:0};
+    return null;
+  }
+  function say(text,rate,py){
+    if(!text) return; stop();
+    const slow=rate&&rate<.7, p=plan(text,py,slow);
+    if(p){ playList(p.list,p.gap,slow&&p.list.length===1?.75:1,()=>tts(text,rate)); return; }
     if(pack&&pack.has(text+'.mp3')){
-      try{ const a=new Audio('./audio/'+encodeURIComponent(text+'.mp3')); if(rate&&rate<.7) a.playbackRate=.7; a.play().catch(()=>tts(text,rate)); return; }catch(e){}
+      try{ const a=new Audio('./audio/'+encodeURIComponent(text+'.mp3')); cur=a; if(rate&&rate<.7) a.playbackRate=.7; a.play().catch(()=>tts(text,rate)); return; }catch(e){}
     }
     tts(text,rate);
   }
-  function stop(){ try{ speechSynthesis.cancel(); }catch(e){} }
-  return {say,stop,has:()=>('speechSynthesis' in window)||!!pack,voice:()=>chosen,
+  function stop(){ seq++; try{ if(cur){ cur.pause(); cur=null; } }catch(e){} try{ speechSynthesis.cancel(); }catch(e){} }
+  // все файлы записей — чтобы приложение озвучивало без интернета (их кэширует service worker)
+  function files(){ return [...AUD.s].map(n=>url('s/'+n)).concat([...AUD.w].map(t=>url('w/'+wid(t)))); }
+  return {say,stop,plan,files,sylls,has:()=>('speechSynthesis' in window)||!!pack||rec(),voice:()=>chosen,
     setPref(n){ prefName=n||null; if('speechSynthesis' in window) refresh(); },
     list(){ if('speechSynthesis' in window) refresh(); return voices.filter(v=>/zh|cmn|chinese/i.test(v.lang+v.name)); },
-    source(){ return pack?('аудио-пак ('+pack.size+' файлов)'):(chosen?chosen.name:'системный синтез'); }};
+    source(){ return rec()?'живые голоса: слова и слоги — запись носителей, предложения — '+(chosen?chosen.name:'голос устройства'):pack?('аудио-пак ('+pack.size+' файлов)'):(chosen?chosen.name:'системный синтез'); }};
 })();
+const sayW=(w,rate)=>Speech.say(w.s,rate,w.p);
+const sayA=w=>`data-say="${esc(w.s)}" data-py="${esc(w.p)}"`;
 
 /*==================================================================
   УТИЛИТЫ

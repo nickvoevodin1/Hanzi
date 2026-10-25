@@ -15,8 +15,8 @@ function viewKeys(s){
   const all=KEY_ORDER.slice(), la=learnedCount(all.map(n=>'r:'+n)), kq=todayKeysQuota();
   v.appendChild(el('p','note',`Колода «Ключи» — все 214, в порядке изучения: сначала частые в иероглифах уроков 1–30 (口, 一, 人, 木…), в конце — ${all.filter(n=>!KEY_CHARS[n]).length}, которых в уроках нет. Введено ${la} из 214; сегодня новых — ${kq.quota} (осталось ${kq.left}). Номера — по Канси; названия — таблица ДВФУ.`));
   const act=el('div','actionrow');
-  const b1=el('button','btn','▶ Учить ключи'); const q1=()=>poolQueue(all.map(n=>'r:'+n),8); b1.onclick=()=>playStart(q1(),{title:'Ключи',kind:'learn',more:q1});
-  const b2=el('button','btn ghost','🃏 Карточки'); const q2=()=>poolQueue(all.map(n=>'r:'+n)); b2.onclick=()=>startSession(q2(),'auto','Все ключи',q2);
+  const b1=el('button','btn',IC('play',16)+' Учить ключи'); const q1=()=>poolQueue(all.map(n=>'r:'+n),8); b1.onclick=()=>playStart(q1(),{title:'Ключи',kind:'learn',more:q1});
+  const b2=el('button','btn ghost',IC('cards',18)+' Карточки'); const q2=()=>poolQueue(all.map(n=>'r:'+n)); b2.onclick=()=>startSession(q2(),'auto','Все ключи',q2);
   act.appendChild(b1); act.appendChild(b2); v.appendChild(act);
   const tabs=el('div','tabs');
   [['order','По порядку изучения'],['all','По номеру']].forEach(([id,t])=>{ const b=el('button','tab'+(scope===id?' on':''),t); b.onclick=()=>go('keys',{scope:id}); tabs.appendChild(b); });
@@ -49,7 +49,7 @@ function viewRadical(s){
     ${r[4].length>1?`<div class="han" style="font-size:22px;color:var(--paper-dim);margin-bottom:6px">${esc([...r[4]].slice(1).join('  '))}</div>`:''}
     <div class="bigpy">${pinyinHTML(r[2])}</div><div class="bigtr">${esc(r[3])}</div>
     <div class="tagrow"><span class="pill">Ключ №${n}</span><span class="pill">${r[1]} ${plural(r[1],'черта','черты','черт')}</span>${KEY_L[n]?`<span class="pill k">урок ${KEY_L[n]}</span>`:''}<span class="pill">№${KEY_ORDER.indexOf(n)+1} в порядке изучения</span>${st!=='new'?'<span class="pill ok">в работе</span>':''}</div>
-    <div class="cardbtns"><button class="iconbtn primary" data-say="${esc(r[4][0])}" aria-label="Слушать">🔊</button><button class="iconbtn" data-draw="${esc(r[4][0])}" aria-label="Прописи">笔</button></div>`;
+    <div class="cardbtns"><button class="iconbtn primary" data-say="${esc(r[4][0])}" aria-label="Слушать">${SPK(26)}</button><button class="iconbtn" data-draw="${esc(r[4][0])}" aria-label="Прописи">${IC('brush',26)}</button></div>`;
   v.appendChild(card);
   const p2=RAD2[n];
   if(p2){ const ex=p2.e&&HZ.c[p2.e]?`<span class="hz han" data-c="${p2.e}" style="font-size:20px">${esc(p2.e)}</span>`:`<span class="han" style="font-size:20px">${esc(p2.e||'')}</span>`;

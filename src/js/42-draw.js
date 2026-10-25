@@ -12,7 +12,7 @@ function viewDraw(s){
   const c=el('div','card'); c.style.padding='14px';
   const rr=RIDX[ch]!=null?RADS[RIDX[ch]]:null;
   c.innerHTML=`<div class="bigpy">${h?pinyinHTML(h[7])+' · '+esc(h[6]||''):rr?pinyinHTML(rr[2])+' · ключ «'+esc(rr[3])+'»':''}</div><div id="writer"></div><div class="drawhint" id="drawHint"></div>
-    <div class="cardbtns"><button class="iconbtn" id="dAnim" aria-label="Анимация">▶</button><button class="iconbtn" id="dRedo" aria-label="Заново">↻</button><button class="iconbtn" id="dOut" aria-label="Контур">◐</button><button class="iconbtn primary" data-say="${ch}" aria-label="Слушать">🔊</button></div>`;
+    <div class="cardbtns"><button class="iconbtn" id="dAnim" aria-label="Анимация">${IC('play',22)}</button><button class="iconbtn" id="dRedo" aria-label="Заново">${IC('undo',22)}</button><button class="iconbtn" id="dOut" aria-label="Контур">${IC('eye',22)}</button><button class="iconbtn primary" data-say="${ch}" aria-label="Слушать">${SPK(26)}</button></div>`;
   v.appendChild(c);
   if(chars.length>1){
     const nav=el('div','actionrow');
@@ -24,7 +24,7 @@ function viewDraw(s){
     v.appendChild(g);
   }
   v.appendChild(el('div','',breakdown(ch)));
-  if(typeof HanziWriter==='undefined') v.appendChild(el('p','note','⚠︎ Библиотека прописей не загрузилась (нужна сеть при первом запуске).'));
+  if(typeof HanziWriter==='undefined') v.appendChild(el('p','note',IC('warn',16)+' Библиотека прописей не загрузилась (нужна сеть при первом запуске).'));
   s.appendChild(v);
   let outline=true;
   const mount=()=>{

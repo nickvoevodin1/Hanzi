@@ -43,23 +43,24 @@ function viewPractice(s){
   v.appendChild(el('h2','title','Повторение'));
   const due=dueKeys().length, tough=Object.keys(State.cards).filter(k=>validKey(k)&&(cardOf(k).lapses||0)>=3);
   const rows=[
-    ['🔁','Повторить всё к сроку',due?due+' к сроку — слова, ключи, разборы':'к сроку ничего нет',()=>startPart('rev')],
-    ['🧩','Разбор на ключи','как на контрольной: тип, ключ, фонетик, пиньинь, перевод',()=>go('decomp')],
-    ['🔤','Разбери иероглиф (игра)','части, тип, фонетик, ключ',()=>{ const q=decompQueue(8); if(!q.length){ toast('Сначала выучи несколько слов'); return; } playStart(q,{title:'Разбери иероглиф',kind:'chars'}); }],
-    ['💬','Перевод предложений','RU→中 и 中→RU, целиком или отрывками',()=>go('sent')],
-    ['➕','Свои предложения',State.sets.length?State.sets.length+' '+plural(State.sets.length,'набор','набора','наборов'):'добавить от преподавателя',()=>go('addsent')],
-    ['📝','Пробная контрольная','5 слов + 10 предложений, таймер',()=>go('mock')],
+    ['cycleC','Повторить всё к сроку',due?due+' к сроку — слова, ключи, разборы':'к сроку ничего нет',()=>startPart('rev')],
+    ['split','Разбор на ключи','как на контрольной: тип, ключ, фонетик, пиньинь, перевод',()=>go('decomp')],
+    ['target','Разбери иероглиф (игра)','части, тип, фонетик, ключ',()=>{ const q=decompQueue(8); if(!q.length){ toast('Сначала выучи несколько слов'); return; } playStart(q,{title:'Разбери иероглиф',kind:'chars'}); }],
+    ['headphones','Тоны на слух','записи носителей: какой тон? слабые слоги — чаще',()=>startToneDrill()],
+    ['chat','Перевод предложений','RU→中 и 中→RU, целиком или отрывками',()=>go('sent')],
+    ['plus','Свои предложения',State.sets.length?State.sets.length+' '+plural(State.sets.length,'набор','набора','наборов'):'добавить от преподавателя',()=>go('addsent')],
+    ['pencil','Пробная контрольная','5 слов + 10 предложений, таймер',()=>go('mock')],
     ['考','Проверочные','полный цикл подготовки по урокам',()=>go('tests')],
-    ['🃏','Карточки (классика)','самопроверка, 4 кнопки оценки',()=>go('cards')],
+    ['cards','Карточки (классика)','самопроверка, 4 кнопки оценки',()=>go('cards')],
     ['部','Ключи-справочник','214 ключей: формы, названия, примеры',()=>go('keys')],
     ['笔','Прописи','новые иероглифы урока группы',()=>go('draw',{chars:LESSON_CHARS[groupL()].slice(),title:'Урок '+groupL(),back:{name:'practice'}})],
   ];
-  if(tough.length) rows.push(['⚠️','Трудные слова',tough.length+' — 3 и больше ошибок',()=>playStart(shuffle(tough).slice(0,12),{title:'Трудные',kind:'review'})]);
-  if(State.meta.reports.length) rows.push(['🐞','Ошибки разбора',State.meta.reports.length+' — отправь список Claude',()=>go('reports')]);
+  if(tough.length) rows.push(['warn','Трудные слова',tough.length+' — 3 и больше ошибок',()=>playStart(shuffle(tough).slice(0,12),{title:'Трудные',kind:'review'})]);
+  if(State.meta.reports.length) rows.push(['flag','Ошибки разбора',State.meta.reports.length+' — отправь список Claude',()=>go('reports')]);
   if(SESSION&&!SESSION.finished){ const rem=SESSION.queue.length+SESSION.again.length+(SESSION.current!=null?1:0);
-    if(rem>0) rows.unshift(['▶','Продолжить карточки',rem+' осталось · '+(SESSION.title||''),()=>go('session')]); }
+    if(rem>0) rows.unshift(['play','Продолжить карточки',rem+' осталось · '+(SESSION.title||''),()=>go('session')]); }
   const list=el('div','rowlist');
-  rows.forEach(([ic,t,sub,fn])=>{ const r=el('button','row',`<span class="ri ${/^[一-鿿]/.test(ic)?'han':''}">${ic}</span><div class="tt"><b>${esc(t)}</b><small>${esc(sub)}</small></div><span class="chev">›</span>`); r.onclick=fn; list.appendChild(r); });
+  rows.forEach(([ic,t,sub,fn])=>{ const r=el('button','row',`<span class="ri">${icn(ic,32)}</span><div class="tt"><b>${esc(t)}</b><small>${esc(sub)}</small></div><span class="chev">${IC('chev',16)}</span>`); r.onclick=fn; list.appendChild(r); });
   v.appendChild(list); s.appendChild(v);
 }
 
@@ -107,7 +108,7 @@ function viewDecomp(s){
   }
   const k=DEC.q[0], ch=kcChar(k);
   const w=Object.keys(State.cards).map(x=>BYK[x]).filter(x=>x&&x.s.includes(ch)).sort((a,b)=>a.s.length-b.s.length)[0];
-  const top=el('div','playtop'); const xb=el('button','x','✕'); xb.onclick=()=>{ DEC=null; render(); }; top.appendChild(xb);
+  const top=el('div','playtop'); const xb=el('button','x',IC('x',22)); xb.onclick=()=>{ DEC=null; render(); }; top.appendChild(xb);
   top.appendChild(el('div','bar',`<i style="width:${DEC.n/(DEC.n+DEC.q.length)*100}%"></i>`)); top.appendChild(el('div','combo',DEC.q.length+''));
   v.appendChild(top);
   head(v,'Разбери иероглиф');
@@ -117,7 +118,7 @@ function viewDecomp(s){
   const sb=el('button','btn showbtn','Показать ответ'); sb.dataset.key='space'; v.appendChild(sb);
   sb.onclick=()=>{
     sb.remove(); v.appendChild(el('div','',decompHTML(ch,{w})));
-    const rep=el('button','linkbtn','🐞 Сообщить об ошибке разбора'); rep.onclick=()=>reportDecomp(ch); v.appendChild(rep);
+    const rep=el('button','linkbtn',IC('flag',16)+' Сообщить об ошибке разбора'); rep.onclick=()=>reportDecomp(ch); v.appendChild(rep);
     const bar=el('div','gradebar four');
     [['Не помню',1,'g1'],['Трудно',2,'g2'],['Помню',3,'g3'],['Легко',4,'g4']].forEach(([t,g,cl],i)=>{ const b=el('button','grade '+cl,`${t}<small>${i+1}</small>`); b.dataset.ch=String(i+1); b.onclick=()=>decGrade(k,g); bar.appendChild(b); });
     v.appendChild(bar);
@@ -172,20 +173,20 @@ function viewSent(s){
     const pool=sentPool(), ls=lessonFilter(O.lm,O.pick);
     v.appendChild(el('p','note',`Уроки: ${esc(ls.join(', '))||'—'} · предложений: ${pool.length} · сегодня переведено ${D().sent} из 5. RU→中 — пиши на бумаге, потом сверь.`));
     if(SENT&&SENT.done) v.appendChild(el('div','info',`Готово: ${SENT.n}, с первого раза верно ${SENT.ok}.`));
-    const b=el('button','btn','▶ 10 предложений'); b.dataset.key='space'; b.disabled=!pool.length; b.style.marginTop='12px';
+    const b=el('button','btn',IC('play',16)+' 10 предложений'); b.dataset.key='space'; b.disabled=!pool.length; b.style.marginTop='12px';
     b.onclick=()=>{ const err=State.meta.sentErr; const q=shuffle(pool).sort((a,b)=>(err[b.id]||0)-(err[a.id]||0)).slice(0,10);
       SENT={q:q.map((x,i)=>({x,dir:O.dir==='mix'?(i%2?'zh':'ru'):O.dir})),n:0,ok:0,first:{}}; render(); };
     v.appendChild(b);
     s.appendChild(v); return;
   }
   const it=SENT.q[0], x=it.x, ru=it.dir==='ru';
-  const top=el('div','playtop'); const xb=el('button','x','✕'); xb.onclick=()=>{ SENT=null; render(); }; top.appendChild(xb);
+  const top=el('div','playtop'); const xb=el('button','x',IC('x',22)); xb.onclick=()=>{ SENT=null; render(); }; top.appendChild(xb);
   top.appendChild(el('div','bar',`<i style="width:${SENT.n/(SENT.n+SENT.q.length)*100}%"></i>`)); top.appendChild(el('div','combo',SENT.q.length+''));
   v.appendChild(top);
   head(v,ru?'Переведи на китайский':'Переведи на русский');
   const c=el('div','qcard'); c.style.minHeight='20vh';
   c.innerHTML=(ru?`<div class="qbig" style="font-size:20px">${esc(x.ru)}</div><div class="qsub">иероглифами на бумаге</div>`
-    :`<div class="han zhl" style="font-size:26px">${wrapHz(x.zh)}</div><div class="actionrow" style="justify-content:center"><button class="say" data-say="${esc(x.zh)}">🔊</button><button class="say" data-say="${esc(x.zh)}" data-rate=".5">🐢</button></div>`)
+    :`<div class="han zhl" style="font-size:26px">${wrapHz(x.zh)}</div><div class="actionrow" style="justify-content:center"><button class="say" data-say="${esc(x.zh)}" aria-label="Слушать">${SPK(20)}</button><button class="say" data-say="${esc(x.zh)}" data-rate=".5">${SLOW()}</button></div>`)
     +`<div class="lbl" style="margin-top:10px">${esc(x.src||'')}${x.L?' · урок '+x.L:''}</div>`;
   v.appendChild(c);
   if(!ru) setTimeout(()=>Speech.say(x.zh),150);
@@ -313,7 +314,7 @@ function viewMock(s){
     [['Неверно',0,'g1'],['Частично',.5,'half'],['Верно',1,'g3']].forEach(([lab,val,cl],j)=>{ const b=el('button','grade '+cl,`${lab}<small>${j+1}</small>`); b.dataset.ch=String(j+1);
       b.onclick=()=>{ MOCK.marks[MOCK.i]=val; MOCK.i++; if(MOCK.i>=tasks.length) mockFinish(); render(); }; bar.appendChild(b); });
     v.appendChild(bar);
-    if(MOCK.i>0){ const u=el('button','linkbtn','↩ Назад к предыдущему'); u.onclick=()=>{ MOCK.i--; render(); }; v.appendChild(u); }
+    if(MOCK.i>0){ const u=el('button','linkbtn',IC('back',14)+' Назад к предыдущему'); u.onclick=()=>{ MOCK.i--; render(); }; v.appendChild(u); }
     s.appendChild(v); return;
   }
   // итог

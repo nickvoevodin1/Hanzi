@@ -5,7 +5,7 @@
   Корона юнита (0–5) — из памяти: ≥80% элементов со стабильностью FSRS ≥1/3/7/21/60 дней.
 ==================================================================*/
 let UNITS=null;
-const UCOL=['#f25a1e','#1cb0f6','#ce82ff','#ff9600','#2b70c9','#ff4b4b','#00a8a8','#e5a000'];
+const UCOL=[['#ff9600','#e07b00'],['#1cb0f6','#1899d6'],['#ce82ff','#a568cc'],['#2b70c9','#1f5aa8'],['#ff4b4b','#ea2b2b']];   // цвет юнита и его «кромка»
 const CROWN_S=[1,3,7,21,60];
 const ZZ=[0,46,70,46,0,-46,-70,-46];
 const PATH_OPEN={};                   // ручное раскрытие/сворачивание юнитов и групп
@@ -16,18 +16,19 @@ function buildUnits(){
   KEY_UNITS.forEach((ns,i)=>{
     const id='K'+(i+1), items=ns.map(n=>'r:'+n), a=Math.round(i*214/11);
     const nodes=chunk(items,7).map((c,j)=>({id:id+'n'+(j+1),type:'learn',icon:'部',title:'Ключи '+(a+j*7+1)+'–'+(a+j*7+c.length),items:c}));
-    nodes.push({id:id+'rev',type:'review',alt:1,icon:'🔁',title:'Повторение ключей',items});
-    U.push({id,sec:'keys',title:'Ключи · юнит '+(i+1),sub:ns.slice(0,8).map(n=>RADS[n-1][4][0]).join(' '),items,nodes,color:UCOL[(i+2)%UCOL.length]});
+    nodes.push({id:id+'rev',type:'review',alt:1,icon:'cycle',title:'Повторение ключей',items});
+    U.push({id,sec:'keys',title:'Ключи · юнит '+(i+1),sub:ns.slice(0,8).map(n=>RADS[n-1][4][0]).join(' '),items,nodes,color:UCOL[(i+1)%UCOL.length]});
   });
   for(let L=1;L<=NL;L++){
     const id='L'+L, words=lessonKeys(L), main=words.filter(k=>!EXTRA_OF[k]), ext=words.filter(k=>EXTRA_OF[k]), nodes=[];
-    chunk(main,7).forEach((c,j,a)=>nodes.push({id:id+'w'+(j+1),type:'learn',icon:'✨',title:'Новые слова'+(a.length>1?' '+(j+1):''),items:c}));
-    chunk(ext,7).forEach((c,j,a)=>nodes.push({id:id+'x'+(j+1),type:'learn',icon:'➕',title:EXTRA_OF[c[0]].split(' · ')[0]+(a.length>1?' '+(j+1):''),items:c}));
-    chunk(LESSON_CHARS[L].map(c=>'key:'+c).filter(validKey),8).forEach((c,j,a)=>nodes.push({id:id+'c'+(j+1),type:'chars',alt:1,icon:'🧩',title:'Иероглифы: ключи'+(a.length>1?' '+(j+1):''),items:c}));
-    if(lessonSents(L).length) nodes.push({id:id+'s',type:'sent',alt:1,icon:'💬',title:'Предложения',L});
-    nodes.push({id:id+'rev',type:'review',alt:1,icon:'🔁',title:'Повторение урока',items:words});
+    chunk(main,7).forEach((c,j,a)=>nodes.push({id:id+'w'+(j+1),type:'learn',icon:'star',title:'Новые слова'+(a.length>1?' '+(j+1):''),items:c}));
+    chunk(ext,7).forEach((c,j,a)=>nodes.push({id:id+'x'+(j+1),type:'learn',icon:'star',title:EXTRA_OF[c[0]].split(' · ')[0]+(a.length>1?' '+(j+1):''),items:c}));
+    chunk(LESSON_CHARS[L].map(c=>'key:'+c).filter(validKey),8).forEach((c,j,a)=>nodes.push({id:id+'c'+(j+1),type:'chars',alt:1,icon:'splitW',title:'Иероглифы: разбор'+(a.length>1?' '+(j+1):''),items:c}));
+    nodes.push({id:id+'h',type:'hear',alt:1,icon:'headphones',title:'Тоны на слух',L});
+    if(lessonSents(L).length) nodes.push({id:id+'s',type:'sent',alt:1,icon:'chatW',title:'Предложения',L});
+    nodes.push({id:id+'rev',type:'review',alt:1,icon:'cycle',title:'Повторение урока',items:words});
     TESTS.filter(t=>t.lesson===L).forEach(t=>nodes.push({id:id+'t'+t.id,type:'test',alt:1,icon:'考',title:t.kind[0].toUpperCase()+t.kind.slice(1),tid:t.id}));
-    nodes.push({id:id+'m',type:'mini',alt:1,icon:'📝',title:'Мини-контрольная',L});
+    nodes.push({id:id+'m',type:'mini',alt:1,icon:'pencilW',title:'Мини-контрольная',L});
     U.push({id,sec:'lessons',L,title:'Урок '+L,sub:lessonTitle(L),items:words,nodes,color:UCOL[(L-1)%UCOL.length]});
   }
   return U;
@@ -59,7 +60,7 @@ function nodeState(u,n,open){
 }
 function examBosses(L){
   return (SEM().exams||[]).filter(e=>e.date&&(e.lessons||[]).length&&Math.max(...e.lessons)===L)
-    .map(e=>({id:'E'+e.date+':'+e.lessons.join(','),type:'exam',icon:'👑',title:e.title||'Контрольная',lessons:e.lessons,date:e.date}));
+    .map(e=>({id:'E'+e.date+':'+e.lessons.join(','),type:'exam',icon:'trophy',title:e.title||'Контрольная',lessons:e.lessons,date:e.date}));
 }
 
 // — запуск узла
@@ -78,6 +79,9 @@ function openNode(u,n,st){
     playStart(got.filter(isDue).concat(got.filter(k=>!isDue(k)).sort((a,b)=>stab(a)-stab(b))).slice(0,12),{...base,kind:'review'});
   }else if(n.type==='sent'){
     playStart(shuffle(lessonSents(n.L)).slice(0,8).map(x=>'sent:'+x.id),{...base,kind:'sent'});
+  }else if(n.type==='hear'){
+    const ws=lessonKeys(n.L).map(k=>BYK[k]).filter(Boolean);
+    startToneDrill(ws,{...base,kind:'tones'});
   }else if(n.type==='test') go('test',{home:1,tid:n.tid});
   else if(n.type==='mini') go('mock',{setup:{lessons:[n.L],node:n.id,title:'Мини-контрольная · урок '+n.L}});
   else if(n.type==='exam') go('mock',{setup:{lessons:n.lessons,node:n.id,title:n.title}});
@@ -135,11 +139,11 @@ function viewPath(s){
   else if(!d.met&&new Date().getHours()>=19&&streakLen()>0) mst='sad';
   else if(d.met) { mst='happy'; say='День засчитан — серия '+streakLen()+' '+plural(streakLen(),'день','дня','дней')+'!'; }
   v.insertAdjacentHTML('beforeend',mascotRow(mst,say));
-  if(PLAY&&!PLAY.end&&playLeft()){ const cb=el('button','btn blue','▶ Продолжить урок ('+playLeft()+')'); cb.style.marginBottom='12px'; cb.onclick=()=>go('play'); v.appendChild(cb); }
+  if(PLAY&&!PLAY.end&&playLeft()){ const cb=el('button','btn blue',IC('play',16)+' Продолжить урок ('+playLeft()+')'); cb.style.marginBottom='12px'; cb.onclick=()=>go('play'); v.appendChild(cb); }
   if(SEM().on) v.appendChild(semCard());
   v.appendChild(planCard(plan));
   const wk=weekInfo();
-  if(wk.chest==='ready'){ const ch=el('div','hero chest',`<span class="cico">🎁</span><div style="flex:1"><b style="color:var(--title)">Недельный сундук!</b><div class="note" style="margin:2px 0 0">Цель недели ${wk.goal} XP выполнена</div></div>`);
+  if(wk.chest==='ready'){ const ch=el('div','hero chest',`<span class="cico">${IC('chest',52)}</span><div style="flex:1"><b style="color:var(--title)">Недельный сундук!</b><div class="note" style="margin:2px 0 0">Цель недели ${wk.goal} XP выполнена</div></div>`);
     ch.style.marginTop='12px'; const ob=el('button','btn gold mini','Открыть'); ob.onclick=()=>{ ch.classList.add('open'); const g=openChest(); Sfx.done(); confetti(); setTimeout(()=>{ toast('+'+g+' XP'); render(); },900); }; ch.appendChild(ob); v.appendChild(ch); }
   v.appendChild(pathEl());
   s.appendChild(v);
@@ -156,14 +160,14 @@ function semCard(){
     <div class="row2"><div class="cell"><b>${dl!=null&&dl>=0?dl:'—'}</b><span>${dl!=null&&dl>=0?plural(dl,'день','дня','дней')+' до конца':'дата не задана'}</span></div>
       <div class="cell"><b>${wq.quota}</b><span>новых сегодня</span></div>
       <div class="cell"><b>${pace?pace.toString().replace('.',','):'—'}</b><span>нужный темп, слов/день</span></div></div>
-    ${ne?`<div class="info">📝 ${esc(ne.title||'Контрольная')} — ${fmtDate(ne.date)} (${whenText(daysTo(ne.date))})${(ne.lessons||[]).length?', уроки '+esc(ne.lessons.join(', ')):''}</div>`:`<div class="note">Даты контрольных не заданы — добавь их в Настройках → Семестр.</div>`}
+    ${ne?`<div class="info">${IC('calendar',18)} ${esc(ne.title||'Контрольная')} — ${fmtDate(ne.date)} (${whenText(daysTo(ne.date))})${(ne.lessons||[]).length?', уроки '+esc(ne.lessons.join(', ')):''}</div>`:`<div class="note">Даты контрольных не заданы — добавь их в Настройках → Семестр.</div>`}
     ${fc.date?`<div class="note">В текущем темпе (${(Math.round(fc.avg*10)/10).toString().replace('.',',')} слов/день за 2 недели) новые слова закончатся к ${fmtDate(fc.date)}${fc.date>sem.newWordsUntil?' — <b style="color:var(--bad-text)">позже плана ('+fmtDate(sem.newWordsUntil)+')</b>':''}.</div>`:''}
-    ${wq.late?`<div class="warn">⚠︎ Срок новых слов (${fmtDate(sem.newWordsUntil)}) прошёл, осталось ${wq.remaining}. Квота считается до ${fmtDate(sem.endDate)}.</div>`:''}
+    ${wq.late?`<div class="warn">${IC('warn',18)} Срок новых слов (${fmtDate(sem.newWordsUntil)}) прошёл, осталось ${wq.remaining}. Квота считается до ${fmtDate(sem.endDate)}.</div>`:''}
     ${bg?`<div class="warn">Отстаёшь от группы на ${bg} ${plural(bg,'слово','слова','слов')} (уроки 1–${groupL()}) — они идут первыми.</div>`:''}`;
   const row=el('div','actionrow');
   const t=dayType();
   if(t==='away'){ const b=el('button','btn ghost mini','Я сегодня дома'); b.onclick=()=>{ sem.awayDays=sem.awayDays.filter(x=>x!==todayStr()); save('settings'); render(); }; row.appendChild(b); }
-  else{ const b=el('button','btn ghost mini','🚆 Я сегодня уезжаю'); b.onclick=()=>{ sem.awayDays=uniq(sem.awayDays.concat([todayStr()])).sort(); save('settings'); toast('Отмечено: сегодня поездка — только повторения'); render(); }; row.appendChild(b); }
+  else{ const b=el('button','btn ghost mini',IC('suitcase',18)+' Я сегодня уезжаю'); b.onclick=()=>{ sem.awayDays=uniq(sem.awayDays.concat([todayStr()])).sort(); save('settings'); toast('Отмечено: сегодня поездка — только повторения'); render(); }; row.appendChild(b); }
   if((t==='away'||t==='holiday')&&semRemaining()){ const m=el('button','btn ghost mini',D().more?'✓ Учу больше':'Учить больше'); m.onclick=()=>{ D().more=D().more?0:1; save('meta'); render(); }; row.appendChild(m); }
   c.appendChild(row);
   return c;
@@ -172,23 +176,24 @@ function planCard(plan){
   const c=el('div','hero'); c.style.marginTop='12px';
   const dq=dailyQueue().length;
   c.innerHTML=`<div class="kind">Сегодня · ${esc(DAY_NAMES[plan.type])}${plan.minutes?' · ≈'+plan.minutes+' мин':' · план выполнен'}${SEM().on&&plan.type==='normal'?' (норма ~'+SEM().minutesNormal+')':''}</div>`;
-  const b=el('button','btn',dq?'▶ Урок дня':'✓ Урок дня пройден'); b.style.margin='10px 0 6px'; b.disabled=!dq; b.dataset.key='space'; b.onclick=startDaily;
+  const b=el('button','btn',dq?IC('play',16)+' Урок дня':IC('check',16)+' Урок дня пройден'); b.style.margin='10px 0 6px'; b.disabled=!dq; b.dataset.key='space'; b.onclick=startDaily;
   c.appendChild(b);
   plan.items.forEach(it=>{
     const pct=it.need?Math.min(100,it.cur/it.need*100):(it.done?100:0);
-    const q=el('button','quest'+(it.done?' done':''),`<span class="qi">${it.done?'✅':it.icon}</span><span class="qm"><b>${esc(it.title)}${it.quest?' <span class="star">★</span>':''}</b><small>${esc(it.sub)}${!it.done&&it.min?' · ≈'+it.min+' мин':''}</small>
-      <span class="bar${it.done?' ok':''}"><i style="width:${pct}%"></i></span></span><span class="chev">›</span>`);
+    const q=el('button','quest'+(it.done?' done':''),`<span class="qi">${it.done?IC('checkOk',28):icn(it.icon,28)}</span><span class="qm"><b>${esc(it.title)}${it.quest?' <span class="star">'+IC('star',14)+'</span>':''}</b><small>${esc(it.sub)}${!it.done&&it.min?' · ≈'+it.min+' мин':''}</small>
+      <span class="bar${it.done?' ok':''}"><i style="width:${pct}%"></i></span></span><span class="chev">${IC('chev',16)}</span>`);
     q.onclick=()=>startPart(it.id); c.appendChild(q);
   });
   const d=D();
-  c.appendChild(el('div','note',d.q?`★ Все задания дня выполнены — бонус +${XP.quests} XP получен`:`★ Выполни 3 задания дня — бонус +${XP.quests} XP`));
+  c.appendChild(el('div','note',d.q?`${IC('chest',18)} Все задания дня выполнены — бонус +${XP.quests} XP получен`:`<span class="star">${IC('star',14)}</span> — задания дня: выполни все 3 — бонус +${XP.quests} XP`));
   return c;
 }
 function unitBanner(u,i,list,open){
   const cr=unitCrowns(u), done=learnNodes(u).filter(nodeDone).length, all=learnNodes(u).length, ck=u.nodes.filter(nodeCracked).length;
   const b=el('button','ubanner'+(open?'':' locked'),`<div class="ut"><small>${esc(u.title)}</small><b class="${u.sec==='keys'?'han':''}">${esc(u.sub)}</b>
-    ${u.sec==='lessons'&&u.L===groupL()?'<span class="tag">📍 Здесь группа</span>':''}${ck?`<span class="tag">🔧 повторить: ${ck}</span>`:''}</div><div class="crowns">${open?'👑 '+cr:'🔒'}<div style="font-size:11px;opacity:.9">${done}/${all}</div></div>`);
-  if(open) b.style.background=u.color;
+    ${u.sec==='lessons'&&u.L===groupL()?`<span class="tag">${IC('pin',14)} Здесь группа</span>`:''}${ck?`<span class="tag">${IC('dumbbell',14)} повторить: ${ck}</span>`:''}</div>
+    <div class="crowns">${open?IC('crown',24)+'<b>'+cr+'</b>':IC('lock',22)}<small>${done}/${all}</small></div>`);
+  if(open){ b.style.background=u.color[0]; b.style.boxShadow='0 4px 0 '+u.color[1]; }
   b.onclick=()=>{ PATH_OPEN[u.id]=!unitExpanded(u,i,list); render(); };
   return b;
 }
@@ -196,18 +201,55 @@ function unitExpanded(u,i,list){
   if(u.id in PATH_OPEN) return PATH_OPEN[u.id];
   return unitOpen(u,i,list)&&!unitComplete(u);
 }
+let PATH_POP=null;                    // открытая подсказка узла (как у Duolingo: тап → карточка с «Начать»)
+function nodeGlyph(n,st){
+  if(st==='done'&&n.type==='learn') return IC('check',34);
+  if(n.icon==='部'||n.icon==='考') return `<span class="han">${n.icon}</span>`;
+  return IC(n.icon||'star',n.type==='exam'?40:34);
+}
+function nodeDesc(n,st){
+  const it=n.items||[], nw=it.filter(isNew).length, due=it.filter(isDue).length;
+  if(st==='locked') return n.type==='learn'?'Сначала пройди предыдущие узлы — или «Перепрыгни» тестом':'Откроется после первых слов юнита';
+  if(n.type==='learn') return nw?`${nw} ${n.items[0]&&isRad(n.items[0])?plural(nw,'новый ключ','новых ключа','новых ключей'):plural(nw,'новое слово','новых слова','новых слов')}${due?' · повторить '+due:''}`:due?'Пора повторить: '+due:'Пройдено — можно потренироваться';
+  if(n.type==='chars') return `Разбор ${it.length} ${plural(it.length,'иероглифа','иероглифов','иероглифов')}: тип, ключ, фонетик`;
+  if(n.type==='sent') return 'Перевод предложений урока RU→中 и 中→RU';
+  if(n.type==='hear') return 'Слоги и слова урока в записи носителей: угадай тон';
+  if(n.type==='review') return due?'К сроку: '+due:'Повторение всего юнита';
+  if(n.type==='test') return 'Проверочная: полный цикл подготовки';
+  if(n.type==='mini') return 'Мини-контрольная: слова и предложения урока';
+  if(n.type==='exam') return 'Контрольная '+fmtDate(n.date)+' · уроки '+n.lessons.join(', ');
+  return '';
+}
+function nodePop(u,n,st,x){
+  const p=el('div','npop'+(st==='locked'?' locked':''));
+  if(st!=='locked'&&u){ p.style.background=u.color[0]; p.style.setProperty('--lip',u.color[1]); p.style.setProperty('--npbg',u.color[0]); }
+  p.style.setProperty('--ax',x+'px');
+  p.innerHTML=`<b>${esc(n.title)}</b><small>${esc(nodeDesc(n,st))}</small>`;
+  if(st!=='locked'){ const b=el('button','popbtn',st==='done'?'Повторить':'Начать'+(n.type==='learn'||n.type==='chars'||n.type==='sent'||n.type==='review'?' · +'+XP.task+' XP':''));
+    b.style.color=u?u.color[0]:'var(--primary-text)'; b.dataset.key='space'; b.onclick=()=>{ PATH_POP=null; openNode(u,n,st); }; p.appendChild(b); }
+  return p;
+}
 function renderNodes(host,u,open,curId){
   const p=el('div','path');
   u.nodes.forEach((n,j)=>{
-    const st=nodeState(u,n,open), isCur=n.id===curId;
-    const w=el('div','pnode '+st+(n.alt?' alt':'')+(isCur?' cur':''));
-    w.style.transform=`translateX(${ZZ[j%ZZ.length]}px)`;
-    if(isCur) w.appendChild(el('div','startbubble','Начать'));
-    const b=el('button','disc '+(n.icon==='部'||n.icon==='考'?'han':''),st==='locked'?'🔒':st==='done'&&n.type==='learn'?'✓':n.icon);
+    const st=nodeState(u,n,open), isCur=n.id===curId, x=ZZ[j%ZZ.length];
+    const w=el('div','pnode '+st+(isCur?' cur':''));
+    w.style.transform=`translateX(${x}px)`;
+    if(st!=='locked'){ w.style.setProperty('--nc',u.color[0]); w.style.setProperty('--nl',u.color[1]); }
+    if(isCur){
+      const it=n.items||[], f=it.length?it.filter(k=>!isNew(k)).length/it.length:0, R=44, C=2*Math.PI*R;
+      w.insertAdjacentHTML('beforeend',`<svg class="nring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="${R}" fill="none" stroke="#e5e5e5" stroke-width="9"/>
+        <circle cx="50" cy="50" r="${R}" fill="none" stroke="${u.color[0]}" stroke-width="9" stroke-linecap="round" stroke-dasharray="${(C*f).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 50 50)"/></svg>`);
+      w.appendChild(el('div','startbubble','Начать'));
+      w.insertAdjacentHTML('beforeend',`<div class="pmascot ${x>=0?'l':'r'}">${mascot('calm',86)}</div>`);
+    }
+    const b=el('button','disc',nodeGlyph(n,st));
     b.setAttribute('aria-label',n.title+(st==='locked'?' (закрыт)':st==='cracked'?' (пора повторить)':st==='done'?' (пройден)':''));
-    b.onclick=()=>openNode(u,n,st); w.appendChild(b);
-    w.appendChild(el('div','lab',esc(n.title)+(st==='cracked'?' · <span style="color:var(--gold-lip)">повторить</span>':'')));
+    b.onclick=e=>{ e.stopPropagation(); PATH_POP=PATH_POP===n.id?null:n.id; render(); };
+    w.appendChild(b);
+    if(st==='cracked') w.insertAdjacentHTML('beforeend',`<span class="nbadge" title="пора повторить">${IC('dumbbell',22)}</span>`);
     p.appendChild(w);
+    if(PATH_POP===n.id) p.appendChild(nodePop(u,n,st,x));
   });
   host.appendChild(p);
 }
@@ -215,7 +257,7 @@ function renderBoss(host,L){
   examBosses(L).forEach(n=>{
     const done=!!State.meta.nodes[n.id], d=daysTo(n.date);
     const w=el('div','pnode boss'+(done?' done':''));
-    const b=el('button','disc',done?'✓':'👑'); b.setAttribute('aria-label',n.title); b.onclick=()=>openNode(null,n,'avail'); w.appendChild(b);
+    const b=el('button','disc',done?IC('check',38):IC('trophy',46)); b.setAttribute('aria-label',n.title); b.onclick=()=>openNode(null,n,'avail'); w.appendChild(b);
     w.appendChild(el('div','lab',`${esc(n.title)} · ${fmtDate(n.date)}${d!=null&&d>=0?' ('+whenText(d)+')':''}<br>уроки ${esc(n.lessons.join(', '))}`));
     const p=el('div','path'); p.appendChild(w); host.appendChild(p);
   });
@@ -236,8 +278,7 @@ function pathEl(){
       if(x.kind!=='show'&&run.length>=3&&!PATH_OPEN[gid]){
         const lbl=sec==='lessons'?'Уроки '+x.u.L+'–'+info[m].u.L:'Ключи · юниты '+(x.i+1)+'–'+(info[m].i+1);
         const crowns=run.reduce((a,y)=>a+unitCrowns(y.u),0), ck=run.reduce((a,y)=>a+y.u.nodes.filter(nodeCracked).length,0);
-        const g=el('button','ubanner'+(x.kind==='locked'?' locked':''),`<div class="ut"><small>${x.kind==='done'?'пройдено':'закрыто'} · нажми, чтобы раскрыть</small><b>${esc(lbl)}</b>${ck?`<span class="tag">🔧 повторить: ${ck}</span>`:''}</div><div class="crowns">${x.kind==='done'?'👑 '+crowns:'🔒'}</div>`);
-        if(x.kind==='done') g.style.background='var(--gold)';
+        const g=el('button','ubanner group'+(x.kind==='locked'?' locked':' donegrp'),`<div class="ut"><small>${x.kind==='done'?'Пройдено':'Закрыто'} · раскрыть</small><b>${esc(lbl)}</b>${ck?`<span class="tag">${IC('dumbbell',14)} повторить: ${ck}</span>`:''}</div><div class="crowns">${x.kind==='done'?IC('crown',24)+'<b>'+crowns+'</b>':IC('lock',22)}</div>`);
         g.onclick=()=>{ PATH_OPEN[gid]=true; render(); };
         wrap.appendChild(g);
         if(sec==='lessons') run.forEach(y=>renderBoss(wrap,y.u.L));
@@ -245,7 +286,7 @@ function pathEl(){
         wrap.appendChild(unitBanner(y.u,y.i,list,y.open));
         if(unitExpanded(y.u,y.i,list)){
           renderNodes(wrap,y.u,y.open,curId);
-          if(!y.open){ const j=el('button','ujump','⤼ Перепрыгнуть сюда · тест, нужно 80%'); j.onclick=()=>jumpStart(y.u); wrap.appendChild(j); }
+          if(!y.open){ const j=el('button','ujump','Перепрыгнуть сюда · тест, нужно 80%'); j.onclick=()=>jumpStart(y.u); wrap.appendChild(j); }
         }
         if(sec==='lessons') renderBoss(wrap,y.u.L);
       });

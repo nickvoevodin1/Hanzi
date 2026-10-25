@@ -97,15 +97,15 @@ function dayPlan(){
   const d=D(), type=dayType(), due=dueKeys().length;
   const wq=todayWordsQuota(), kq=todayKeysQuota();
   const items=[];
-  items.push({id:'rev',icon:'🔁',title:'Повторения',sub:due?'к сроку: '+due:(d.rv?'все сделаны':'на сегодня нет'),cur:d.rv,need:d.rv+due,done:due===0,min:planMinutes('rev',due)});
-  if(wq.quota>0||(!wq.rest&&wq.remaining>0)) items.push({id:'new',icon:'✨',title:'Новые слова — '+wq.quota,sub:wq.left?'осталось '+wq.left:'квота выполнена',cur:d.new,need:wq.quota,done:wq.left===0,min:planMinutes('new',wq.left)});
+  items.push({id:'rev',icon:'cycleC',title:'Повторения',sub:due?'к сроку: '+due:(d.rv?'все сделаны':'на сегодня нет'),cur:d.rv,need:d.rv+due,done:due===0,min:planMinutes('rev',due)});
+  if(wq.quota>0||(!wq.rest&&wq.remaining>0)) items.push({id:'new',icon:'sparkleC',title:'Новые слова — '+wq.quota,sub:wq.left?'осталось '+wq.left:'квота выполнена',cur:d.new,need:wq.quota,done:wq.left===0,min:planMinutes('new',wq.left)});
   if(keysDeckLeft()&&kq.quota>0) items.push({id:'keys',icon:'部',title:'Новые ключи — '+kq.quota,sub:'осталось ввести '+keysDeckLeft()+' из 214',cur:d.keys,need:kq.quota,done:kq.left===0,min:planMinutes('keys',kq.left)});
   if(type==='focus'){
-    items.push({id:'mock',icon:'📝',title:'Пробная контрольная',sub:'фокус-неделя: '+(focusExam(todayStr(),SEM()).e.title||'контрольная'),cur:d.mock,need:1,done:d.mock>=1,min:planMinutes('mock')});
+    items.push({id:'mock',icon:'pencil',title:'Пробная контрольная',sub:'фокус-неделя: '+(focusExam(todayStr(),SEM()).e.title||'контрольная'),cur:d.mock,need:1,done:d.mock>=1,min:planMinutes('mock')});
   }else if(type!=='away'){
-    items.push({id:'dec',icon:'🧩',title:'Разбор на ключи — 5',sub:'иероглифы выученных слов',cur:d.dec,need:5,done:d.dec>=5,min:planMinutes('dec',Math.max(0,5-d.dec))});
-    items.push({id:'sent',icon:'💬',title:'Перевод предложений — 5',sub:'RU→中 и 中→RU',cur:d.sent,need:5,done:d.sent>=5,min:planMinutes('sent',Math.max(0,5-d.sent))});
-    if(type==='holiday'||type==='consol') items.push({id:'mock',icon:'📝',title:'Пробная контрольная',sub:'раз в 2–3 дня',cur:d.mock,need:1,done:d.mock>=1,opt:1,min:planMinutes('mock')});
+    items.push({id:'dec',icon:'split',title:'Разбор на ключи — 5',sub:'иероглифы выученных слов',cur:d.dec,need:5,done:d.dec>=5,min:planMinutes('dec',Math.max(0,5-d.dec))});
+    items.push({id:'sent',icon:'chat',title:'Перевод предложений — 5',sub:'RU→中 и 中→RU',cur:d.sent,need:5,done:d.sent>=5,min:planMinutes('sent',Math.max(0,5-d.sent))});
+    if(type==='holiday'||type==='consol') items.push({id:'mock',icon:'pencil',title:'Пробная контрольная',sub:'раз в 2–3 дня',cur:d.mock,need:1,done:d.mock>=1,opt:1,min:planMinutes('mock')});
   }
   // 3 ежедневных задания: повторения, новые слова (или предложения), ключи (или разбор / пробная в фокус-неделю)
   const pick=ids=>ids.map(id=>items.find(x=>x.id===id)).find(Boolean);

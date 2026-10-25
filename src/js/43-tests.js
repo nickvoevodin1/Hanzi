@@ -84,7 +84,7 @@ function tHome(v,t){
   }
   v.appendChild(head);
   const row=el('div','actionrow');
-  const cb=el('button','btn mini ghost','📄 Шпаргалка: все предложения'); cb.onclick=()=>tGo('cheat'); row.appendChild(cb);
+  const cb=el('button','btn mini ghost',IC('clipboard',18)+' Шпаргалка: все предложения'); cb.onclick=()=>tGo('cheat'); row.appendChild(cb);
   v.appendChild(row);
   const list=el('div','list'); list.style.marginTop='12px';
   t.blocks.forEach((b,bi)=>{
@@ -111,7 +111,7 @@ function tCheat(v,t){
 function unitItem(u,src){
   return el('div','item',`${src?`<div class="kind" style="color:var(--muted)">${esc(src)}</div>`:''}<div class="han zhl">${wrapHz(u.zh)}</div><div class="pyl">${esc(u.py)}</div><div class="rul">${esc(u.ru)}</div>
     ${u.parts?`<div class="parts">${u.parts.map(p=>`<div><span class="han" style="font-size:17px">${wrapHz(p[1])}</span> <span class="pyl">${esc(p[2])}</span><br><span class="rul">${esc(p[0])}</span></div>`).join('')}</div>`:''}
-    <div class="actionrow" style="margin-top:8px"><button class="say" data-say="${esc(u.zh)}">▶ Слушать</button><button class="say" data-say="${esc(u.zh)}" data-rate=".5">🐢 Медленно</button></div>`);
+    <div class="actionrow" style="margin-top:8px"><button class="say" data-say="${esc(u.zh)}">${SPK()} Слушать</button><button class="say" data-say="${esc(u.zh)}" data-rate=".5">${SLOW()} Медленно</button></div>`);
 }
 function frags(b){ const o=[]; b.u.forEach(u=>{ (u.parts||[]).forEach(p=>o.push({ru:p[0],zh:p[1],py:p[2],src:b.title+', отрывок'})); o.push({ru:u.ru,zh:u.zh,py:u.py,src:b.title}); }); return o; }
 function wholes(b){ return b.u.map(u=>({ru:u.ru,zh:u.zh,py:u.py,src:b.title})); }
@@ -177,19 +177,19 @@ function tRun(v,t){
   const c=el('div','qcard'); c.style.minHeight='30vh'; v.appendChild(c);
   const stage=el('div',''); v.appendChild(stage);
   const ans=html=>{ c.appendChild(el('div','reveal',html)); };
-  const audio=f=>{ c.innerHTML+=`<div class="actionrow" style="justify-content:center;width:100%"><button class="btn mini" data-say="${esc(f.zh)}">▶ Слушать</button><button class="btn mini ghost" data-say="${esc(f.zh)}" data-rate=".5">🐢 Медленно</button></div>
+  const audio=f=>{ c.innerHTML+=`<div class="actionrow" style="justify-content:center;width:100%"><button class="btn mini" data-say="${esc(f.zh)}">${SPK()} Слушать</button><button class="btn mini ghost" data-say="${esc(f.zh)}" data-rate=".5">${SLOW()} Медленно</button></div>
     <button class="linkbtn" id="tTxt">Нет звука? Показать иероглифы</button><div class="han zhl" id="tTx" hidden>${esc(f.zh)}</div>`;
     $('#tTxt').onclick=()=>{ $('#tTx').hidden=!$('#tTx').hidden; };
     if(T.played!==x){ T.played=x; setTimeout(()=>Speech.say(f.zh),150); } };
   if(x.k==='flash'){
     const w=x.w;
     if(x.dir==='zh'){ c.innerHTML=`<div class="qprompt">Что значит?</div><div class="qhz han" style="font-size:68px">${esc(w[0])}</div>`;
-      showBtn(stage,()=>{ ans(`<div class="py">${pinyinHTML(w[1])}</div><div class="tr">${esc(w[2])}</div>`); Speech.say(hanOf(w[0]).join('')); tSelf(stage,t); stage.appendChild(el('div','',breakdown(w[0]))); }); }
+      showBtn(stage,()=>{ ans(`<div class="py">${pinyinHTML(w[1])}</div><div class="tr">${esc(w[2])}</div>`); Speech.say(hanOf(w[0]).join(''),undefined,w[1]); tSelf(stage,t); stage.appendChild(el('div','',breakdown(w[0]))); }); }
     else{ c.innerHTML=`<div class="qprompt">Напиши иероглифами</div><div class="qbig">${esc(w[2])}</div><div class="qsub">на бумаге, потом сверь</div>`;
-      showBtn(stage,()=>{ ans(`<div class="qhz han" style="font-size:60px">${wrapHz(w[0])}</div><div class="py">${pinyinHTML(w[1])}</div>`); Speech.say(hanOf(w[0]).join('')); tSelf(stage,t); stage.appendChild(el('div','',breakdown(w[0]))); }); }
+      showBtn(stage,()=>{ ans(`<div class="qhz han" style="font-size:60px">${wrapHz(w[0])}</div><div class="py">${pinyinHTML(w[1])}</div>`); Speech.say(hanOf(w[0]).join(''),undefined,w[1]); tSelf(stage,t); stage.appendChild(el('div','',breakdown(w[0]))); }); }
   }else if(x.k==='tone'){
     const u=x.u, sy=u.sy.split(' ');
-    c.innerHTML=`<div class="qprompt">Тоны</div><div class="rul" style="font-size:16px">${esc(u.ru)}</div><button class="say" data-say="${esc(u.zh)}" style="margin-top:8px">▶ Послушать</button>`;
+    c.innerHTML=`<div class="qprompt">Тоны</div><div class="rul" style="font-size:16px">${esc(u.ru)}</div><button class="say" data-say="${esc(u.zh)}" style="margin-top:8px">${SPK()} Послушать</button>`;
     toneTask(c,hanOf(u.zh),sy,ok=>{ ans(`<div class="pyl" style="font-size:17px">${esc(u.py)}</div><div class="verdict ${ok?'ok':'bad'}">${ok?'Все тоны верны':'Есть ошибки — пример вернётся'}</div>`); tNextBtn(stage,t,ok); });
   }else if(x.k==='tiles'){
     const tl=x.x, pool=shuffle(tl.seg.map((s,i)=>({s,i}))), pick=[];

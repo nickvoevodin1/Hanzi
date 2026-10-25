@@ -29,10 +29,10 @@ function viewExtra(s){
   v.appendChild(el('h2','title',esc(x.title)));
   v.appendChild(el('p','note',`${x.words.length} слов, в работе ${learnedCount(keys)} · в «Уроке дня» идут после урока ${L}.<br>${esc(x.note||'')}<br>Источник: ${esc(x.src||'')}`));
   const act=el('div','actionrow');
-  const b1=el('button','btn','▶ Учить'); b1.onclick=()=>playStart(poolQueue(keys,8),{title:x.title,kind:'learn',more:()=>poolQueue(keys,8)});
+  const b1=el('button','btn',IC('play',16)+' Учить'); b1.onclick=()=>playStart(poolQueue(keys,8),{title:x.title,kind:'learn',more:()=>poolQueue(keys,8)});
   const b2=el('button','btn ghost','笔 Прописи'); b2.onclick=()=>go('draw',{chars,title:x.title,back:{name:'extra',L,id}});
   act.appendChild(b1); act.appendChild(b2); v.appendChild(act);
-  const b3=el('button','btn mini ghost','🔊 Прослушать'); b3.style.marginTop='10px'; b3.onclick=()=>playAll(x.words); v.appendChild(b3);
+  const b3=el('button','btn mini ghost',SPK()+' Прослушать'); b3.style.marginTop='10px'; b3.onclick=()=>playAll(x.words); v.appendChild(b3);
   const list=el('div','rowlist'); list.style.marginTop='12px'; x.words.forEach(w=>list.appendChild(witem(w))); v.appendChild(list);
   s.appendChild(v);
 }
@@ -45,14 +45,14 @@ function viewLesson(s){
   v.appendChild(el('h2','title','Урок '+L+' · '+esc(lessonTitle(L))));
   v.appendChild(el('p','note',`<span class="han" style="font-size:15px;color:var(--paper)">${esc(LESSONS[L].sub||'')}</span> · ${ws.length} слов, в работе ${learnedCount(ws.map(w=>w.key))} · новых иероглифов ${LESSON_CHARS[L].length} · новых ключей в разборе ${LESSON_KEYS[L].length}`));
   const act=el('div','actionrow');
-  const b1=el('button','btn','▶ Учить урок'); b1.onclick=()=>playStart(poolQueue(keys,8),{title:'Урок '+L,kind:'learn',more:()=>poolQueue(keys,8)});
+  const b1=el('button','btn',IC('play',16)+' Учить урок'); b1.onclick=()=>playStart(poolQueue(keys,8),{title:'Урок '+L,kind:'learn',more:()=>poolQueue(keys,8)});
   const real=TESTS.find(t=>t.lesson===L);
   const b2=el('button','btn ghost','考 '+(real?'Проверочная':'К проверочной')); b2.onclick=()=>go('test',{home:1,tid:(real||autoTest(L)).id});
   act.appendChild(b1); act.appendChild(b2); v.appendChild(act);
   const act2=el('div','actionrow');
-  const b0=el('button','btn mini ghost','🃏 Карточки'); b0.onclick=()=>startSession(poolQueue(keys),mode,'Урок '+L,()=>poolQueue(keys)); act2.appendChild(b0);
+  const b0=el('button','btn mini ghost',IC('cards',18)+' Карточки'); b0.onclick=()=>startSession(poolQueue(keys),mode,'Урок '+L,()=>poolQueue(keys)); act2.appendChild(b0);
   const b3=el('button','btn mini ghost','笔 Прописи урока'); b3.onclick=()=>go('draw',{chars:LESSON_CHARS[L].slice(),title:'Урок '+L+' · новые иероглифы',back:{name:'lesson',L}});
-  const b4=el('button','btn mini ghost','🔊 Прослушать'); b4.onclick=()=>playAll(ws);
+  const b4=el('button','btn mini ghost',SPK()+' Прослушать'); b4.onclick=()=>playAll(ws);
   act2.appendChild(b3); act2.appendChild(b4); v.appendChild(act2);
   lessonExtras(L).forEach(x=>{ const xb=el('button','item rowbtn','＋ '+esc(x.title)+' · '+x.words.length+' слов ›'); xb.style.marginTop='10px'; xb.onclick=()=>go('extra',{L,id:x.id}); v.appendChild(xb); });
   const mc=el('div','chips'); mc.appendChild(el('span','note','Режим карточек:')).style.margin='6px 4px 0 0';
@@ -82,7 +82,7 @@ function witem(w){
   it.onclick=()=>go('card',{id:w.id,from:State.route}); return it;
 }
 let playT;
-function playAll(ws){ let i=0; clearTimeout(playT); (function nxt(){ if(i>=ws.length) return; Speech.say(ws[i].s); i++; playT=setTimeout(nxt,1200); })(); toast('Проигрываю '+ws.length+' слов'); }
+function playAll(ws){ let i=0; clearTimeout(playT); (function nxt(){ if(i>=ws.length) return; sayW(ws[i]); i++; playT=setTimeout(nxt,1200); })(); toast('Проигрываю '+ws.length+' слов'); }
 
 /*==================================================================
   КАРТОЧКА СЛОВА
@@ -98,10 +98,10 @@ function viewCard(s){
     <div class="bigtr">${esc(w.ru||meaning(w))}</div>
     ${w.ru&&w.en?`<div class="bigen">${esc(w.en.slice(0,2).join('; '))}</div>`:''}
     <div class="tagrow">${(w.k||[]).map(n=>`<span class="pill k">Урок ${n}</span>`).join('')}${w.hsk?`<span class="pill hsk">HSK ${w.hsk}</span>`:''}${EXTRA_OF[w.key]?`<span class="pill k">${esc(EXTRA_OF[w.key])}</span>`:''}${statusOf(w.key)!=='new'?'<span class="pill ok">в работе</span>':''}</div>
-    <div class="cardbtns"><button class="iconbtn primary" id="cSay" aria-label="Слушать">🔊</button><button class="iconbtn" id="cDraw" aria-label="Прописи">笔</button></div>`;
+    <div class="cardbtns"><button class="iconbtn primary" id="cSay" aria-label="Слушать">${SPK(26)}</button><button class="iconbtn" id="cDraw" aria-label="Прописи">${IC('brush',26)}</button></div>`;
   v.appendChild(card);
   const meta=el('div','meta');
-  if(w.ex) meta.appendChild(mr('Пример',`<div class="han zhl">${wrapHz(w.ex[0])}</div><div>${pinyinHTML(w.ex[1])}</div><div style="color:var(--paper-dim)">${esc(w.ex[2])}</div><button class="say" data-say="${esc(w.ex[0])}" style="margin-top:6px">🔊 Пример</button>`));
+  if(w.ex) meta.appendChild(mr('Пример',`<div class="han zhl">${wrapHz(w.ex[0])}</div><div>${pinyinHTML(w.ex[1])}</div><div style="color:var(--paper-dim)">${esc(w.ex[2])}</div><button class="say" data-say="${esc(w.ex[0])}" style="margin-top:6px">${SPK()} Пример</button>`));
   if(w.cl&&w.cl.length) meta.appendChild(mr('Счётное слово',w.cl.map(c=>'<span class="han">'+wrapHz(c)+'</span>').join('  ')));
   if(w.alt&&w.alt.length) meta.appendChild(mr('Ещё чтение',w.alt.map(a=>pinyinHTML(a.p)+(a.en&&a.en[0]?' — '+esc(a.en[0]):'')).join('<br>')));
   if(w.ra) meta.appendChild(mr('Перевод','<span style="color:var(--muted)">из открытого словаря — можно перепроверить</span>'));
@@ -111,7 +111,7 @@ function viewCard(s){
   v.appendChild(el('p','eyebrow','Разбор по иероглифам'));
   v.appendChild(el('div','',breakdown(w.s)));
   s.appendChild(v);
-  $('#cSay').onclick=()=>Speech.say(w.s);
+  $('#cSay').onclick=()=>sayW(w);
   $('#cDraw').onclick=()=>go('draw',{chars:hanOf(w.s),title:w.d||w.s,back:{name:'card',id:w.id,from}});
 }
 function mr(k,v){ return el('div','mr',`<div class="k">${k}</div><div class="v">${v}</div>`); }

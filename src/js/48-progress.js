@@ -7,9 +7,9 @@ function viewProgress(s){
   v.appendChild(el('h2','title','Прогресс'));
   const totalXP=Object.values(State.meta.daily).reduce((a,r)=>a+(r.xp||0),0);
   v.appendChild(el('div','stats4',`
-    <div class="stbox"><span class="si">🔥</span><div><b>${streakLen()}</b><small>${plural(streakLen(),'день','дня','дней')} подряд</small></div></div>
-    <div class="stbox"><span class="si">⚡</span><div><b>${totalXP}</b><small>XP всего · сегодня ${d.xp}</small></div></div>
-    <div class="stbox"><span class="si">📚</span><div><b>${st.learned}</b><small>слов из ${st.total}</small></div></div>
+    <div class="stbox"><span class="si">${IC('flame',30)}</span><div><b>${streakLen()}</b><small>${plural(streakLen(),'день','дня','дней')} подряд</small></div></div>
+    <div class="stbox"><span class="si">${IC('bolt',30)}</span><div><b>${totalXP}</b><small>XP всего · сегодня ${d.xp}</small></div></div>
+    <div class="stbox"><span class="si">${IC('books',30)}</span><div><b>${st.learned}</b><small>слов из ${st.total}</small></div></div>
     <div class="stbox"><span class="si han">部</span><div><b>${kl}</b><small>ключей из 214</small></div></div>`));
   // тепловая карта: 20 недель, столбец — неделя (пн…вс)
   v.appendChild(el('p','eyebrow','Дни занятий'));
@@ -32,7 +32,7 @@ function viewProgress(s){
     <div class="cell" style="flex:1;text-align:center"><b style="font-size:20px">${wk.last}</b><div class="lbl">прошлая</div></div>
     <div class="cell" style="flex:1;text-align:center"><b style="font-size:20px;color:var(--gold-lip)">${Math.max(wk.best,wk.cur)}</b><div class="lbl">рекорд</div></div></div>
     <div class="bar gold" style="margin-top:12px"><i style="width:${Math.min(100,wk.cur/wk.goal*100)}%"></i></div>
-    <div class="note">Недельная цель — ${wk.goal} XP (5 дневных целей): ${wk.chest==='opened'?'сундук открыт ✓':wk.chest==='ready'?'сундук ждёт на Пути 🎁':'осталось '+(wk.goal-wk.cur)+' XP до сундука'}.</div>`;
+    <div class="note">Недельная цель — ${wk.goal} XP (5 дневных целей): ${wk.chest==='opened'?'сундук открыт ✓':wk.chest==='ready'?'сундук ждёт на Пути':'осталось '+(wk.goal-wk.cur)+' XP до сундука'}.</div>`;
   v.appendChild(wb);
   // XP и точность по неделям
   v.appendChild(el('p','eyebrow','XP и точность по неделям'));
@@ -62,13 +62,13 @@ function viewProgress(s){
   // короны
   v.appendChild(el('p','eyebrow','Короны уроков (из памяти FSRS)'));
   const cg=el('div','crowngrid');
-  pathUnits().filter(u=>u.sec==='lessons').forEach(u=>{ const c=unitCrowns(u); cg.appendChild(el('div','c'+c,`${u.L}<b>${c?'👑'+c:'·'}</b>`)); });
+  pathUnits().filter(u=>u.sec==='lessons').forEach(u=>{ const c=unitCrowns(u); cg.appendChild(el('div','c'+c,`${u.L}<b>${c?IC('crown',14)+c:'·'}</b>`)); });
   v.appendChild(cg);
   v.appendChild(el('p','note','Корона k — у 80% слов урока стабильность памяти не меньше 1 / 3 / 7 / 21 / 60 дней.'));
   // достижения
   v.appendChild(el('p','eyebrow','Достижения'));
   const ag=el('div','achs');
-  ACH.forEach(a=>{ const got=State.meta.ach[a.id]; ag.appendChild(el('div','ach'+(got?' got':''),`<div class="ai ${a.ic==='部'?'han':''}">${a.ic}</div><b>${esc(a.t)}</b><small>${got?fmtDate(got):esc(a.d)}</small>`)); });
+  ACH.forEach(a=>{ const got=State.meta.ach[a.id]; ag.appendChild(el('div','ach'+(got?' got':''),`<div class="ai">${icn(a.ic,40)}</div><b>${esc(a.t)}</b><small>${got?fmtDate(got):esc(a.d)}</small>`)); });
   v.appendChild(ag);
   if(State.meta.mocks.length){
     v.appendChild(el('p','eyebrow','Пробные контрольные'));

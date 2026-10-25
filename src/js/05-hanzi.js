@@ -38,7 +38,7 @@ function charBox(ch,opts){
     ${type?`<div class="lbl">Тип: ${TYPES[type]}${type==='p'&&(sem||phon)?` — смысловая часть <b class="han">${esc(sem||'—')}</b>, звуковая <b class="han">${esc(phon||'—')}</b>`:''}</div>`:''}`}
     ${(()=>{ const st=strokesOf(ch); return st.length?`<details class="strk"><summary>Порядок черт (${st.length}) — по таблице черт курса</summary><ol>${st.map(x=>`<li>${strokeImg(x.n,18)}${esc(x.name)}${x.n?` <span class="lbl">№${x.n}</span>`:' <span class="lbl">(нет в таблице)</span>'}</li>`).join('')}</ol></details>`:''; })()}
     ${EVO.includes(ch)?`<div class="evo"><div class="lbl">Эволюция написания (таблица курса):</div><img src="evolution/${ch.codePointAt(0).toString(16)}.jpg" loading="lazy" alt="эволюция ${ch}"><div class="evocap"><span>Инь, гадат. надписи</span><span>Чжоу, бронза</span><span>сяо-чжуань</span><span>лишу</span><span>кайшу</span><span>цаошу</span><span>синшу</span><span>сокращ.</span></div></div>`:''}
-    ${opts&&opts.actions?`<div class="actionrow" style="margin-top:6px"><button class="say" data-say="${ch}">🔊 Слушать</button><button class="say" data-draw="${ch}">笔 Прописи</button></div>`:''}
+    ${opts&&opts.actions?`<div class="actionrow" style="margin-top:6px"><button class="say" data-say="${ch}">${SPK()} Слушать</button><button class="say" data-draw="${ch}">${IC('brushW',18)} Прописи</button></div>`:''}
   </div>`;
 }
 function hzBtn(c){ const b=el('button','han',c); b.dataset.c=c; b.setAttribute('aria-label','разбор '+c); return b; }
@@ -56,10 +56,10 @@ $('#sheet').addEventListener('click',e=>{
   if(e.target.id==='sheet'){ closeSheet(); return; }
   const wb=e.target.closest('[data-word]'); if(wb){ closeSheet(); go('card',{id:+wb.dataset.word, from:State.route}); }
 });
-// глобально: тап по иероглифу — разбор; кнопки 🔊 / 笔 внутри разбора
+// глобально: тап по иероглифу — разбор; кнопки «Слушать» / «Прописи» внутри разбора
 document.addEventListener('click',e=>{
   const h=e.target.closest('[data-c]'); if(h){ e.preventDefault(); e.stopPropagation(); openChar(h.dataset.c); return; }
-  const sb=e.target.closest('[data-say]'); if(sb){ Speech.say(sb.dataset.say, sb.dataset.rate?+sb.dataset.rate:undefined); return; }
+  const sb=e.target.closest('[data-say]'); if(sb){ Speech.say(sb.dataset.say, sb.dataset.rate?+sb.dataset.rate:undefined, sb.dataset.py); return; }
   const db=e.target.closest('[data-draw]'); if(db){ closeSheet(); go('draw',{chars:[db.dataset.draw], title:db.dataset.draw, back:State.route}); }
 },true);
 

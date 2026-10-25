@@ -17,9 +17,12 @@ function render(){
     lessons:viewLessons,lesson:viewLesson,extra:viewExtra,strokes:viewStrokes,card:viewCard,session:viewSession,draw:viewDraw,
     tests:viewTests,test:viewTest,keys:viewKeys,radical:viewRadical,dict:viewDict,list:viewList,progress:viewProgress,settings:viewSettings};
   const s=$('#screen'); s.innerHTML=''; (V[State.route.name]||viewPath)(s);
+  Resume.later();
 }
 $('#nav').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) go(b.dataset.nav); });
 $('#stStreak').onclick=$('#stFreeze').onclick=$('#stRing').onclick=()=>go('progress');
+$('#logo').onclick=()=>go('path');
+document.querySelectorAll('[data-ic]').forEach(e=>{ e.innerHTML=IC(e.dataset.ic,28); });
 // Клавиатура: Пробел/Enter — показать/дальше, 1/← и 2/→ — оценка, 1–4 — варианты, Backspace — отменить
 document.addEventListener('keydown',e=>{
   if(e.target&&/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;

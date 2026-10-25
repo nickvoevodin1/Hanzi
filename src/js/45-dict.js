@@ -35,7 +35,7 @@ function viewList(s){
   const back=el('button','back','‹ Словарь'); back.onclick=()=>go('dict'); v.appendChild(back);
   v.appendChild(el('h2','title','HSK '+l));
   v.appendChild(el('p','note',ws.length+' слов, в работе '+learnedCount(keys)+'. Порядок — по частотности.'));
-  const act=el('div','actionrow'); const b=el('button','btn','▶ Учить HSK '+l); const q=()=>poolQueue(keys); b.onclick=()=>startSession(q(),'auto','HSK '+l,q); act.appendChild(b); v.appendChild(act);
+  const act=el('div','actionrow'); const b=el('button','btn',IC('play',16)+' Учить HSK '+l); const q=()=>poolQueue(keys); b.onclick=()=>startSession(q(),'auto','HSK '+l,q); act.appendChild(b); v.appendChild(act);
   const list=el('div','rowlist'); list.style.marginTop='12px'; ws.slice(0,State.route.all?ws.length:150).forEach(w=>list.appendChild(witem(w))); v.appendChild(list);
   if(!State.route.all&&ws.length>150){ const m=el('button','btn ghost','Показать все '+ws.length); m.style.marginTop='10px'; m.onclick=()=>go('list',{hsk:l,all:1}); v.appendChild(m); }
   s.appendChild(v);

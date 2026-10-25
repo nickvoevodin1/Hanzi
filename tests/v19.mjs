@@ -1,0 +1,48 @@
+// v19: озвучка живыми записями, тренажёр тонов, продолжение после перезапуска, иконки, путь.
+import {load} from './env.mjs';
+const A=await load(); const {T,ev,ok,txt,click,doc}=A;
+const reset=()=>ev("State.cards={}; State.meta=freshMeta(); PLAY=null; SESSION=null; render()");
+await T('audio-plan',()=>{
+  ok(ev("AUD.s.size")>=450&&ev("AUD.w.size")>=300,'мало записей: '+ev("AUD.s.size")+'/'+ev("AUD.w.size"));
+  ok(JSON.stringify(ev("Speech.plan('谢谢',null,false)"))==='{"list":["w/8c22-8c22"],"gap":0}','谢谢 — запись слова');
+  ok(JSON.stringify(ev("Speech.plan('行','xíng',false).list"))==='["s/xing2"]'&&JSON.stringify(ev("Speech.plan('行','háng',false).list"))==='["s/hang2"]','многочтенный 行 — слог по пиньиню слова');
+  ok(JSON.stringify(ev("Speech.plan('中国',null,false).list"))==='["s/zhong1","s/guo2"]','нет записи слова → по слогам');
+  ok(JSON.stringify(ev("Speech.plan('中国',null,true)"))==='{"list":["s/zhong1","s/guo2"],"gap":420}','медленно — по слогам с паузами');
+  ok(ev("Speech.plan('我很好。',null,false)")===null,'предложение — голос устройства');
+  ok(JSON.stringify(ev("Speech.plan('吗',null,false).list"))==='["w/5417"]','лёгкий тон 吗 — запись знака');
+  ok(ev("Speech.sylls('女','nǚ')[0]")==='nv3','ü → v');
+  ev("State.settings.voiceRec=false"); ok(ev("Speech.plan('谢谢',null,false)")===null,'выключатель записей'); ev("State.settings.voiceRec=true");
+  ok(ev("Speech.files().length")===ev("AUD.s.size+AUD.w.size"),'список для офлайна');
+  A.w.__played.length=0; ev("Speech.say('谢谢')"); ok(/audio\/w\/8c22-8c22\.mp3$/.test(A.w.__played[0]||''),'играет файл записи: '+A.w.__played[0]); });
+await T('syl-mark',()=>{ ok(ev("['xie4','hao3','gui4','liu2','nv3','lve4','er2'].map(sylMark).join(' ')")==='xiè hǎo guì liú nǚ lüè ér','тоновые знаки'); });
+await T('tone-drill',()=>{ reset(); ev("startToneDrill(lessonKeys(8).map(k=>BYK[k]))");
+  ok(ev("State.route.name")==='play'&&ev("PLAY.queue.length+1")>=8,'нет тренировки'); ok(ev("PLAY.opts.kind")==='tones','вид');
+  ev("PLAY.queue.unshift(PLAY.cur); PLAY.cur={t:'hear',sy:'xie4',ungraded:1}; render()");
+  ok(/Какой тон ты слышишь/.test(txt())&&doc.querySelectorAll('#screen .choice').length===4,'4 тона');
+  [...doc.querySelectorAll('#screen .choice')][3].click(); ok(doc.getElementById('fb').classList.contains('ok'),'тон 4 верно');
+  ok(/xiè/.test(doc.getElementById('fb').textContent),'пиньинь в ответе');
+  ev("hideFB(); PLAY.answered=false; PLAY.cur={t:'hear',sy:'xie4',ungraded:1}; render()"); [...doc.querySelectorAll('#screen .choice')][0].click();
+  ok(doc.getElementById('fb').classList.contains('bad')&&/Сравни/.test(doc.getElementById('fb').textContent),'ошибка + «сравни»');
+  ok(ev("State.meta.toneErr.xie4")===1,'слабый слог запомнен'); ok(!ev("State.cards['谢谢']"),'тренировка тонов не трогает FSRS'); ev("hideFB()"); });
+await T('path-hear-node',()=>{ reset(); const n=ev("pathUnits().find(u=>u.id==='L8').nodes.filter(n=>n.type==='hear').length"); ok(n===1,'узел «Тоны на слух» в уроке'); });
+await T('resume-reload',async()=>{
+  reset(); ev("playStart(['你','好'],{title:'Урок 1',kind:'learn'})"); ev("PLAY.done=1; PLAY.xp=10; Resume.save()");
+  const raw=A.w.localStorage.getItem('zhu-resume'); ok(raw&&/"play"/.test(raw),'снимок не сохранён');
+  const B=await load({before(w){ w.localStorage.setItem('zhu-resume',raw); }});
+  await B.sleep(300);
+  ok(B.ev("State.route.name")==='play'&&B.ev("PLAY.title")==='Урок 1'&&B.ev("PLAY.xp")===10,'урок не восстановлен: '+B.ev("State.route.name"));
+  ok(B.ev("PLAY.fails instanceof Set"),'Set восстановлен');
+  B.ev("PLAY=null; go('dict')"); B.ev("Resume.save()");
+  const raw2=B.w.localStorage.getItem('zhu-resume');
+  const C=await load({before(w){ w.localStorage.setItem('zhu-resume',raw2); }}); await C.sleep(300);
+  ok(C.ev("State.route.name")==='dict','экран словаря не восстановлен');
+  const old=JSON.parse(raw2); old.ts=Date.now()-13*3600e3;
+  const D=await load({before(w){ w.localStorage.setItem('zhu-resume',JSON.stringify(old)); }}); await D.sleep(300);
+  ok(D.ev("State.route.name")==='path','старый снимок (>12 ч) не должен восстанавливаться'); });
+await T('no-emoji',()=>{ ev("go('path')"); const h=doc.body.innerHTML; ok(!/[\u{1F300}-\u{1FAFF}]/u.test(h),'эмодзи в разметке Пути');
+  ev("go('practice')"); ok(!/[\u{1F300}-\u{1FAFF}]/u.test(doc.body.innerHTML),'эмодзи в Повторении');
+  ok(doc.querySelectorAll('.nav svg.ico').length===5,'иконки навигации'); });
+await T('node-popover',()=>{ reset(); ev("go('path')"); const d=doc.querySelector('.pnode.cur .disc'); ok(d,'нет текущего узла'); d.click();
+  ok(doc.querySelector('.npop .popbtn'),'нет подсказки «Начать»'); doc.querySelector('.npop .popbtn').click(); ok(ev("State.route.name")==='play','узел не запустил урок'); });
+await T('splash',()=>{ ok(!doc.getElementById('splash')||doc.getElementById('splash').classList.contains('out'),'заставка не убрана'); });
+A.finish('v19: записи носителей, тоны на слух, продолжение после перезапуска, иконки, путь');

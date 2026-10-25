@@ -3,29 +3,38 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#ff9600">
+<meta name="mobile-web-app-capable" content="yes">
 <title>朱 · Тренажёр иероглифов</title>
 <link rel="manifest" href="./manifest.json">
-<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-180.png">
+<link rel="icon" type="image/png" sizes="32x32" href="./icon-32.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/hanzi-writer/3.7.3/hanzi-writer.min.js"></script>
 <style>
-/* ===== Оформление: палитра в духе Duolingo, акцент — оранжевый «朱» вместо зелёного =====
-   Оранжевый — кнопки и активные элементы; зелёный — только «верно»; красный — «ошибка». */
+/* ===== Оформление: палитра Duolingo (белый, серые Swan/Wolf/Eel), их зелёный акцент заменён оранжевым =====
+   Оранжевый (#ff9600, «Fox» из палитры Duolingo) — кнопки и активные элементы; зелёный — только «верно»; красный — «ошибка».
+   Шрифт Nunito (OFL) — локально из ./fonts, чтобы приложение выглядело одинаково и без интернета. */
+@font-face{font-family:Nunito;font-style:normal;font-weight:700;font-display:swap;src:url(./fonts/nunito-cyrillic-700-normal.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:Nunito;font-style:normal;font-weight:700;font-display:swap;src:url(./fonts/nunito-latin-ext-700-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:Nunito;font-style:normal;font-weight:700;font-display:swap;src:url(./fonts/nunito-latin-700-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Nunito;font-style:normal;font-weight:800;font-display:swap;src:url(./fonts/nunito-cyrillic-800-normal.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:Nunito;font-style:normal;font-weight:800;font-display:swap;src:url(./fonts/nunito-latin-ext-800-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:Nunito;font-style:normal;font-weight:800;font-display:swap;src:url(./fonts/nunito-latin-800-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:Nunito;font-style:normal;font-weight:900;font-display:swap;src:url(./fonts/nunito-cyrillic-900-normal.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:Nunito;font-style:normal;font-weight:900;font-display:swap;src:url(./fonts/nunito-latin-ext-900-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:Nunito;font-style:normal;font-weight:900;font-display:swap;src:url(./fonts/nunito-latin-900-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 :root{
-  --bg:#ffffff; --bg2:#f7f7f7; --card:#ffffff; --line:#e5e5e5; --line2:#d9d9d9;
+  --bg:#ffffff; --bg2:#f7f7f7; --card:#ffffff; --line:#e5e5e5; --line2:#d7d7d7;
   --text:#4b4b4b; --title:#3c3c3c; --text2:#777777; --text3:#afafaf;
-  --primary:#f25a1e; --primary-lip:#c8461a; --primary-soft:#ffeadf; --primary-text:#d2481a; --primary-line:#ffc6ad;
+  --primary:#ff9600; --primary-lip:#e07b00; --primary-soft:#fff3e0; --primary-text:#d26c00; --primary-line:#ffd29a;
   --ok:#58cc02; --ok-lip:#58a700; --ok-soft:#d7ffb8; --ok-text:#58a700;
   --bad:#ff4b4b; --bad-lip:#ea2b2b; --bad-soft:#ffdfe0; --bad-text:#ea2b2b;
   --blue:#1cb0f6; --blue-lip:#1899d6; --blue-soft:#ddf4ff;
   --gold:#ffc800; --gold-lip:#e5a000; --gold-soft:#fff5d3;
   --fire:#ff9600; --ice:#84d8ff; --purple:#ce82ff; --purple-lip:#a568cc;
-  --seal:#e23d2e;
+  --seal:#ff9600;
   --t1:#e8432f; --t2:#e59400; --t3:#3a9d23; --t4:#1899d6; --t5:#9a9a9a;
   --r:16px; --rs:14px;
   --safe-b:env(safe-area-inset-bottom,0px);
@@ -53,18 +62,17 @@ body.focus #app{padding-bottom:calc(150px + var(--safe-b))}
 .top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:8px;padding:10px 14px;
   padding-top:calc(10px + env(safe-area-inset-top,0px));background:var(--bg);border-bottom:2px solid var(--line)}
 body.focus .top{display:none}
-.seal{width:38px;height:38px;border-radius:10px;background:var(--seal);color:#fff;display:grid;place-items:center;font-size:22px;line-height:1;flex:none;
-  box-shadow:0 3px 0 #a92c20;position:relative}
-.seal::after{content:"";position:absolute;inset:4px;border:1.5px solid rgba(255,255,255,.55);border-radius:6px}
-.daychip{font-size:12px;font-weight:800;color:var(--text2);border:2px solid var(--line);border-radius:12px;padding:4px 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.seal{width:44px;height:36px;display:grid;place-items:center;flex:none;padding:0}
+.seal .mascot{display:block}
+.daychip{font-size:12px;font-weight:800;color:var(--text2);border:2px solid var(--line);border-radius:12px;padding:4px 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;background:var(--bg2)}
 .daychip.away,.daychip.holiday{color:var(--blue-lip);border-color:#b9e6fb;background:var(--blue-soft)}
 .daychip.focus{color:var(--purple-lip);border-color:#ecd0ff;background:#f9efff}
 .daychip.consol{color:var(--gold-lip);border-color:#ffe28a;background:var(--gold-soft)}
 .top .spacer{flex:1}
-.stat{display:flex;align-items:center;gap:3px;font-weight:900;font-size:16px;color:var(--text3);flex:none}
-.stat.fire{color:var(--fire)} .stat.ice{color:var(--ice)}
-.stat .ico{font-size:19px;line-height:1}
-.stat.off .ico{filter:grayscale(1);opacity:.5}
+.stat{display:flex;align-items:center;gap:4px;font-weight:900;font-size:17px;color:var(--text3);flex:none;padding:0}
+.stat.fire{color:var(--fire)} .stat.ice{color:#49c0f8}
+.stat.off{color:var(--text3)}
+.stat svg{display:block}
 .ring{position:relative;width:38px;height:38px;flex:none}
 .ring svg{transform:rotate(-90deg)}
 .ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:10.5px;font-weight:900;color:var(--text2)}
@@ -119,60 +127,86 @@ h2.title{margin:2px 0 4px;font-size:22px;font-weight:900;color:var(--title)}
 .sem .cell{flex:1;text-align:center;border:2px solid var(--line);border-radius:12px;padding:8px 4px}
 .sem .cell b{display:block;font-size:20px;font-weight:900;color:var(--title);line-height:1.15}
 .sem .cell span{font-size:11px;color:var(--text3);font-weight:800}
-.warn{margin-top:10px;font-size:13px;color:var(--bad-text);background:var(--bad-soft);border-radius:12px;padding:8px 10px;font-weight:800}
+.warn{margin-top:10px;font-size:13px;color:var(--primary-text);background:var(--primary-soft);border:2px solid var(--primary-line);border-radius:12px;padding:8px 10px;font-weight:800}
 .info{margin-top:10px;font-size:13px;color:var(--blue-lip);background:var(--blue-soft);border-radius:12px;padding:8px 10px;font-weight:800}
+/* иконки внутри текста и кнопок */
+.ico{flex:none}
+.btn .ico,.say .ico,.linkbtn .ico,.back .ico,.tag .ico,.info .ico,.warn .ico,.note .ico,.kind .ico,.newtag .ico,.star .ico,.chip .ico,.tab .ico{vertical-align:-4px}
+.btn .ico{margin-right:2px}
 .quest{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:2px solid var(--line);width:100%;text-align:left}
 .quest:last-of-type{border-bottom:none}
-.quest .qi{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:20px;background:var(--bg2);flex:none}
+.quest .qi{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:22px;background:var(--bg2);flex:none;border:2px solid var(--line)}
 .quest .qm{flex:1;min-width:0}
 .quest .qm b{display:block;font-size:14.5px;color:var(--title);font-weight:800}
 .quest .qm small{display:block;color:var(--text3);font-size:12px;font-weight:700;margin:1px 0 5px}
 .quest .bar{height:12px}
-.quest.done .qi{background:var(--ok-soft)}
+.quest.done .qi{background:var(--ok-soft);border-color:#b8f28b}
 .quest .star{color:var(--gold-lip);font-size:12px;font-weight:900}
-.quest .chev{color:var(--text3);font-size:20px}
+.quest .chev{color:var(--text3);font-size:20px;display:grid}
 
-/* Путь */
-.section{margin:22px 0 4px;text-align:center}
+/* Путь (как у Duolingo: баннер юнита, узлы-«таблетки» с кромкой, кольцо прогресса у текущего, подсказка по тапу) */
+.section{margin:26px 0 4px;text-align:center;display:flex;align-items:center;gap:12px}
+.section::before,.section::after{content:"";flex:1;height:2px;background:var(--line)}
 .section h3{margin:0;font-size:13px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--text3)}
-.ubanner{border-radius:var(--r);padding:14px 16px;color:#fff;display:flex;align-items:center;gap:12px;margin:18px 0 8px;box-shadow:0 4px 0 rgba(0,0,0,.18);text-align:left;width:100%}
+.ubanner{border-radius:var(--r);padding:14px 14px 14px 18px;color:#fff;display:flex;align-items:center;gap:12px;margin:18px 0 10px;box-shadow:0 4px 0 rgba(0,0,0,.18);text-align:left;width:100%}
 .ubanner .ut{flex:1;min-width:0}
-.ubanner small{display:block;font-size:12px;opacity:.9;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
-.ubanner b{display:block;font-size:17px;font-weight:900;line-height:1.25}
-.ubanner .crowns{font-size:13px;font-weight:900;white-space:nowrap}
-.ubanner.locked{background:var(--line)!important;color:var(--text3);box-shadow:0 4px 0 var(--line2)}
-.ubanner .tag{display:inline-block;background:rgba(255,255,255,.95);color:var(--primary-text);border-radius:8px;padding:1px 7px;font-size:11px;font-weight:900;margin:4px 6px 0 0;text-transform:none;letter-spacing:0}
-.ujump{display:block;margin:0 auto 6px;color:var(--blue-lip);font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.05em}
-.path{display:flex;flex-direction:column;align-items:center;gap:14px;padding:6px 0 10px}
-.pnode{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px}
-.pnode button.disc{width:68px;height:62px;border-radius:50%;background:var(--primary);color:#fff;font-size:26px;display:grid;place-items:center;
-  box-shadow:0 6px 0 var(--primary-lip);transition:transform .08s,box-shadow .08s}
-.pnode button.disc:active{transform:translateY(6px);box-shadow:0 0 0 var(--primary-lip)}
-.pnode .lab{font-size:12px;color:var(--text2);font-weight:800;max-width:150px;text-align:center;line-height:1.2}
-.pnode.done button.disc{background:var(--gold);box-shadow:0 6px 0 var(--gold-lip);color:#fff}
-.pnode.alt button.disc{background:var(--blue);box-shadow:0 6px 0 var(--blue-lip)}
-.pnode.alt.done button.disc{background:var(--gold);box-shadow:0 6px 0 var(--gold-lip)}
-.pnode.locked button.disc{background:var(--line);color:var(--text3);box-shadow:0 6px 0 var(--line2)}
-.pnode.cracked button.disc{background:#e9c46a;box-shadow:0 6px 0 #b98d2a;filter:saturate(.6)}
-.pnode.cracked button.disc::after{content:"";position:absolute;inset:0;border-radius:50%;
-  background:linear-gradient(115deg,transparent 46%,rgba(90,60,20,.55) 47%,rgba(90,60,20,.55) 49%,transparent 50%),linear-gradient(60deg,transparent 58%,rgba(90,60,20,.45) 59%,rgba(90,60,20,.45) 61%,transparent 62%)}
-.pnode button.disc{position:relative}
-.pnode.boss button.disc{width:84px;height:76px;border-radius:24px;background:var(--purple);box-shadow:0 6px 0 var(--purple-lip);font-size:32px}
-.pnode.boss.locked button.disc{background:var(--line);box-shadow:0 6px 0 var(--line2)}
-.pnode.cur{margin-top:44px}
-.pnode.cur button.disc{outline:6px solid var(--primary-soft);outline-offset:4px}
-.startbubble{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--card);border:2px solid var(--line);
-  color:var(--primary-text);font-weight:900;font-size:13px;letter-spacing:.06em;text-transform:uppercase;padding:7px 12px;border-radius:12px;white-space:nowrap;
+.ubanner small{display:block;font-size:12.5px;opacity:.92;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.ubanner b{display:block;font-size:18px;font-weight:900;line-height:1.25;margin-top:1px}
+.ubanner b.han{font-size:21px;letter-spacing:2px}
+.ubanner .crowns{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:58px;padding:6px 6px 4px;border-radius:12px;border:2px solid rgba(255,255,255,.4);flex:none}
+.ubanner .crowns b{font-size:15px;margin:0;line-height:1}
+.ubanner .crowns small{font-size:11px;letter-spacing:0;text-transform:none;opacity:.95;margin-top:1px}
+.ubanner.locked{background:var(--bg2)!important;color:var(--text3);box-shadow:0 4px 0 var(--line)!important;border:2px solid var(--line)}
+.ubanner.locked .crowns{border-color:var(--line);color:var(--text3)}
+.ubanner.donegrp{background:var(--gold);box-shadow:0 4px 0 var(--gold-lip);color:#7a5200}
+.ubanner.donegrp .crowns{border-color:rgba(122,82,0,.25)}
+.ubanner .tag{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.95);color:var(--title);border-radius:8px;padding:2px 8px;font-size:11.5px;font-weight:900;margin:6px 6px 0 0;text-transform:none;letter-spacing:0}
+.ujump{display:block;margin:2px auto 8px;color:var(--blue-lip);font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.05em}
+.path{display:flex;flex-direction:column;align-items:center;gap:22px;padding:14px 0 18px}
+.pnode{--nc:var(--primary);--nl:var(--primary-lip);position:relative;display:flex;flex-direction:column;align-items:center;width:100px}
+.pnode button.disc{position:relative;z-index:2;width:72px;height:64px;border-radius:50%;background:var(--nc);color:#fff;font-size:30px;display:grid;place-items:center;
+  box-shadow:0 8px 0 var(--nl);transition:transform .08s,box-shadow .08s}
+.pnode button.disc::before{content:"";position:absolute;left:14px;right:14px;top:8px;height:9px;border-radius:9px;background:rgba(255,255,255,.28)}
+.pnode button.disc:active{transform:translateY(8px);box-shadow:0 0 0 var(--nl)}
+.pnode button.disc .han{font-size:31px;line-height:1}
+.pnode button.disc svg{position:relative}
+.pnode.locked button.disc{background:var(--line);color:var(--text3);box-shadow:0 8px 0 var(--line2)}
+.pnode.locked button.disc::before{background:rgba(255,255,255,.5)}
+.pnode.locked button.disc .han{color:var(--text3)}
+.pnode .nbadge{position:absolute;z-index:3;top:-8px;right:4px;width:34px;height:34px;border-radius:50%;background:#fff;border:2px solid var(--line);display:grid;place-items:center;box-shadow:0 2px 0 var(--line)}
+.pnode .lab{font-size:12.5px;color:var(--text2);font-weight:800;max-width:220px;text-align:center;line-height:1.3;margin-top:14px}
+.pnode.boss{width:auto}
+.pnode.boss button.disc{width:92px;height:80px;border-radius:26px;background:var(--purple);box-shadow:0 8px 0 var(--purple-lip)}
+.pnode.boss.done button.disc{background:var(--gold);box-shadow:0 8px 0 var(--gold-lip)}
+/* текущий узел: кольцо прогресса строго вокруг «лица» узла (центр — в центре круга, кромка не сдвигает), «Начать» сверху */
+.pnode.cur{margin-top:56px}
+.pnode .nring{position:absolute;z-index:1;width:100px;height:100px;left:0;top:-18px;pointer-events:none}
+.startbubble{position:absolute;z-index:4;bottom:calc(100% + 26px);left:50%;transform:translateX(-50%);background:var(--card);border:2px solid var(--line);
+  color:var(--nc);font-weight:900;font-size:14px;letter-spacing:.06em;text-transform:uppercase;padding:8px 14px;border-radius:12px;white-space:nowrap;
   animation:bob 1.6s ease-in-out infinite}
-.startbubble::after{content:"";position:absolute;top:100%;left:50%;margin-left:-7px;border:7px solid transparent;border-top-color:var(--line)}
+.startbubble::after{content:"";position:absolute;top:100%;left:50%;margin-left:-8px;border:8px solid transparent;border-top-color:var(--line)}
+.startbubble::before{content:"";position:absolute;top:calc(100% - 3px);left:50%;margin-left:-6px;border:6px solid transparent;border-top-color:#fff;z-index:1}
 @keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-5px)}}
+.pmascot{position:absolute;top:-6px;pointer-events:none}
+.pmascot.l{right:calc(100% + 18px)} .pmascot.r{left:calc(100% + 18px)}
+/* подсказка узла */
+.npop{--ax:0px;--lip:var(--primary-lip);position:relative;width:min(100%,300px);margin:-6px 0 2px;background:var(--primary);color:#fff;border-radius:16px;padding:14px 16px 16px;text-align:left;
+  box-shadow:0 4px 0 var(--lip);animation:pop2 .18s ease-out}
+.npop::before{content:"";position:absolute;bottom:100%;left:calc(50% + var(--ax));margin-left:-10px;border:10px solid transparent;border-bottom-color:var(--npbg,var(--primary))}
+.npop b{display:block;font-size:17px;font-weight:900}
+.npop small{display:block;font-size:13.5px;font-weight:800;opacity:.92;margin:2px 0 12px;line-height:1.35}
+.npop .popbtn{display:block;width:100%;background:#fff;border-radius:14px;padding:12px;font-size:14.5px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;box-shadow:0 4px 0 rgba(0,0,0,.15)}
+.npop .popbtn:active{transform:translateY(4px);box-shadow:none}
+.npop.locked{--npbg:var(--line);background:var(--bg2);color:var(--text2);border:2px solid var(--line);box-shadow:0 4px 0 var(--line)}
+.npop.locked small{margin-bottom:0}
+@keyframes pop2{from{opacity:0;transform:translateY(-6px) scale(.97)}to{opacity:1;transform:none}}
 .unitmeta{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:-2px 0 4px}
 
 /* Урок-игра */
 .playtop{display:flex;align-items:center;gap:12px;margin:2px 0 14px}
-.playtop .x{font-size:24px;color:var(--text3);width:32px;flex:none;line-height:1}
+.playtop .x{font-size:24px;color:var(--text3);width:32px;flex:none;line-height:1;display:grid;place-items:center}
 .playtop .bar{flex:1;height:16px}
-.combo{font-weight:900;color:var(--text3);font-size:15px;min-width:42px;text-align:right;flex:none;transition:color .2s}
+.combo{font-weight:900;color:var(--text3);font-size:16px;min-width:44px;flex:none;transition:color .2s;display:flex;align-items:center;justify-content:flex-end;gap:2px}
 .combo.hot{color:var(--fire)}
 .qh{font-size:22px;font-weight:900;color:var(--title);margin:4px 0 14px;line-height:1.25}
 .qhz{font-size:92px;line-height:1.05;letter-spacing:2px;color:var(--title)}
@@ -210,8 +244,8 @@ textarea.tinput{text-align:left;font-size:15px;min-height:140px}
 .trow{display:flex;align-items:center;gap:8px}
 .trow .han{font-size:30px;width:44px;text-align:center;color:var(--title)}
 .trow .seg{flex:1;display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
-.trow .seg button{border:2px solid var(--line);border-radius:12px;padding:8px 0;font-size:20px;box-shadow:0 3px 0 var(--line);background:var(--card);color:var(--title);line-height:1}
-.trow .seg button small{display:block;font-size:10px;color:var(--text3);margin-top:2px}
+.trow .seg button{border:2px solid var(--line);border-radius:12px;padding:6px 0 4px;font-size:20px;box-shadow:0 3px 0 var(--line);background:var(--card);color:var(--title);line-height:1;display:flex;flex-direction:column;align-items:center}
+.trow .seg button small{display:block;font-size:10.5px;color:var(--text3);margin-top:1px;font-weight:900}
 .trow .seg button.on{border-color:#84d8ff;background:var(--blue-soft);box-shadow:0 3px 0 #84d8ff;color:var(--blue-lip)}
 .trow .seg button.right{border-color:#a5ed6e;background:var(--ok-soft);color:var(--ok-text)}
 .trow .seg button.wrongs{border-color:#ffb2b2;background:var(--bad-soft);color:var(--bad-text)}
@@ -254,6 +288,18 @@ textarea.tinput{text-align:left;font-size:15px;min-height:140px}
 @keyframes zz{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:1;transform:translateY(-4px)}}
 
 /* Нижняя панель ответа */
+/* нижняя панель действия в уроке (как у Duolingo) */
+.playfoot{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--bg);border-top:2px solid var(--line);padding:14px 16px calc(14px + var(--safe-b))}
+.playfoot .in{max-width:600px;margin:0 auto}
+.playfoot .btn,.playfoot .showbtn,.playfoot .actionrow{margin:0}
+.playfoot:has(.in:empty){display:none}
+.kind.retry{color:var(--bad-text);display:flex;align-items:center;gap:6px}
+.bigsay{width:96px!important;height:96px!important;border-radius:26px!important;margin:4px auto 0;box-shadow:0 5px 0 var(--blue-lip)!important}
+.tonechoice{display:flex;flex-direction:column;align-items:center;gap:2px}
+.tonechoice b{font-size:18px;line-height:1}
+.tonechoice small{font-size:11.5px;color:var(--text2);font-weight:800;line-height:1.2}
+.choice.correct .tonechoice small,.choice.wrong .tonechoice small{color:inherit}
+.cmprow .say{display:inline-flex;align-items:center;gap:4px;font-size:15px}
 .fb{position:fixed;left:0;right:0;bottom:0;z-index:50;padding:16px 16px calc(16px + var(--safe-b));transform:translateY(105%);transition:transform .34s cubic-bezier(.2,1.25,.4,1)}
 .fb.on{transform:none}
 .fb .in{max-width:600px;margin:0 auto}
@@ -263,39 +309,42 @@ textarea.tinput{text-align:left;font-size:15px;min-height:140px}
 .fb .ans{font-size:15px;line-height:1.4;margin-bottom:12px;color:var(--bad-text);font-weight:800}
 .fb.ok .ans{color:var(--ok-text)}
 .fb .ans .han{font-size:22px}
-.fb .ic{width:34px;height:34px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:19px;flex:none}
+.fb .ic{width:40px;height:40px;border-radius:50%;background:#fff;display:grid;place-items:center;flex:none;box-shadow:0 2px 0 rgba(0,0,0,.06)}
 .fb .btn{margin-top:4px}
 .fb.ok .btn{background:var(--ok);box-shadow:0 4px 0 var(--ok-lip)}
 .fb.bad .btn{background:var(--bad);box-shadow:0 4px 0 var(--bad-lip)}
 .fb .linkbtn{display:block;margin:10px auto 0;color:var(--text2)}
+.fb .fbextra{margin:-2px 0 12px}
 .fb .cheer{display:flex;align-items:center;gap:8px;margin:-4px 0 10px;font-size:13px;color:var(--text2);font-weight:800}
-.combopop{position:fixed;left:50%;top:22%;z-index:65;transform:translate(-50%,0) scale(.4);opacity:0;pointer-events:none;
+.combopop{position:fixed;left:50%;top:22%;z-index:65;transform:translate(-50%,0) scale(.4);opacity:0;pointer-events:none;display:flex;align-items:center;gap:4px;white-space:nowrap;
   background:var(--fire);color:#fff;font-weight:900;font-size:24px;padding:10px 20px;border-radius:18px;box-shadow:0 5px 0 #d97f00}
 .combopop.on{animation:combo 1.1s cubic-bezier(.2,1.4,.4,1) forwards}
 @keyframes combo{0%{opacity:0;transform:translate(-50%,10px) scale(.4)}25%{opacity:1;transform:translate(-50%,0) scale(1.1)}70%{opacity:1;transform:translate(-50%,-6px) scale(1)}100%{opacity:0;transform:translate(-50%,-30px) scale(.9)}}
-.achpop{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));z-index:70;transform:translate(-50%,-140%);transition:transform .45s cubic-bezier(.2,1.3,.4,1);
+.achpop{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));z-index:70;transform:translate(-50%,calc(-100% - 60px));visibility:hidden;transition:transform .45s cubic-bezier(.2,1.3,.4,1),visibility 0s .45s;
   background:var(--card);border:2px solid var(--gold);box-shadow:0 5px 0 var(--gold-lip);border-radius:18px;padding:10px 16px;display:flex;align-items:center;gap:12px;width:max-content;max-width:92%}
 .achpop div{min-width:0}
-.achpop.on{transform:translate(-50%,0)}
-.achpop .ai{font-size:30px}
+.achpop.on{transform:translate(-50%,0);visibility:visible;transition:transform .45s cubic-bezier(.2,1.3,.4,1),visibility 0s}
+.achpop .ai{font-size:30px;display:grid}
 .achpop b{display:block;color:var(--title);font-size:15px}
 .achpop small{color:var(--text2);font-size:12.5px}
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:80;width:100%;height:100%}
 
 /* Итог урока */
-.endwrap{text-align:center;padding-top:10px}
+.endwrap{text-align:center;padding-top:22px}
+.endwrap .mascot{margin:0 auto}
+.endwrap .btn{margin-top:18px}
 .endwrap h2{font-size:26px;font-weight:900;color:var(--gold-lip);margin:12px 0 4px}
 .endstats{display:flex;gap:10px;margin:18px 0 8px}
 .estat{flex:1;border-radius:16px;border:2px solid var(--gold);overflow:hidden}
 .estat small{display:block;background:var(--gold);color:#fff;font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;padding:4px 2px}
-.estat b{display:block;font-size:22px;font-weight:900;padding:10px 2px;color:var(--gold-lip)}
+.estat b{display:flex;align-items:center;justify-content:center;gap:4px;font-size:22px;font-weight:900;padding:12px 2px;color:var(--gold-lip)}
 .estat.acc{border-color:var(--ok)} .estat.acc small{background:var(--ok)} .estat.acc b{color:var(--ok-text)}
 .estat.time{border-color:var(--blue)} .estat.time small{background:var(--blue)} .estat.time b{color:var(--blue-lip)}
 
 /* Прогресс */
 .stats4{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .stbox{border:2px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;gap:10px;align-items:center}
-.stbox .si{font-size:22px}
+.stbox .si{font-size:22px;display:grid}
 .stbox b{display:block;font-size:19px;font-weight:900;color:var(--title);line-height:1.1}
 .stbox small{color:var(--text3);font-size:12px;font-weight:800}
 .heat{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,1fr);gap:3px;overflow-x:auto;padding-bottom:4px}
@@ -319,14 +368,14 @@ textarea.tinput{text-align:left;font-size:15px;min-height:140px}
 .crowngrid div.c0 b{color:var(--text3)}
 .achs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .ach{border:2px solid var(--line);border-radius:14px;padding:10px 6px;text-align:center}
-.ach .ai{font-size:30px;filter:grayscale(1);opacity:.4}
+.ach .ai{font-size:30px;filter:grayscale(1);opacity:.4;display:grid;place-items:center;height:44px}
 .ach b{display:block;font-size:12.5px;color:var(--text3);line-height:1.2;margin-top:4px}
 .ach small{display:block;font-size:10.5px;color:var(--text3);font-weight:700;margin-top:2px}
 .ach.got{border-color:var(--gold);background:var(--gold-soft)}
 .ach.got .ai{filter:none;opacity:1}
 .ach.got b{color:var(--title)}
 .chest{display:flex;align-items:center;gap:12px}
-.chest .cico{font-size:40px;transition:transform .3s}
+.chest .cico{font-size:40px;transition:transform .3s;display:grid}
 .chest.open .cico{animation:chest 1s ease}
 @keyframes chest{0%{transform:scale(1) rotate(0)}20%{transform:scale(1.2) rotate(-12deg)}40%{transform:scale(1.2) rotate(12deg)}60%{transform:scale(1.3) rotate(-6deg)}100%{transform:scale(1)}}
 
@@ -341,8 +390,8 @@ textarea.tinput{text-align:left;font-size:15px;min-height:140px}
 .row .tt b{font-size:15px;font-weight:800;display:block;color:var(--title)}
 .row .tt small{color:var(--text3);font-size:12px;font-weight:700}
 .row .cnt{font-size:12px;color:var(--gold-lip);border:2px solid var(--line);border-radius:20px;padding:2px 9px;flex:none;font-weight:900}
-.row .chev{color:var(--text3);font-size:20px;flex:none}
-.row .ri{font-size:24px;width:34px;text-align:center;flex:none}
+.row .chev{color:var(--text3);font-size:20px;flex:none;display:grid}
+.row .ri{font-size:24px;width:40px;height:40px;text-align:center;flex:none;display:grid;place-items:center}
 .tabs{display:flex;gap:8px;margin:10px 0 12px}
 .tab{flex:1;padding:9px 6px;border-radius:12px;background:var(--card);border:2px solid var(--line);font-size:13px;color:var(--text2);text-align:center;font-weight:800;box-shadow:0 3px 0 var(--line)}
 .tab.on{background:var(--blue-soft);border-color:#84d8ff;color:var(--blue-lip);box-shadow:0 3px 0 #84d8ff}
@@ -430,7 +479,7 @@ details.strk .sti{vertical-align:middle;margin-right:6px;opacity:.85}
 .tn{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:10px 0}
 .tc{display:flex;flex-direction:column;align-items:center;min-width:48px;padding:6px 4px;border:2px solid var(--line);border-radius:12px;background:var(--card)}
 .tc .han{font-size:24px;line-height:1.2}
-.tc .tm{font-size:20px;line-height:1;color:var(--primary);min-height:20px;font-weight:900}
+.tc .tm{font-size:20px;line-height:1;color:var(--primary);min-height:24px;font-weight:900;display:grid;place-items:center}
 .tc .tp{font-size:12px;color:var(--text3)}
 .tc.fix{opacity:.55}
 .tc.ok{border-color:#a5ed6e;background:var(--ok-soft)}
@@ -471,10 +520,12 @@ button.item{box-shadow:0 3px 0 var(--line)}
 /* Нижняя навигация */
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--bg);border-top:2px solid var(--line);display:flex;max-width:600px;margin:0 auto;padding-bottom:var(--safe-b)}
 body.focus .nav{display:none}
-.nav button{flex:1;padding:8px 0 7px;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--text3);font-size:10.5px;font-weight:900;letter-spacing:.02em;border-radius:12px;margin:5px 2px;border:2px solid transparent}
-.nav button .ic{font-size:21px;line-height:1.1;filter:grayscale(1);opacity:.6}
+.nav button{flex:1;padding:6px 0 5px;display:flex;flex-direction:column;align-items:center;gap:1px;color:var(--text3);font-size:10.5px;font-weight:900;letter-spacing:.02em;border-radius:14px;margin:6px 3px;border:2px solid transparent;min-width:0}
+.nav button .ic{display:block;height:28px;transition:transform .15s}
+.nav button .ic svg{display:block}
+.nav button:not(.on) .ic{filter:saturate(.75);opacity:.85}
 .nav button.on{color:var(--primary-text);background:var(--primary-soft);border-color:var(--primary-line)}
-.nav button.on .ic{filter:none;opacity:1}
+.nav button.on .ic{transform:scale(1.08)}
 .toast{position:fixed;left:50%;bottom:calc(96px + var(--safe-b));transform:translateX(-50%);background:var(--title);color:#fff;padding:11px 17px;border-radius:14px;
   font-size:13.5px;z-index:90;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%;font-weight:800}
 .toast.on{opacity:1}
@@ -496,29 +547,49 @@ select,input[type=date],input[type=text].inl,input[type=number].inl{background:v
 .datechips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .datechips button{border:2px solid #b9e6fb;background:var(--blue-soft);color:var(--blue-lip);border-radius:10px;padding:4px 8px;font-size:12.5px;font-weight:800}
 
+
+/* Экран загрузки: оранжевый, как системная заставка (manifest background_color), маскот + название */
+.splash{position:fixed;inset:0;z-index:200;background:radial-gradient(120% 80% at 50% 30%,#ffb020 0%,#ff9600 55%,#f08400 100%);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;color:#fff;text-align:center;transition:opacity .35s ease,visibility .35s;padding:24px}
+.splash.out{opacity:0;visibility:hidden}
+.spl-badge{width:168px;height:168px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 10px 0 rgba(160,70,0,.28);animation:splhop 1.1s cubic-bezier(.3,1.4,.5,1) infinite alternate}
+.spl-badge svg{width:132px;height:auto;margin-top:8px}
+.spl-t{margin-top:28px;font:900 34px/1.1 Nunito,system-ui,sans-serif;letter-spacing:.01em;text-shadow:0 3px 0 rgba(160,70,0,.25)}
+.spl-t .han{font-family:"Noto Serif SC","Songti SC",serif;font-weight:700;margin-right:6px}
+.spl-s{margin-top:8px;font:800 15px/1.35 Nunito,system-ui,sans-serif;opacity:.95}
+.spl-bar{margin-top:34px;width:180px;height:14px;border-radius:8px;background:rgba(255,255,255,.35);overflow:hidden}
+.spl-bar i{display:block;height:100%;width:40%;border-radius:8px;background:#fff;animation:splbar 1.1s ease-in-out infinite}
+@keyframes splhop{from{transform:translateY(0)}to{transform:translateY(-12px)}}
+@keyframes splbar{0%{transform:translateX(-110%)}100%{transform:translateX(280%)}}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
 </style>
 </head>
 <body>
+<div class="splash" id="splash" role="status" aria-label="Загрузка">
+  <div class="spl-badge"><svg class="spl-m" viewBox="8 4 104 76" width="140" height="102" aria-hidden="true"><path d="M16 40C10 20 18 8 32 9c8 .6 12 6 11 14z" fill="#f47a2c"/> <path d="M21 33C18 21 22 14 31 14.5c5 .4 7 4 6 9z" fill="#fff7ee"/> <path d="M24 31C23 24 25 19 30 19.5c3 .3 4 2.5 3.6 5z" fill="#5c2a18"/><path d="M104 40C110 20 102 8 88 9c-8 .6 -12 6 -11 14z" fill="#f47a2c"/> <path d="M99 33C102 21 98 14 89 14.5c-5 .4 -7 4 -6 9z" fill="#fff7ee"/> <path d="M96 31C97 24 95 19 90 19.5c-3 .3 -4 2.5 -3.6 5z" fill="#5c2a18"/> <rect x="12" y="15" width="96" height="63" rx="31.5" fill="#f47a2c"/> <rect x="34" y="21" width="15" height="7" rx="3.5" fill="#fff7ee"/><rect x="71" y="21" width="15" height="7" rx="3.5" fill="#fff7ee"/> <circle cx="25" cy="55" r="11" fill="#fff7ee"/><circle cx="95" cy="55" r="11" fill="#fff7ee"/> <rect x="41" y="44" width="38" height="28" rx="14" fill="#fff7ee"/> <path d="M43 48c-1 6 1 10 5 13M77 48c1 6-1 10-5 13" fill="none" stroke="#d9581c" stroke-width="3" stroke-linecap="round" opacity=".55"/> <path d="M36 42q7-10 14 0" fill="none" stroke="#2b1a12" stroke-width="4" stroke-linecap="round"/><path d="M70 42q7-10 14 0" fill="none" stroke="#2b1a12" stroke-width="4" stroke-linecap="round"/> <rect x="29" y="47" width="10" height="5" rx="2.5" fill="#ff8fa0" opacity=".75"/><rect x="81" y="47" width="10" height="5" rx="2.5" fill="#ff8fa0" opacity=".75"/> <path d="M54 50h12c1.6 0 2.4 1.9 1.2 3l-4.8 4.6a3.4 3.4 0 0 1-4.8 0L52.8 53c-1.2-1.1-.4-3 1.2-3z" fill="#2b1a12"/><path d="M51 59h18a9 9 0 0 1-18 0z" fill="#8a2c1a"/><path d="M55 64.5a5.5 3.5 0 0 0 10 0 9 9 0 0 1-10 0z" fill="#ff8fa0"/></svg></div>
+  <div class="spl-t"><span class="han">朱</span>Ханьцзы</div>
+  <div class="spl-s">иероглифы уроков 1–30 по Кондрашевскому</div>
+  <div class="spl-bar"><i></i></div>
+</div>
 <div id="app">
   <header class="top">
-    <div class="seal han" aria-hidden="true">朱</div>
+    <button class="seal" id="logo" aria-label="Чжу — на главную"></button>
     <div class="daychip" id="dayChip">обычный день</div>
     <div class="spacer"></div>
-    <div class="stat fire" id="stStreak" title="Серия дней"><span class="ico">🔥</span><span>0</span></div>
-    <div class="stat ice" id="stFreeze" title="Заморозки серии"><span class="ico">❄️</span><span>0</span></div>
+    <button class="stat fire" id="stStreak" title="Серия дней"><span class="si"></span><span>0</span></button>
+    <button class="stat ice" id="stFreeze" title="Заморозки серии"><span class="si"></span><span>0</span></button>
     <div class="ring" id="stRing" title="Дневная цель XP"></div>
   </header>
   <main id="screen"></main>
 </div>
 <nav class="nav" id="nav">
-  <button data-nav="path" class="on"><span class="ic">🧭</span>Путь</button>
-  <button data-nav="practice"><span class="ic">🔁</span>Повторение</button>
-  <button data-nav="dict"><span class="ic">📖</span>Словарь</button>
-  <button data-nav="progress"><span class="ic">📊</span>Прогресс</button>
-  <button data-nav="settings"><span class="ic">⚙️</span>Настройки</button>
+  <button data-nav="path" class="on"><span class="ic" data-ic="home"></span>Путь</button>
+  <button data-nav="practice"><span class="ic" data-ic="dumbbell"></span>Повторение</button>
+  <button data-nav="dict"><span class="ic" data-ic="book"></span>Словарь</button>
+  <button data-nav="progress"><span class="ic" data-ic="trophy"></span>Прогресс</button>
+  <button data-nav="settings"><span class="ic" data-ic="gear"></span>Настройки</button>
 </nav>
 <div class="fb" id="fb" hidden><div class="in" id="fbin"></div></div>
 <div class="combopop" id="combopop"></div>
@@ -717,7 +788,7 @@ const DEF_SEM={on:true,endDate:'2027-01-31',targetLesson:30,groupLesson:18,
   holidays:{from:'2026-12-31',to:'2027-01-10',capacity:0.3},awayDays:[],newWordsUntil:'2026-12-28',
   keysPerDay:10,exams:[],minutesNormal:40};
 const clone=o=>JSON.parse(JSON.stringify(o));
-const DEF_SETTINGS={semester:clone(DEF_SEM),newPerDay:12,voiceName:null,xpGoal:50,sound:true,vibrate:false,
+const DEF_SETTINGS={semester:clone(DEF_SEM),newPerDay:12,voiceName:null,voiceRec:true,xpGoal:50,sound:true,vibrate:false,
   mockMin:40,scale:[90,75,60]};
 const State = {
   cards:{},                                  // ключ → карточка FSRS: слово (w.key), ключ 'r:N', разбор знака 'key:<иероглиф>'
@@ -751,7 +822,7 @@ async function loadState(){
   }
   const s=await Store.get('settings');
   if(s){
-    ['newPerDay','voiceName','xpGoal','sound','vibrate','mockMin','scale'].forEach(k=>{ if(s[k]!==undefined) State.settings[k]=s[k]; });
+    ['newPerDay','voiceName','voiceRec','xpGoal','sound','vibrate','mockMin','scale'].forEach(k=>{ if(s[k]!==undefined) State.settings[k]=s[k]; });
     // миграция: старые «урок группы» (lesson) и цель (goal) → семестр; прогресс не трогаем
     const sem=s.semester||{}; if(!s.semester&&s.lesson) sem.groupLesson=s.lesson;
     State.settings.semester=mergeSemester(sem);
@@ -825,34 +896,75 @@ function pinyinHTML(py){
 function wordSylls(w){ const s=w.p.trim().split(/\s+/); return s.length===hanOf(w.s).length ? s : null; }
 
 /*==================================================================
-  ОЗВУЧКА: аудио-пак ./audio (если выложен) или голос устройства
+  ОЗВУЧКА: живые записи носителей (audio/, tools/make_audio_pack.py) — чёткие тоны;
+  предложения и слова без записи — голос устройства (Web Speech, zh-CN).
+  Слово с записью → audio/w/<коды>.mp3 (диктор Yue Tan); односложное слово и знак → слог audio/s/<слог><тон>.mp3
+  (диктор Chen Wang; тон всегда как в учебнике); нет записи слова → по слогам; «медленно» — по слогам с паузами.
 ==================================================================*/
+const AUD=(()=>{ const a={"s":["ai4","an1","ba1","ba4","bai2","bai3","ban1","ban3","ban4","bang1","bao1","bao3","bao4","bei1","bei3","bei4","ben3","bi3","bian1","biao3","bie2","bin1","bing1","bing4","bo1","bu2","bu4","cai2","cai4","can1","ce4","ceng2","cha2","cha4","chang2","chang3","chang4","chao2","che1","chen4","cheng2","chi1","chi3","chu1","chu2","chu3","chuan1","chuan2","chuang2","chun1","ci2","cong2","cun1","cuo4","da2","da3","da4","dai1","dai4","dang1","dao3","dao4","de2","deng1","deng3","di4","dian3","dian4","diao4","ding1","ding3","ding4","dong1","dong3","dong4","dou1","duan3","duan4","dui4","duo1","e1","e2","er2","er4","fa1","fa3","fan1","fan4","fang1","fang2","fang3","fang4","fei1","fen1","fen3","feng1","fu1","fu2","fu3","fu4","gai1","gan1","gan3","gan4","gao1","gao4","ge1","ge4","gei3","gen1","geng4","gong1","gu1","gu3","guan1","guan3","guang1","gui4","guo1","guo2","guo3","guo4","hai2","hai3","han4","hang2","hao3","hao4","he1","he2","he4","hei1","hen3","heng2","hong2","hou4","hu1","hu4","hua1","hua2","hua4","huan1","huan2","huang2","hui1","hui2","hui4","hun1","huo3","huo4","ji1","ji3","ji4","jia1","jian1","jian3","jian4","jiang1","jiao1","jiao3","jiao4","jie1","jie2","jie3","jie4","jin1","jin3","jin4","jing1","jing4","jiu1","jiu3","jiu4","ju2","ju4","jue2","ka1","kai1","kan4","kang1","ke1","ke3","ke4","kong1","kou3","ku1","ku4","kuai4","kuang4","la1","lai2","lan2","lan3","lao3","lao4","le4","li2","li3","li4","lia3","lian2","lian3","lian4","liang3","liang4","liao3","lie4","ling2","liu2","liu4","lou2","lu3","lu4","luo2","lv3","lv4","ma1","ma3","mai3","man4","mang2","mao2","mao4","mei2","mei3","mei4","men2","mi4","mian4","miao3","min2","ming2","mo4","na3","na4","nai3","nan2","nao3","neng2","ni2","ni3","nian2","nian4","niang2","nin2","niu2","nong2","nu3","nv3","ou1","pai2","pan2","pan4","pang1","pang2","pao3","peng2","pi2","pian4","piao4","ping1","ping2","pu2","qi1","qi2","qi3","qi4","qian1","qian2","qing1","qing2","qing3","qiu1","qiu2","qu4","quan2","qun2","ran2","rang4","re4","ren2","ren4","ri4","rong2","ruo4","sai4","san1","san3","se4","sha1","shan1","shang1","shang4","shao3","shao4","she3","she4","shei2","shen1","shen2","sheng1","sheng4","shi1","shi2","shi3","shi4","shou3","shou4","shu1","shu4","shuang1","shui3","shui4","shuo1","si1","si4","song4","su4","suan4","sui4","suo3","ta1","tai2","tai4","tan2","tang1","tang2","tao2","tao4","ti1","ti2","ti3","tian1","tiao2","tiao4","ting1","ting2","tong2","tu2","tuan2","tui3","tuo1","wa1","wa4","wai4","wan2","wan3","wan4","wang2","wang3","wang4","wei2","wei4","wen2","wen4","wo3","wo4","wu3","wu4","xi1","xi2","xi3","xi4","xia4","xian1","xian3","xian4","xiang1","xiang3","xiang4","xiao3","xiao4","xie1","xie2","xie3","xie4","xin1","xin4","xing1","xing2","xing4","xiu1","xu4","xue2","xue3","xun4","ya4","yan1","yan2","yan3","yan4","yang2","yang4","yao4","ye2","ye3","ye4","yi1","yi2","yi3","yi4","yin1","yin2","ying1","ying2","ying3","yong3","yong4","you2","you3","you4","yu2","yu3","yu4","yuan2","yuan3","yuan4","yue1","yue4","yun2","yun4","za2","zai3","zai4","zan4","zao3","zen3","zhai1","zhan4","zhang1","zhang3","zhang4","zhao1","zhao3","zhao4","zhe3","zhe4","zhen1","zheng3","zheng4","zhi1","zhi2","zhi3","zhi4","zhong1","zhong4","zhou1","zhu1","zhu4","zhuan3","zhuang1","zhun3","zhuo1","zi3","zi4","zong1","zong3","zou3","zu2","zui3","zuo2","zuo3","zuo4"],"w":["一下儿","一定","一点儿","一起","一路平安","丈夫","上午","上班","上衣","上课","上边","下午","下班","下课","不敢当","不错","世界","东西","东边","中午","中文","乒乓球","书店","了","了解","互相","京剧","人民","什么","今天","今年","介绍","他们","代表","以后","们","休息","体育场","作家","你们","俄语","保重","健康","儿子","先生","公司","公园","公平","公斤","公里","再见","农村","农民","冬天","准备","出发","分别","分钟","别的","前边","剧场","加深","努力","医院","千万","午饭","半夜","卧室","历史","厕所","厨房","去年","参加","参观","友好","友谊","口语","古代","古典","可以","可是","号码","同学","名字","后边","吗","吧","吸烟","告诉","呢","咖啡","哥哥","哪里","商店","啊","啤酒","喜欢","回答","因为","围巾","国家","图书馆","圆珠笔","地图","地址","地方","复习","夏天","外语","多少","大使","大使馆","大夫","大学","大家","大衣","太太","夫人","女儿","奶奶","她们","好听","好看","妈妈","妹妹","妻子","姐姐","姑娘","姥姥","学习","学生","学院","孩子","它们","客厅","客气","容易","宿舍","对不起","对面","小学","小学生","小说","尺子","岁数","工人","工作","工厂","工程师","左边","差不多","帮助","帽子","干净","干杯","年轻","应该","座位","开始","弟弟","得","忽然","怎么样","总是","感谢","愿意","成语","我们","或者","房子","房间","所以","手套","手表","报纸","招待会","排球","放心","教室","教授","教练","整理","整齐","文化","文学","新年","新闻","旁边","旅行","早饭","时候","明天","明年","星期","星期日","春天","昨天","晚上","晚饭","有名","有意思","有时候","朋友","服务","服务员","服装","本子","机场","杂志","条子","桌子","棕色","椅子","橘子","欢迎","歌剧","正在","毛笔","水果","汉字","汉语","汽车","没关系","没有","注意","洗澡","洗衣机","流利","清楚","游泳","滑冰","滑雪","漂亮","火车","点心","热情","照片","照相","爱人","爷爷","爸爸","牛奶","玩儿","现代","现在","理想","生日","生词","电影","电影院","电脑","电视","电话","画儿","画报","留学生","留念","的","眼睛","眼镜","睡觉","知道","研究","礼物","祝贺","离开","秋天","空儿","筷子","签证","箱子","篮球","糖果","红茶","约会","练习","经理","结婚","网球","美国","翻译","老师","职员","自己","舞会","花园","英语","苹果","茅台酒","葡萄","行李","衣服","衬衫","袜子","裁判","裙子","裤子","见面","认真","认识","访问","词典","诗歌","语法","请柬","请问","课文","课本","谢谢","贵姓","起床","起飞","足球","跑步","跳舞","身体","辅导","运动","还是","这个","进步","送行","那个","邮局","邮票","里边","铅笔","银行","锻炼","问题","阅览室","难过","雨伞","青蛙","非常","面包","音乐","颜色","飞机","食堂","餐厅","饭店","饺子","香蕉","高兴","黄色","黑板"],"n":{"ceng2":1,"cha4":1,"chang4":1,"chen4":3,"chuan2":3,"cuo4":0,"da4":1,"diao4":1,"guan3":4,"han4":1,"hua4":1,"jian3":4,"lao4":1,"lian4":1,"lu3":2,"niu2":1,"nu3":4,"qu4":2,"ren4":2,"rong2":1,"se4":1,"shi4":2,"shu4":1,"tiao2":3,"wa4":1,"wai4":1,"wei4":1,"wu3":2,"yi3":2,"yu3":2}}; return {s:new Set(a.s||[]),w:new Set(a.w||[])}; })();
 const Speech=(()=>{
-  let voices=[], chosen=null, prefName=null, pack=null;
+  let voices=[], chosen=null, prefName=null, pack=null, seq=0, cur=null;
   fetch('./audio/manifest.json').then(r=>r.ok?r.json():null).then(j=>{ if(Array.isArray(j)&&j.length) pack=new Set(j); }).catch(()=>{});
-  function refresh(){ voices=speechSynthesis.getVoices()||[];
+  function refresh(){ voices=('speechSynthesis' in window)?(speechSynthesis.getVoices()||[]):[];
     const zh=voices.filter(v=>/zh|cmn|chinese/i.test(v.lang+v.name));
     chosen=(prefName&&zh.find(v=>v.name===prefName))||zh.find(v=>/CN|Hans|普通话|Ting|Mandarin/i.test(v.name+v.lang))||zh[0]||null; }
   if('speechSynthesis' in window){ refresh(); speechSynthesis.onvoiceschanged=refresh; }
+  const rec=()=>State.settings.voiceRec!==false;
   function tts(text,rate){
     if(!('speechSynthesis' in window)){ toast('Озвучка недоступна в этом браузере'); return; }
     if(!chosen) refresh();
     try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text.replace(/——/g,'，'));
       u.lang='zh-CN'; if(chosen) u.voice=chosen; u.rate=rate||.82; speechSynthesis.speak(u); }catch(e){}
   }
-  function say(text,rate){
-    if(!text) return;
+  // слог пиньиня → имя файла «xie4» (ü → v); лёгкий тон и эрхуа — нет записи
+  function sylName(p){ const t=syllTone(p), b=toneless(p); if(t>4||!b) return null; return b==='er'||!/r$/.test(b)?b+t:null; }
+  function sylls(text,py){
+    const hz=hanOf(text); if(!hz.length) return null;
+    if(!py){ const w=BYS[text]; py=w?w.p:(hz.length===1?charPy(hz[0]).split(' / ')[0]:''); }
+    const ps=(py||'').trim().split(/\s+/).filter(Boolean); if(ps.length!==hz.length) return null;
+    const ns=ps.map(sylName); return ns.every(n=>n&&AUD.s.has(n))?ns:null;
+  }
+  const url=n=>'./audio/'+n+'.mp3';
+  const wid=t=>[...t].map(c=>c.codePointAt(0).toString(16)).join('-');
+  function playList(list,gap,rate,onFail){
+    const my=++seq; let i=0;
+    (function next(){
+      if(my!==seq||i>=list.length) return;
+      try{ const a=new Audio(url(list[i++])); cur=a; if(rate&&rate<1) a.playbackRate=Math.max(.7,rate);
+        a.onended=()=>{ if(my===seq) setTimeout(next,gap); };
+        a.play().catch(()=>{ if(my===seq&&i===1&&onFail) onFail(); });
+      }catch(e){ if(onFail) onFail(); }
+    })();
+  }
+  // источник для текста: {list:[файлы], gap} или null (тогда синтез)
+  function plan(text,py,slow){
+    if(!rec()) return null;
+    const ss=sylls(text,py), hz=hanOf(text), t=text.trim();
+    if(slow&&ss) return {list:ss.map(n=>'s/'+n),gap:420};
+    if(hz.length>1&&AUD.w.has(t)&&[...t].every(isHan)) return {list:['w/'+wid(t)],gap:0};
+    if(hz.length===1&&!ss&&AUD.w.has(t)) return {list:['w/'+wid(t)],gap:0};          // лёгкий тон: 吗 呢 了…
+    if(ss&&hz.length<=4) return {list:ss.map(n=>'s/'+n),gap:hz.length>1?60:0};
+    return null;
+  }
+  function say(text,rate,py){
+    if(!text) return; stop();
+    const slow=rate&&rate<.7, p=plan(text,py,slow);
+    if(p){ playList(p.list,p.gap,slow&&p.list.length===1?.75:1,()=>tts(text,rate)); return; }
     if(pack&&pack.has(text+'.mp3')){
-      try{ const a=new Audio('./audio/'+encodeURIComponent(text+'.mp3')); if(rate&&rate<.7) a.playbackRate=.7; a.play().catch(()=>tts(text,rate)); return; }catch(e){}
+      try{ const a=new Audio('./audio/'+encodeURIComponent(text+'.mp3')); cur=a; if(rate&&rate<.7) a.playbackRate=.7; a.play().catch(()=>tts(text,rate)); return; }catch(e){}
     }
     tts(text,rate);
   }
-  function stop(){ try{ speechSynthesis.cancel(); }catch(e){} }
-  return {say,stop,has:()=>('speechSynthesis' in window)||!!pack,voice:()=>chosen,
+  function stop(){ seq++; try{ if(cur){ cur.pause(); cur=null; } }catch(e){} try{ speechSynthesis.cancel(); }catch(e){} }
+  // все файлы записей — чтобы приложение озвучивало без интернета (их кэширует service worker)
+  function files(){ return [...AUD.s].map(n=>url('s/'+n)).concat([...AUD.w].map(t=>url('w/'+wid(t)))); }
+  return {say,stop,plan,files,sylls,has:()=>('speechSynthesis' in window)||!!pack||rec(),voice:()=>chosen,
     setPref(n){ prefName=n||null; if('speechSynthesis' in window) refresh(); },
     list(){ if('speechSynthesis' in window) refresh(); return voices.filter(v=>/zh|cmn|chinese/i.test(v.lang+v.name)); },
-    source(){ return pack?('аудио-пак ('+pack.size+' файлов)'):(chosen?chosen.name:'системный синтез'); }};
+    source(){ return rec()?'живые голоса: слова и слоги — запись носителей, предложения — '+(chosen?chosen.name:'голос устройства'):pack?('аудио-пак ('+pack.size+' файлов)'):(chosen?chosen.name:'системный синтез'); }};
 })();
+const sayW=(w,rate)=>Speech.say(w.s,rate,w.p);
+const sayA=w=>`data-say="${esc(w.s)}" data-py="${esc(w.p)}"`;
 
 /*==================================================================
   УТИЛИТЫ
@@ -875,6 +987,109 @@ function daysTo(s){ const p=(s||'').split('-').map(Number); if(p.length!==3) ret
 function whenText(d){ return d===0?'сегодня':d===1?'завтра':d>1?'через '+d+' '+plural(d,'день','дня','дней'):d<0?'прошла':''; }
 function plural(n,a,b,c){ n=Math.abs(n)%100; const n1=n%10; return n>10&&n<20?c:n1>1&&n1<5?b:n1===1?a:c; }
 
+
+/*==================================================================
+  ИКОНКИ «朱»: свои, рисованные (SVG 32×32), в духе Duolingo — круглые формы, 2–3 тона,
+  тёмная «кромка» снизу. IC(имя, размер, класс) → строка <svg>. Без эмодзи и внешних наборов.
+==================================================================*/
+const ICP={
+  // — навигация
+  home:`<path d="M6 15h20v10.5a3.5 3.5 0 0 1-3.5 3.5h-13A3.5 3.5 0 0 1 6 25.5z" fill="#ffd9a8"/><path d="M6 25h20v.5a3.5 3.5 0 0 1-3.5 3.5h-13A3.5 3.5 0 0 1 6 25.5z" fill="#f5be7c"/>
+    <rect x="12.5" y="19" width="7" height="10" rx="2.4" fill="#ff9600"/><path d="M2.6 15.4C7.6 13.9 11.9 10.6 14.3 6a2 2 0 0 1 3.4 0c2.4 4.6 6.7 7.9 11.7 9.4 1 .3.8 1.8-.3 1.8H2.9c-1.1 0-1.3-1.5-.3-1.8z" fill="#ff4b4b"/>
+    <path d="M3.4 17.2h25.2c.9 0 1.3-.9.9-1.5H2.5c-.4.6 0 1.5.9 1.5z" fill="#d93636"/><circle cx="16" cy="4.6" r="1.8" fill="#ffc800"/>`,
+  dumbbell:`<rect x="9" y="14" width="14" height="4" rx="2" fill="#afafaf"/><rect x="3" y="9" width="7" height="14" rx="3" fill="#1cb0f6"/><rect x="3" y="18" width="7" height="5" rx="2.5" fill="#1899d6"/>
+    <rect x="22" y="9" width="7" height="14" rx="3" fill="#1cb0f6"/><rect x="22" y="18" width="7" height="5" rx="2.5" fill="#1899d6"/><rect x="5" y="11" width="2" height="5" rx="1" fill="#fff" opacity=".55"/><rect x="24" y="11" width="2" height="5" rx="1" fill="#fff" opacity=".55"/>`,
+  book:`<rect x="5" y="4" width="21" height="25" rx="4" fill="#ce82ff"/><rect x="5" y="23" width="21" height="6" rx="3" fill="#a568cc"/><path d="M9 23.5h17v2.5H9.8a1.3 1.3 0 0 1-.8-2.5z" fill="#fff"/>
+    <rect x="9" y="4" width="3" height="19" fill="#b66ee8"/><path d="M19 4h5v9l-2.5-2-2.5 2z" fill="#ff9600"/><text x="17.5" y="20" font-size="9" text-anchor="middle" fill="#fff" font-family="'Noto Sans SC',sans-serif" font-weight="700">字</text>`,
+  trophy:`<path d="M9 4h14v8a7 7 0 0 1-14 0z" fill="#ffc800"/><path d="M9 9h14v3a7 7 0 0 1-14 0z" fill="#ffb100"/><path d="M9 6H5.5a1.5 1.5 0 0 0-1.5 1.6C4.3 11.6 6.6 14 9.6 14.6M23 6h3.5A1.5 1.5 0 0 1 28 7.6c-.3 4-2.6 6.4-5.6 7" fill="none" stroke="#ffc800" stroke-width="2.4" stroke-linecap="round"/>
+    <rect x="14" y="18" width="4" height="5" fill="#e5a800"/><rect x="9" y="23" width="14" height="6" rx="2.5" fill="#ff9600"/><rect x="9" y="26" width="14" height="3" rx="1.5" fill="#e07c00"/><rect x="12" y="6" width="2.4" height="7" rx="1.2" fill="#fff" opacity=".6"/>`,
+  gear:'GEAR',
+  // — шапка
+  flame:`<path d="M16 2.5c1.3 4.4 7.4 7.6 9 13.4C26.9 23 22.2 29.5 16 29.5S5.1 23 7 15.9c.9-3.3 3.3-5 4.2-7.6.5 2.2 1.7 3.4 2.9 4C13.7 8.6 14.6 5.4 16 2.5z" fill="#ff9600"/>
+    <path d="M16 13.5c.8 2.9 4.9 4.8 5.3 8.6.4 3.8-2.3 6.4-5.3 6.4s-5.8-2.6-5.3-6.4c.3-2.4 2-3.4 2.7-5.1.6 1.4 1.3 2 2.1 2.3-.2-2 .1-3.9.5-5.8z" fill="#ffc800"/>`,
+  flameOff:`<path d="M16 2.5c1.3 4.4 7.4 7.6 9 13.4C26.9 23 22.2 29.5 16 29.5S5.1 23 7 15.9c.9-3.3 3.3-5 4.2-7.6.5 2.2 1.7 3.4 2.9 4C13.7 8.6 14.6 5.4 16 2.5z" fill="#e5e5e5"/>
+    <path d="M16 13.5c.8 2.9 4.9 4.8 5.3 8.6.4 3.8-2.3 6.4-5.3 6.4s-5.8-2.6-5.3-6.4c.3-2.4 2-3.4 2.7-5.1.6 1.4 1.3 2 2.1 2.3-.2-2 .1-3.9.5-5.8z" fill="#cfcfcf"/>`,
+  ice:`<rect x="4" y="5" width="24" height="23" rx="6" fill="#84d8ff"/><rect x="4" y="21" width="24" height="7" rx="3.5" fill="#49c0f8"/><path d="M8 10.5a2.5 2.5 0 0 1 2.5-2.5H17" stroke="#fff" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+    <circle cx="21" cy="9" r="1.4" fill="#fff"/><path d="M21 15.5v6M18.4 17l5.2 3M18.4 20l5.2-3" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity=".9"/>`,
+  iceOff:`<rect x="4" y="5" width="24" height="23" rx="6" fill="#e5e5e5"/><rect x="4" y="21" width="24" height="7" rx="3.5" fill="#d0d0d0"/><path d="M8 10.5a2.5 2.5 0 0 1 2.5-2.5H17" stroke="#fff" stroke-width="2.6" stroke-linecap="round" fill="none"/>`,
+  bolt:`<path d="M18.5 2.5 6.8 17.2c-.6.8-.1 1.8.9 1.8h6.6l-2 10.1c-.2.9.9 1.4 1.5.7L25.2 15c.6-.8.1-1.8-.9-1.8h-6.5l2.4-10c.2-.9-1-1.4-1.7-.7z" fill="#ffc800"/><path d="M14.3 19 12.3 29c-.1.6.3 1 .7 1L14.9 19z" fill="#e5a800"/>`,
+  // — узлы пути и общие
+  star:`<path d="M16 3.6c.6 0 1.1.3 1.4.9l3 6.2 6.8 1c1.3.2 1.8 1.8.9 2.7l-4.9 4.8 1.2 6.8c.2 1.3-1.1 2.3-2.3 1.7L16 24.5l-6.1 3.2c-1.2.6-2.5-.4-2.3-1.7l1.2-6.8-4.9-4.8c-.9-.9-.4-2.5.9-2.7l6.8-1 3-6.2c.3-.6.8-.9 1.4-.9z" fill="currentColor"/>`,
+  check:`<path d="M7 16.5l6 6L25.5 10" fill="none" stroke="currentColor" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"/>`,
+  checkOk:`<circle cx="16" cy="16" r="14" fill="#58cc02"/><path d="M9.5 16.5l4.5 4.5 8.5-9" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>`,
+  xBad:`<circle cx="16" cy="16" r="14" fill="#ff4b4b"/><path d="M11 11l10 10m0-10L11 21" stroke="#fff" stroke-width="3.6" stroke-linecap="round"/>`,
+  lock:`<path d="M10 14v-3.5a6 6 0 0 1 12 0V14" fill="none" stroke="currentColor" stroke-width="3.4"/><rect x="6.5" y="13" width="19" height="15" rx="4.5" fill="currentColor"/><circle cx="16" cy="19.5" r="2.2" fill="#fff" opacity=".8"/><rect x="15" y="20" width="2" height="4" rx="1" fill="#fff" opacity=".8"/>`,
+  lockC:`<path d="M10 14v-3.5a6 6 0 0 1 12 0V14" fill="none" stroke="#afafaf" stroke-width="3.4"/><rect x="6.5" y="13" width="19" height="15" rx="4.5" fill="#ffc800"/><rect x="6.5" y="23" width="19" height="5" rx="2.5" fill="#e5a800"/><circle cx="16" cy="19" r="2.2" fill="#a06d00"/>`,
+  chest:`<rect x="3.5" y="12" width="25" height="16" rx="3.5" fill="#c97a2c"/><path d="M3.5 13.5A8.5 8.5 0 0 1 12 5h8a8.5 8.5 0 0 1 8.5 8.5V15h-25z" fill="#e8963e"/><rect x="3.5" y="15" width="25" height="3" fill="#ffc800"/><rect x="3.5" y="24" width="25" height="4" rx="2" fill="#a8621f"/>
+    <rect x="13" y="13" width="6" height="8" rx="2" fill="#ffc800"/><rect x="15" y="16" width="2" height="3" rx="1" fill="#a06d00"/><rect x="8" y="5.5" width="3" height="22" fill="#ffc800" opacity=".55"/><rect x="21" y="5.5" width="3" height="22" fill="#ffc800" opacity=".55"/>`,
+  crown:`<path d="M4 11.5c0-1.1 1.3-1.7 2.1-.9l4.4 4.2 4.1-7.4c.6-1.1 2.2-1.1 2.8 0l4.1 7.4 4.4-4.2c.8-.8 2.1-.2 2.1.9V24a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z" fill="#ffc800"/><path d="M4 22h24v2a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z" fill="#e5a800"/>
+    <circle cx="10" cy="19" r="1.8" fill="#ff4b4b"/><circle cx="16" cy="18" r="2.1" fill="#1cb0f6"/><circle cx="22" cy="19" r="1.8" fill="#ff4b4b"/>`,
+  pin:`<path d="M16 29.5c-1 0-9-8.4-9-15a9 9 0 0 1 18 0c0 6.6-8 15-9 15z" fill="#ff4b4b"/><circle cx="16" cy="14" r="3.6" fill="#fff"/>`,
+  suitcase:`<rect x="11" y="4.5" width="10" height="6" rx="2.5" fill="none" stroke="#a8621f" stroke-width="2.4"/><rect x="4" y="9" width="24" height="18" rx="4" fill="#1cb0f6"/><rect x="4" y="22" width="24" height="5" rx="2.5" fill="#1899d6"/>
+    <rect x="10" y="9" width="2.5" height="18" fill="#ffc800"/><rect x="19.5" y="9" width="2.5" height="18" fill="#ffc800"/>`,
+  sparkle:`<path d="M15 3.5c.4 0 .8.3.9.7l1.4 5.4a6 6 0 0 0 4.3 4.3l5.4 1.4c.9.2.9 1.6 0 1.8l-5.4 1.4a6 6 0 0 0-4.3 4.3l-1.4 5.4c-.2.9-1.6.9-1.8 0l-1.4-5.4a6 6 0 0 0-4.3-4.3l-5.4-1.4c-.9-.2-.9-1.6 0-1.8l5.4-1.4a6 6 0 0 0 4.3-4.3l1.4-5.4c.1-.4.5-.7.9-.7z" fill="currentColor"/><circle cx="26" cy="6" r="2.2" fill="currentColor" opacity=".7"/>`,
+  sparkleC:`<path d="M15 3.5c.4 0 .8.3.9.7l1.4 5.4a6 6 0 0 0 4.3 4.3l5.4 1.4c.9.2.9 1.6 0 1.8l-5.4 1.4a6 6 0 0 0-4.3 4.3l-1.4 5.4c-.2.9-1.6.9-1.8 0l-1.4-5.4a6 6 0 0 0-4.3-4.3l-5.4-1.4c-.9-.2-.9-1.6 0-1.8l5.4-1.4a6 6 0 0 0 4.3-4.3l1.4-5.4c.1-.4.5-.7.9-.7z" fill="#ffc800"/><circle cx="26" cy="6" r="2.2" fill="#ff9600"/>`,
+  // «разбор»: знак-квадрат, разделённый на ключ (оранжевый) и фонетик (голубой)
+  split:`<rect x="3" y="4" width="11" height="24" rx="3.5" fill="#ff9600"/><rect x="3" y="23" width="11" height="5" rx="2.5" fill="#e07c00"/><rect x="18" y="4" width="11" height="24" rx="3.5" fill="#1cb0f6"/><rect x="18" y="23" width="11" height="5" rx="2.5" fill="#1899d6"/>
+    <text x="8.5" y="19.5" font-size="11" text-anchor="middle" fill="#fff" font-family="'Noto Sans SC',sans-serif" font-weight="700">讠</text><text x="23.5" y="19.5" font-size="10" text-anchor="middle" fill="#fff" font-family="'Noto Sans SC',sans-serif" font-weight="700">射</text>`,
+  splitW:`<path d="M6 8.5h5.4a3.4 3.4 0 1 1 6.8 0h5.3v5.3a3.4 3.4 0 1 1 0 6.8v5.4h-5.3a3.4 3.4 0 1 0-6.8 0H6v-5.4a3.4 3.4 0 1 0 0-6.8z" fill="currentColor"/>`,
+  chat:`<path d="M5 5h15a4 4 0 0 1 4 4v7a4 4 0 0 1-4 4h-7l-5 4v-4H5a4 4 0 0 1-4-4V9a4 4 0 0 1 4-4z" fill="#ff9600"/><path d="M14 13h13a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4h-1v4l-5-4h-7a4 4 0 0 1-4-4v-6a4 4 0 0 1 4-4z" fill="#1cb0f6"/>
+    <text x="10.5" y="15.6" font-size="7.5" text-anchor="middle" fill="#fff" font-weight="900" font-family="Nunito,sans-serif">RU</text><text x="20.5" y="23.8" font-size="8.5" text-anchor="middle" fill="#fff" font-family="'Noto Sans SC',sans-serif" font-weight="700">中</text>`,
+  chatW:`<path d="M7 5h18a5 5 0 0 1 5 5v8a5 5 0 0 1-5 5h-8l-6 5v-5H7a5 5 0 0 1-5-5v-8a5 5 0 0 1 5-5z" fill="currentColor"/><circle cx="10" cy="14" r="2" fill="#fff" opacity=".85"/><circle cx="16" cy="14" r="2" fill="#fff" opacity=".85"/><circle cx="22" cy="14" r="2" fill="#fff" opacity=".85"/>`,
+  clipboard:`<rect x="5" y="5" width="22" height="25" rx="4" fill="#e8963e"/><rect x="8" y="8" width="16" height="19" rx="2" fill="#fff"/><rect x="11" y="3" width="10" height="5" rx="2" fill="#a8621f"/>
+    <path d="M11 14h10M11 18h10M11 22h6" stroke="#afafaf" stroke-width="2" stroke-linecap="round"/>`,
+  pencil:`<path d="M21.5 4.8a3 3 0 0 1 4.2 0l1.5 1.5a3 3 0 0 1 0 4.2L12 25.7 5.5 27c-.6.1-1.1-.4-1-1L5.8 19.5z" fill="#ffc800"/><path d="M5.8 19.5 12 25.7l-6.5 1.3c-.6.1-1.1-.4-1-1z" fill="#ffd9a8"/><path d="M4.5 26 5 23.3 7.7 26z" fill="#4b4b4b"/>
+    <path d="M19 7.3 24.7 13" stroke="#ff4b4b" stroke-width="3"/><path d="M8.5 22.5 20 11" stroke="#e5a800" stroke-width="1.6" stroke-linecap="round"/>`,
+  pencilW:`<path d="M21.5 4.8a3 3 0 0 1 4.2 0l1.5 1.5a3 3 0 0 1 0 4.2L12 25.7 5.5 27c-.6.1-1.1-.4-1-1L5.8 19.5z" fill="currentColor"/>`,
+  cards:`<rect x="9" y="3" width="17" height="22" rx="3.5" fill="#84d8ff" transform="rotate(10 17 14)"/><rect x="5" y="6" width="17" height="23" rx="3.5" fill="#1cb0f6"/><rect x="5" y="24" width="17" height="5" rx="2.5" fill="#1899d6"/>
+    <text x="13.5" y="21" font-size="11" text-anchor="middle" fill="#fff" font-family="'Noto Sans SC',sans-serif" font-weight="700">你</text>`,
+  plus:`<circle cx="16" cy="16" r="13" fill="#ff9600"/><path d="M16 10v12M10 16h12" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/>`,
+  cycle:`<path d="M24.5 12.5a9.5 9.5 0 0 0-16.8-2.3" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/><path d="M6 5.5v6h6" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M7.5 19.5a9.5 9.5 0 0 0 16.8 2.3" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/><path d="M26 26.5v-6h-6" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>`,
+  cycleC:`<path d="M24.5 12.5a9.5 9.5 0 0 0-16.8-2.3" fill="none" stroke="#ff9600" stroke-width="3.6" stroke-linecap="round"/><path d="M6 5.5v6h6" fill="none" stroke="#ff9600" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M7.5 19.5a9.5 9.5 0 0 0 16.8 2.3" fill="none" stroke="#1cb0f6" stroke-width="3.6" stroke-linecap="round"/><path d="M26 26.5v-6h-6" fill="none" stroke="#1cb0f6" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>`,
+  speaker:`<path d="M4 12.5a2 2 0 0 1 2-2h4l6.4-5.3c1-.8 2.6-.1 2.6 1.2v19.2c0 1.3-1.6 2-2.6 1.2L10 21.5H6a2 2 0 0 1-2-2z" fill="currentColor"/><path d="M22.5 11.5a6.5 6.5 0 0 1 0 9M25.8 8a11.5 11.5 0 0 1 0 16" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/>`,
+  turtle:`<path d="M5 22a11 11 0 0 1 22 0z" fill="#e8963e"/><path d="M5 22h22v1.5a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z" fill="#a8621f"/><path d="M11 12.5 16 17l5-4.5M16 17v5M8 19.5l3-1.8M24 19.5l-3-1.8" stroke="#ffc800" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+    <circle cx="28" cy="18.5" r="3.4" fill="#ffc07a"/><circle cx="29" cy="17.6" r=".9" fill="#4b4b4b"/><rect x="7.5" y="24" width="4" height="4.5" rx="2" fill="#ffc07a"/><rect x="20.5" y="24" width="4" height="4.5" rx="2" fill="#ffc07a"/>`,
+  headphones:`<path d="M5 19v-3a11 11 0 0 1 22 0v3" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/><rect x="3" y="17" width="7" height="11" rx="3.5" fill="currentColor"/><rect x="22" y="17" width="7" height="11" rx="3.5" fill="currentColor"/>`,
+  warn:`<path d="M14.3 4.6a2 2 0 0 1 3.4 0l11 19.4a2 2 0 0 1-1.7 3H5a2 2 0 0 1-1.7-3z" fill="#ffc800"/><rect x="14.5" y="11" width="3" height="9" rx="1.5" fill="#6b4b00"/><circle cx="16" cy="23.3" r="1.8" fill="#6b4b00"/>`,
+  flag:`<rect x="5" y="3" width="3" height="27" rx="1.5" fill="#afafaf"/><path d="M8 5h17.5c.9 0 1.3 1 .8 1.7L23 11l3.3 4.3c.5.7.1 1.7-.8 1.7H8z" fill="#ff4b4b"/>`,
+  calendar:`<rect x="4" y="6" width="24" height="23" rx="4" fill="#fff" stroke="#e5e5e5" stroke-width="2"/><path d="M4 10a4 4 0 0 1 4-4h16a4 4 0 0 1 4 4v3H4z" fill="#ff4b4b"/><rect x="9" y="3" width="3" height="6" rx="1.5" fill="#4b4b4b"/><rect x="20" y="3" width="3" height="6" rx="1.5" fill="#4b4b4b"/>
+    <text x="16" y="25.5" font-size="10" text-anchor="middle" fill="#4b4b4b" font-weight="900" font-family="Nunito,sans-serif">10</text>`,
+  gem:`<path d="M9 5h14l6 7.5L16 28 3 12.5z" fill="#1cb0f6"/><path d="M3 12.5h26L16 28z" fill="#1899d6"/><path d="M9 5l3 7.5h8L23 5" fill="#84d8ff"/><path d="M12 12.5 16 28l4-15.5" fill="#49c0f8"/>`,
+  sprout:`<path d="M16 29V15" stroke="#58a700" stroke-width="3" stroke-linecap="round"/><path d="M16 17C16 10 11 6 4 6c0 7 5 11 12 11z" fill="#89e219"/><path d="M16 15c0-6 4-9.5 10-9.5 0 6-4 9.5-10 9.5z" fill="#58cc02"/>`,
+  leaf:`<path d="M16 29V10" stroke="#58a700" stroke-width="3" stroke-linecap="round"/><path d="M16 22c-6 0-10-3-11-8 6 0 10 3 11 8zM16 16c6 0 10-3 11-8-6 0-10 3-11 8zM16 12c-3-2-4-5-3-8.5 3 1.5 4.3 4.5 3 8.5z" fill="#58cc02"/>`,
+  tree:`<rect x="14" y="18" width="4" height="11" rx="2" fill="#a8621f"/><circle cx="16" cy="11" r="8" fill="#58cc02"/><circle cx="9.5" cy="16" r="5.5" fill="#58cc02"/><circle cx="22.5" cy="16" r="5.5" fill="#58cc02"/><circle cx="13" cy="8.5" r="2.2" fill="#89e219"/>`,
+  books:`<rect x="4" y="20" width="24" height="7" rx="2.5" fill="#1cb0f6"/><rect x="6" y="13" width="21" height="7" rx="2.5" fill="#ff9600"/><rect x="5" y="6" width="20" height="7" rx="2.5" fill="#ce82ff"/><path d="M8 23.5h17M10 16.5h14M8 9.5h14" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".7"/>`,
+  timer:`<circle cx="16" cy="18" r="11" fill="#fff" stroke="#1cb0f6" stroke-width="3"/><rect x="13" y="2.5" width="6" height="3.5" rx="1.5" fill="#1cb0f6"/><path d="M16 18V12" stroke="#4b4b4b" stroke-width="2.6" stroke-linecap="round"/><circle cx="16" cy="18" r="2" fill="#ff4b4b"/>`,
+  x:`<path d="M8 8l16 16M24 8 8 24" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/>`,
+  back:`<path d="M20 6 10 16l10 10" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>`,
+  chev:`<path d="M12 6l10 10-10 10" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>`,
+  play:`<path d="M9 5.5c0-1.6 1.7-2.6 3.1-1.8l14.5 9.1c1.3.8 1.3 2.7 0 3.5L12.1 25.4c-1.4.9-3.1-.1-3.1-1.8z" fill="currentColor"/>`,
+  undo:`<path d="M10 7 4 13l6 6" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 13h13a8 8 0 0 1 0 16h-4" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/>`,
+  brush:`<path d="M26.5 3.5c.9.9-7.4 11.4-10.2 14.2l-2.1-2.1C17 12.9 25.6 2.6 26.5 3.5z" fill="#a8621f"/><path d="M13.6 16.1l2.3 2.3c.6 4.7-3.2 8.6-10.4 8.6 2.4-1.8 1.5-4.9 3.2-7.6 1.1-1.8 3.2-3.1 4.9-3.3z" fill="#4b4b4b"/>`,
+  brushW:`<path d="M26.5 3.5c.9.9-7.4 11.4-10.2 14.2l-2.1-2.1C17 12.9 25.6 2.6 26.5 3.5z" fill="currentColor" opacity=".75"/><path d="M13.6 16.1l2.3 2.3c.6 4.7-3.2 8.6-10.4 8.6 2.4-1.8 1.5-4.9 3.2-7.6 1.1-1.8 3.2-3.1 4.9-3.3z" fill="currentColor"/>`,
+  eye:`<path d="M2.5 16C6 9.5 10.6 6.5 16 6.5S26 9.5 29.5 16C26 22.5 21.4 25.5 16 25.5S6 22.5 2.5 16z" fill="currentColor"/><circle cx="16" cy="16" r="5" fill="#fff"/><circle cx="16" cy="16" r="2.4" fill="currentColor"/>`,
+  info:`<circle cx="16" cy="16" r="13" fill="currentColor"/><rect x="14.4" y="13.5" width="3.2" height="10" rx="1.6" fill="#fff"/><circle cx="16" cy="9.5" r="2" fill="#fff"/>`,
+  target:`<circle cx="16" cy="16" r="13" fill="#ff4b4b"/><circle cx="16" cy="16" r="9" fill="#fff"/><circle cx="16" cy="16" r="5" fill="#ff4b4b"/><circle cx="16" cy="16" r="1.8" fill="#fff"/>`,
+  medal:`<path d="M9 3h5l3 8h-5zM23 3h-5l-3 8h5z" fill="#1cb0f6"/><circle cx="16" cy="20" r="9" fill="#ffc800"/><circle cx="16" cy="20" r="6" fill="#ffb100"/><path d="M16 15.8l1.3 2.7 2.9.4-2.1 2 .5 2.9-2.6-1.4-2.6 1.4.5-2.9-2.1-2 2.9-.4z" fill="#fff"/>`,
+  moon:`<path d="M20.5 4.5a12 12 0 1 0 7 17.3A10 10 0 0 1 20.5 4.5z" fill="#ffc800"/><circle cx="25" cy="8" r="1.6" fill="#ffc800"/><circle cx="28" cy="13" r="1" fill="#ffc800"/>`,
+  sun:`<circle cx="16" cy="16" r="7" fill="#ffc800"/><g stroke="#ff9600" stroke-width="2.6" stroke-linecap="round"><path d="M16 3v3M16 26v3M3 16h3M26 16h3M6.8 6.8l2.1 2.1M23.1 23.1l2.1 2.1M6.8 25.2l2.1-2.1M23.1 8.9l2.1-2.1"/></g>`,
+};
+// Шестерёнка строится программно: 8 зубцов
+ICP.gear=(()=>{ let d=''; const R=14,r=10.6,n=8; for(let i=0;i<n*4;i++){ const a=(i/(n*4))*Math.PI*2-Math.PI/2, rr=(i%4<2)?R:r;
+  d+=(i?'L':'M')+(16+rr*Math.cos(a)).toFixed(2)+' '+(16+rr*Math.sin(a)).toFixed(2); }
+  return `<path d="${d}Z" fill="#afafaf" stroke="#afafaf" stroke-width="2.4" stroke-linejoin="round"/><circle cx="16" cy="16" r="8.4" fill="#cfcfcf"/><circle cx="16" cy="16" r="4.2" fill="#fff"/>`; })();
+function IC(name,size,cls){ const p=ICP[name]; if(!p) return '';
+  return `<svg class="ico${cls?' '+cls:''}" viewBox="0 0 32 32" width="${size||24}" height="${size||24}" aria-hidden="true">${p}</svg>`; }
+// Контур тона (1 ровный высокий, 2 восходящий, 3 нисходяще-восходящий, 4 нисходящий, 5 лёгкий) — шкала 1…5 по Чжао Юаньжэню
+const TONE_PATH={1:'M5 7H27',2:'M5 17C12 16 20 12 27 7',3:'M5 13C10 21 15 23 19 21S25 15 27 11',4:'M5 7C12 11 20 17 27 24',5:'M16 18m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0'};
+function toneIcon(t,size){ const c='var(--t'+t+')';
+  return `<svg class="ico tonei" viewBox="0 0 32 28" width="${size||30}" height="${Math.round((size||30)*28/32)}" aria-hidden="true">
+    <path d="M3 4v20M29 4v20" stroke="#e5e5e5" stroke-width="1.5"/><path d="${TONE_PATH[t]}" fill="${t===5?c:'none'}" stroke="${c}" stroke-width="${t===5?0:4.2}" stroke-linecap="round" stroke-linejoin="round"/></svg>`; }
+// Иконка по имени из набора, одиночный иероглиф — как текст (部, 考), иначе строка как есть
+function icn(x,size){ return ICP[x]?IC(x,size):/^[㐀-鿿]$/.test(x||'')?`<span class="han">${x}</span>`:(x||''); }
+const SPK=s=>IC('speaker',s||18), SLOW=()=>IC('turtle',22);
 
 /*==================================================================
   СЕМЕСТРОВЫЙ ПЛАН: ёмкость дней, квоты новых слов и ключей, тип дня
@@ -975,15 +1190,15 @@ function dayPlan(){
   const d=D(), type=dayType(), due=dueKeys().length;
   const wq=todayWordsQuota(), kq=todayKeysQuota();
   const items=[];
-  items.push({id:'rev',icon:'🔁',title:'Повторения',sub:due?'к сроку: '+due:(d.rv?'все сделаны':'на сегодня нет'),cur:d.rv,need:d.rv+due,done:due===0,min:planMinutes('rev',due)});
-  if(wq.quota>0||(!wq.rest&&wq.remaining>0)) items.push({id:'new',icon:'✨',title:'Новые слова — '+wq.quota,sub:wq.left?'осталось '+wq.left:'квота выполнена',cur:d.new,need:wq.quota,done:wq.left===0,min:planMinutes('new',wq.left)});
+  items.push({id:'rev',icon:'cycleC',title:'Повторения',sub:due?'к сроку: '+due:(d.rv?'все сделаны':'на сегодня нет'),cur:d.rv,need:d.rv+due,done:due===0,min:planMinutes('rev',due)});
+  if(wq.quota>0||(!wq.rest&&wq.remaining>0)) items.push({id:'new',icon:'sparkleC',title:'Новые слова — '+wq.quota,sub:wq.left?'осталось '+wq.left:'квота выполнена',cur:d.new,need:wq.quota,done:wq.left===0,min:planMinutes('new',wq.left)});
   if(keysDeckLeft()&&kq.quota>0) items.push({id:'keys',icon:'部',title:'Новые ключи — '+kq.quota,sub:'осталось ввести '+keysDeckLeft()+' из 214',cur:d.keys,need:kq.quota,done:kq.left===0,min:planMinutes('keys',kq.left)});
   if(type==='focus'){
-    items.push({id:'mock',icon:'📝',title:'Пробная контрольная',sub:'фокус-неделя: '+(focusExam(todayStr(),SEM()).e.title||'контрольная'),cur:d.mock,need:1,done:d.mock>=1,min:planMinutes('mock')});
+    items.push({id:'mock',icon:'pencil',title:'Пробная контрольная',sub:'фокус-неделя: '+(focusExam(todayStr(),SEM()).e.title||'контрольная'),cur:d.mock,need:1,done:d.mock>=1,min:planMinutes('mock')});
   }else if(type!=='away'){
-    items.push({id:'dec',icon:'🧩',title:'Разбор на ключи — 5',sub:'иероглифы выученных слов',cur:d.dec,need:5,done:d.dec>=5,min:planMinutes('dec',Math.max(0,5-d.dec))});
-    items.push({id:'sent',icon:'💬',title:'Перевод предложений — 5',sub:'RU→中 и 中→RU',cur:d.sent,need:5,done:d.sent>=5,min:planMinutes('sent',Math.max(0,5-d.sent))});
-    if(type==='holiday'||type==='consol') items.push({id:'mock',icon:'📝',title:'Пробная контрольная',sub:'раз в 2–3 дня',cur:d.mock,need:1,done:d.mock>=1,opt:1,min:planMinutes('mock')});
+    items.push({id:'dec',icon:'split',title:'Разбор на ключи — 5',sub:'иероглифы выученных слов',cur:d.dec,need:5,done:d.dec>=5,min:planMinutes('dec',Math.max(0,5-d.dec))});
+    items.push({id:'sent',icon:'chat',title:'Перевод предложений — 5',sub:'RU→中 и 中→RU',cur:d.sent,need:5,done:d.sent>=5,min:planMinutes('sent',Math.max(0,5-d.sent))});
+    if(type==='holiday'||type==='consol') items.push({id:'mock',icon:'pencil',title:'Пробная контрольная',sub:'раз в 2–3 дня',cur:d.mock,need:1,done:d.mock>=1,opt:1,min:planMinutes('mock')});
   }
   // 3 ежедневных задания: повторения, новые слова (или предложения), ключи (или разбор / пробная в фокус-неделю)
   const pick=ids=>ids.map(id=>items.find(x=>x.id===id)).find(Boolean);
@@ -1014,7 +1229,7 @@ function checkDay(){
   if((act&&dueKeys().length===0)||d.xp>=State.settings.xpGoal){
     d.met=1;
     const n=streakLen(), fz=State.meta.fz;                       // заморозка: 1 за каждые 7 дней серии, максимум 2
-    if(n>0&&n%7===0&&fz.day!==todayStr()&&fz.n<2){ fz.n++; fz.day=todayStr(); notice('❄️','Заморозка серии','за '+n+' '+plural(n,'день','дня','дней')+' подряд'); }
+    if(n>0&&n%7===0&&fz.day!==todayStr()&&fz.n<2){ fz.n++; fz.day=todayStr(); notice('ice','Заморозка серии','за '+n+' '+plural(n,'день','дня','дней')+' подряд'); }
     save('meta'); renderTop();
   }
 }
@@ -1025,7 +1240,7 @@ function applyFreezes(){
   while(!dayMet(d)&&gap.length<=2){ gap.push(d); d=addDays(d,-1); }
   if(!gap.length||gap.length>fz.n||!dayMet(d)) return;
   gap.forEach(x=>{ D(x).fz=1; }); fz.n-=gap.length;
-  setTimeout(()=>notice('❄️','Серия спасена','заморозка прикрыла '+gap.map(fmtDate).join(', ')),600);
+  setTimeout(()=>notice('ice','Серия спасена','заморозка прикрыла '+gap.map(fmtDate).join(', ')),600);
 }
 
 // — неделя: XP этой недели против прошлой и рекорда; сундук за недельную цель (5 дневных целей)
@@ -1045,17 +1260,17 @@ function wordsLearned(){ return semWords().filter(k=>!isNew(k)).length; }
 function lessonDaysRun(){ let d=todayStr(), n=0; if(!(State.meta.daily[d]&&State.meta.daily[d].ls)) d=addDays(d,-1);
   while(State.meta.daily[d]&&State.meta.daily[d].ls){ n++; d=addDays(d,-1); } return n; }
 const ACH=[
-  {id:'w100',ic:'🌱',t:'100 слов',d:'выучены первые 100 слов',f:()=>wordsLearned()>=100},
-  {id:'w300',ic:'🌿',t:'300 слов',d:'выучено 300 слов',f:()=>wordsLearned()>=300},
-  {id:'wall',ic:'🌳',t:'Все слова',d:'все слова уроков 1–30',f:()=>semRemaining()===0},
+  {id:'w100',ic:'sprout',t:'100 слов',d:'выучены первые 100 слов',f:()=>wordsLearned()>=100},
+  {id:'w300',ic:'leaf',t:'300 слов',d:'выучено 300 слов',f:()=>wordsLearned()>=300},
+  {id:'wall',ic:'tree',t:'Все слова',d:'все слова уроков 1–30',f:()=>semRemaining()===0},
   {id:'k214',ic:'部',t:'214 ключей',d:'введены все ключи',f:()=>keysDeckLeft()===0},
-  {id:'crown5',ic:'👑',t:'5 корон',d:'юнит на 5 корон',f:()=>pathUnits().some(u=>unitCrowns(u)>=5)},
-  {id:'s7',ic:'🔥',t:'Серия 7',d:'7 дней подряд',f:()=>streakLen()>=7},
-  {id:'s30',ic:'🔥',t:'Серия 30',d:'30 дней подряд',f:()=>streakLen()>=30},
-  {id:'s60',ic:'🔥',t:'Серия 60',d:'60 дней подряд',f:()=>streakLen()>=60},
-  {id:'mock90',ic:'📝',t:'Пробная на 5',d:'пробная контрольная ≥ 90%',f:()=>State.meta.mocks.some(m=>m.pct>=90)},
-  {id:'perfect',ic:'💎',t:'Без ошибок',d:'урок без единой ошибки',f:()=>false},
-  {id:'days10',ic:'📅',t:'10 дней',d:'10 уроков подряд без пропуска дня',f:()=>lessonDaysRun()>=10},
+  {id:'crown5',ic:'crown',t:'5 корон',d:'юнит на 5 корон',f:()=>pathUnits().some(u=>unitCrowns(u)>=5)},
+  {id:'s7',ic:'flame',t:'Серия 7',d:'7 дней подряд',f:()=>streakLen()>=7},
+  {id:'s30',ic:'flame',t:'Серия 30',d:'30 дней подряд',f:()=>streakLen()>=30},
+  {id:'s60',ic:'flame',t:'Серия 60',d:'60 дней подряд',f:()=>streakLen()>=60},
+  {id:'mock90',ic:'medal',t:'Пробная на 5',d:'пробная контрольная ≥ 90%',f:()=>State.meta.mocks.some(m=>m.pct>=90)},
+  {id:'perfect',ic:'gem',t:'Без ошибок',d:'урок без единой ошибки',f:()=>false},
+  {id:'days10',ic:'calendar',t:'10 дней',d:'10 уроков подряд без пропуска дня',f:()=>lessonDaysRun()>=10},
 ];
 function grantAch(id){
   if(State.meta.ach[id]) return false;
@@ -1067,7 +1282,7 @@ function checkAch(){ let any=false; ACH.forEach(a=>{ if(!State.meta.ach[a.id]&&a
 function checkQuests(){
   const d=D(); if(d.q) return;
   const p=dayPlan(); if(p.quests.length&&p.quests.every(q=>q.done)&&(d.t||d.rv||d.dec||d.sent||d.mock)){
-    d.q=1; addXP(XP.quests); notice('🎁','Все задания дня!','+'+XP.quests+' XP'); Sfx.done(); confetti(); save('meta');
+    d.q=1; addXP(XP.quests); notice('chest','Все задания дня!','+'+XP.quests+' XP'); Sfx.done(); confetti(); save('meta');
   }
 }
 
@@ -1076,7 +1291,7 @@ const NOTES=[]; let noteBusy=false;
 function notice(ic,title,sub){ NOTES.push([ic,title,sub]); if(!noteBusy) nextNotice(); }
 function nextNotice(){
   const n=NOTES.shift(), p=$('#achpop'); if(!n){ noteBusy=false; return; }
-  noteBusy=true; p.innerHTML=`<span class="ai">${n[0]}</span><div><b>${esc(n[1])}</b><small>${esc(n[2]||'')}</small></div>`;
+  noteBusy=true; p.innerHTML=`<span class="ai">${icn(n[0],36)}</span><div><b>${esc(n[1])}</b><small>${esc(n[2]||'')}</small></div>`;
   p.classList.add('on'); setTimeout(()=>{ p.classList.remove('on'); setTimeout(nextNotice,450); },2600);
 }
 
@@ -1105,7 +1320,7 @@ function confetti(){
   if(reducedMotion()) return;
   const c=$('#confetti'); let ctx=null; try{ ctx=c.getContext('2d'); }catch(e){} if(!ctx) return;
   const dpr=Math.min(2,window.devicePixelRatio||1), W=c.width=innerWidth*dpr, H=c.height=innerHeight*dpr; c.hidden=false;
-  const col=['#f25a1e','#ffc800','#58cc02','#1cb0f6','#ce82ff','#ff4b4b'];
+  const col=['#ff9600','#ffc800','#58cc02','#1cb0f6','#ce82ff','#ff4b4b'];
   const P=Array.from({length:140},()=>({x:W/2+(Math.random()-.5)*W*.3,y:H*.35,vx:(Math.random()-.5)*16*dpr,vy:(-Math.random()*16-6)*dpr,
     w:(6+Math.random()*7)*dpr,h:(8+Math.random()*10)*dpr,r:Math.random()*6,vr:(Math.random()-.5)*.3,c:col[Math.random()*col.length|0]}));
   const t0=performance.now();
@@ -1117,7 +1332,8 @@ function confetti(){
   })(t0);
 }
 
-// — маскот «Чжу»: красная печать 朱 с глазами; состояния calm / happy / cheer / sad / sleep
+// — маскот «Чжу»: красная панда (小熊猫) — оранжевая, как акцент приложения; состояния calm / happy / cheer / sad / sleep.
+//   Нарисована из кругов и скруглённых прямоугольников (без острых углов и овалов — правила иллюстраций Duolingo).
 const MASCOT_SAY={
   calm:['Начнём? Пара минут — и шаг к 30-му уроку.','Я рядом. Один узел за раз.','Учим понемногу, но каждый день.'],
   happy:['Отлично!','Так держать!','Здорово получилось!','Вот это темп!'],
@@ -1126,25 +1342,46 @@ const MASCOT_SAY={
   sleep:['Сегодня поездка — хватит повторений.','Каникулы: отдыхаем, но повторяем.'],
 };
 function mascotPhrase(st){ const a=MASCOT_SAY[st]||MASCOT_SAY.calm; return a[Math.random()*a.length|0]; }
-function mascot(st,size){
-  size=size||64; st=st||'calm';
-  const eye=(x)=>{
-    if(st==='happy'||st==='cheer') return `<path d="M${x-9} 44 q9 -11 18 0" stroke="#3c1d16" stroke-width="5" fill="none" stroke-linecap="round"/>`;
-    if(st==='sleep') return `<path d="M${x-8} 42 q8 7 16 0" stroke="#3c1d16" stroke-width="4.5" fill="none" stroke-linecap="round"/>`;
-    const dy=st==='sad'?4:0;
-    return `<ellipse cx="${x}" cy="41" rx="9.5" ry="11" fill="#fff"/><circle cx="${x+1}" cy="${43+dy}" r="5.2" fill="#3c1d16"/><circle cx="${x+3}" cy="${40+dy}" r="1.8" fill="#fff"/>`;
-  };
-  const brows=st==='sad'?`<path d="M26 28 l12 4 M74 28 l-12 4" stroke="#3c1d16" stroke-width="4" stroke-linecap="round"/>`:'';
-  const cheeks=(st==='happy'||st==='cheer')?`<ellipse cx="24" cy="56" rx="6" ry="3.5" fill="#ff9b8a" opacity=".8"/><ellipse cx="76" cy="56" rx="6" ry="3.5" fill="#ff9b8a" opacity=".8"/>`:'';
-  const extra= st==='cheer'?`<path d="M8 14 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3z" fill="#ffc800"/><path d="M90 8 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2z" fill="#ffc800"/>`
-    : st==='sleep'?`<text class="zz" x="80" y="16" font-size="16" font-weight="900" fill="#1cb0f6" font-family="Nunito,sans-serif">z</text><text class="zz" x="90" y="6" font-size="11" font-weight="900" fill="#1cb0f6" font-family="Nunito,sans-serif">z</text>`
-    : st==='sad'?`<path d="M80 50 q4 7 0 10 q-4 -3 0 -10z" fill="#84d8ff"/>`:'';
-  return `<svg class="mascot m-${st}" viewBox="0 0 100 106" width="${size}" height="${Math.round(size*1.06)}" aria-hidden="true">
-    <rect x="10" y="18" width="80" height="84" rx="20" fill="#a92c20"/>
-    <rect x="10" y="12" width="80" height="84" rx="20" fill="#e23d2e"/>
-    <rect x="16" y="18" width="68" height="72" rx="14" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="2.5"/>
-    ${brows}${eye(36)}${eye(64)}${cheeks}
-    <text x="50" y="87" font-size="30" text-anchor="middle" fill="#fff" font-family="'Songti SC','Noto Serif SC',serif">朱</text>${extra}</svg>`;
+const MC={fur:'#f47a2c',furD:'#d9581c',dark:'#5c2a18',darker:'#3d1c10',cream:'#fff7ee',ink:'#2b1a12'};
+function mascot(st,size,o){
+  st=st||'calm'; size=size||64; o=o||{};
+  const C=MC, happy=st==='happy'||st==='cheer';
+  const ear=x=>{ const m=x<60?1:-1, X=v=>60+(v-60)*m;
+    return `<path d="M${X(16)} 40C${X(10)} 20 ${X(18)} 8 ${X(32)} 9c${8*m} .6 ${12*m} 6 ${11*m} 14z" fill="${C.fur}"/>
+      <path d="M${X(21)} 33C${X(18)} 21 ${X(22)} 14 ${X(31)} 14.5c${5*m} .4 ${7*m} 4 ${6*m} 9z" fill="${C.cream}"/>
+      <path d="M${X(24)} 31C${X(23)} 24 ${X(25)} 19 ${X(30)} 19.5c${3*m} .3 ${4*m} 2.5 ${3.6*m} 5z" fill="${C.dark}"/>`; };
+  const eye=x=>{
+    if(happy) return `<path d="M${x-7} 42q7-10 14 0" fill="none" stroke="${C.ink}" stroke-width="4" stroke-linecap="round"/>`;
+    if(st==='sleep') return `<path d="M${x-7} 40q7 6 14 0" fill="none" stroke="${C.ink}" stroke-width="3.6" stroke-linecap="round"/>`;
+    const dy=st==='sad'?3:0;
+    return `<rect x="${x-7}" y="30" width="14" height="18" rx="7" fill="#fff"/><rect x="${x-4}" y="${35+dy}" width="9" height="11" rx="4.5" fill="${C.ink}"/><circle cx="${x+2.6}" cy="${38+dy}" r="1.9" fill="#fff"/>`
+      +(st==='sad'?`<path d="M${x-8} 29.5h16v6h-16z" fill="${C.fur}"/>`:''); };
+  const mouth = happy?`<path d="M51 59h18a9 9 0 0 1-18 0z" fill="#8a2c1a"/><path d="M55 64.5a5.5 3.5 0 0 0 10 0 9 9 0 0 1-10 0z" fill="#ff8fa0"/>`
+    : st==='sad'?`<path d="M53 66q7-6 14 0" fill="none" stroke="${C.ink}" stroke-width="2.8" stroke-linecap="round"/>`
+    : st==='sleep'?`<rect x="57" y="60" width="6" height="4" rx="2" fill="${C.ink}"/>`
+    : `<path d="M53 59.5q3.5 4 7 0 3.5 4 7 0" fill="none" stroke="${C.ink}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const arms = st==='cheer'?['M40 74L22 52','M80 74L98 52'] : st==='happy'?['M40 76L35 96','M80 74L99 58'] : ['M40 76L35 96','M80 76L85 96'];
+  const head=`${ear(20)}${ear(100)}
+    <rect x="12" y="15" width="96" height="63" rx="31.5" fill="${C.fur}"/>
+    <rect x="34" y="21" width="15" height="7" rx="3.5" fill="${C.cream}"/><rect x="71" y="21" width="15" height="7" rx="3.5" fill="${C.cream}"/>
+    <circle cx="25" cy="55" r="11" fill="${C.cream}"/><circle cx="95" cy="55" r="11" fill="${C.cream}"/>
+    <rect x="41" y="44" width="38" height="28" rx="14" fill="${C.cream}"/>
+    <path d="M43 48c-1 6 1 10 5 13M77 48c1 6-1 10-5 13" fill="none" stroke="${C.furD}" stroke-width="3" stroke-linecap="round" opacity=".55"/>
+    ${eye(43)}${eye(77)}
+    ${st==='sad'?`<path d="M33 30l12-5M87 30l-12-5" stroke="${C.ink}" stroke-width="3.4" stroke-linecap="round"/>`:''}
+    ${happy?`<rect x="29" y="47" width="10" height="5" rx="2.5" fill="#ff8fa0" opacity=".75"/><rect x="81" y="47" width="10" height="5" rx="2.5" fill="#ff8fa0" opacity=".75"/>`:''}
+    <path d="M54 50h12c1.6 0 2.4 1.9 1.2 3l-4.8 4.6a3.4 3.4 0 0 1-4.8 0L52.8 53c-1.2-1.1-.4-3 1.2-3z" fill="${C.ink}"/>${mouth}`;
+  if(o.head) return `<svg class="mascot m-${st}" viewBox="8 4 104 76" width="${size}" height="${Math.round(size*76/104)}" aria-hidden="true">${head}</svg>`;
+  const extra= st==='cheer'?`<path d="M11 14c.3 0 .6.2.7.5l1 3.8a4 4 0 0 0 3 3l3.8 1c.7.2.7 1.2 0 1.4l-3.8 1a4 4 0 0 0-3 3l-1 3.8c-.2.7-1.2.7-1.4 0l-1-3.8a4 4 0 0 0-3-3l-3.8-1c-.7-.2-.7-1.2 0-1.4l3.8-1a4 4 0 0 0 3-3l1-3.8c.1-.3.4-.5.7-.5z" fill="#ffc800"/><circle cx="108" cy="12" r="3.5" fill="#ffc800"/><circle cx="102" cy="26" r="2.2" fill="#1cb0f6"/>`
+    : st==='sleep'?`<text class="zz" x="96" y="18" font-size="18" font-weight="900" fill="#1cb0f6" font-family="Nunito,sans-serif">z</text><text class="zz" x="108" y="7" font-size="12" font-weight="900" fill="#1cb0f6" font-family="Nunito,sans-serif">z</text>`
+    : st==='sad'?`<path d="M96 44c3 5 3 8 0 9.5-3-1.5-3-4.5 0-9.5z" fill="#84d8ff"/>`:'';
+  return `<svg class="mascot m-${st}" viewBox="0 0 120 124" width="${size}" height="${Math.round(size*124/120)}" aria-hidden="true">
+    <rect x="28" y="115" width="64" height="8" rx="4" fill="#000" opacity=".07"/>
+    <g transform="translate(84 62) rotate(-28)"><rect x="-11" y="0" width="22" height="52" rx="11" fill="${C.fur}"/><rect x="-11" y="13" width="22" height="7" fill="${C.furD}"/><rect x="-11" y="28" width="22" height="7" fill="${C.furD}"/><rect x="-11" y="43" width="22" height="9" rx="4.5" fill="${C.dark}"/></g>
+    <rect x="32" y="60" width="56" height="56" rx="26" fill="${C.fur}"/><rect x="38" y="86" width="44" height="30" rx="15" fill="${C.dark}"/>
+    <rect x="37" y="105" width="19" height="11" rx="5.5" fill="${C.darker}"/><rect x="64" y="105" width="19" height="11" rx="5.5" fill="${C.darker}"/>
+    <path d="${arms[0]}" stroke="${C.dark}" stroke-width="12" stroke-linecap="round"/><path d="${arms[1]}" stroke="${C.dark}" stroke-width="12" stroke-linecap="round"/>
+    ${head}${extra}</svg>`;
 }
 function mascotRow(st,text){ return `<div class="mascotrow">${mascot(st,58)}<div class="say-bubble">${esc(text||mascotPhrase(st))}</div></div>`; }
 
@@ -1152,26 +1389,27 @@ function mascotRow(st,text){ return `<div class="mascotrow">${mascot(st,58)}<div
 function showFB(ok,html,onNext,extra){
   const fb=$('#fb'), inn=$('#fbin');
   fb.className='fb '+(ok?'ok':'bad'); fb.hidden=false;
-  inn.innerHTML=`<h3><span class="ic">${ok?'✅':'❌'}</span>${ok?esc(mascotPhrase('happy')):'Правильный ответ:'}</h3>${html?`<div class="ans">${html}</div>`:''}`
+  inn.innerHTML=`<h3><span class="ic">${IC(ok?'checkOk':'xBad',38)}</span>${ok?esc(mascotPhrase('happy')):'Правильный ответ:'}</h3>${html?`<div class="ans">${html}</div>`:''}`
     +(ok?'':`<div class="cheer">${mascot('cheer',30)}<span>${esc(mascotPhrase('cheer'))}</span></div>`);
+  if(extra){ extra.classList.add('fbextra'); inn.appendChild(extra); }
   const b=el('button','btn',ok?'Дальше':'Понятно'); b.dataset.key='space'; b.onclick=()=>{ hideFB(); onNext(); }; inn.appendChild(b);
-  if(extra) inn.appendChild(extra);
   requestAnimationFrame(()=>requestAnimationFrame(()=>fb.classList.add('on')));
 }
 function hideFB(){ const fb=$('#fb'); fb.classList.remove('on'); fb.hidden=true; $('#fbin').innerHTML=''; }
-function comboPop(n){ const p=$('#combopop'); p.textContent='×'+n+' комбо 🔥'; p.classList.remove('on'); void p.offsetWidth; p.classList.add('on'); Sfx.combo(); }
+function comboPop(n){ const p=$('#combopop'); p.innerHTML=IC('flame',26)+' ×'+n+' комбо'; p.classList.remove('on'); void p.offsetWidth; p.classList.add('on'); Sfx.combo(); }
 
 // — шапка: тип дня, серия, заморозки, кольцо XP
 function ringSVG(p,size){ const r=15, C=2*Math.PI*r;
   return `<svg width="${size||38}" height="${size||38}" viewBox="0 0 38 38"><circle cx="19" cy="19" r="${r}" fill="none" stroke="#e5e5e5" stroke-width="5"/>
-    <circle cx="19" cy="19" r="${r}" fill="none" stroke="${p>=1?'#ffc800':'#f25a1e'}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${(C*Math.min(1,p)).toFixed(1)} ${C.toFixed(1)}"/></svg>`; }
+    <circle cx="19" cy="19" r="${r}" fill="none" stroke="${p>=1?'#ffc800':'#ff9600'}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${(C*Math.min(1,p)).toFixed(1)} ${C.toFixed(1)}"/></svg>`; }
 function renderTop(){
   const t=dayType(), dc=$('#dayChip'); dc.className='daychip '+t; dc.textContent=DAY_NAMES[t];
   const n=streakLen(), met=dayMet(todayStr());
-  const s=$('#stStreak'); s.className='stat fire'+(met?'':' off'); s.lastChild.textContent=n; s.title='Серия: '+n+' '+plural(n,'день','дня','дней')+(met?' · сегодня засчитан':' · сегодня ещё не засчитан');
-  const f=$('#stFreeze'); f.className='stat ice'+(State.meta.fz.n?'':' off'); f.lastChild.textContent=State.meta.fz.n;
+  const s=$('#stStreak'); s.className='stat fire'+(met?'':' off'); s.firstChild.innerHTML=IC(met?'flame':'flameOff',26); s.lastChild.textContent=n; s.title='Серия: '+n+' '+plural(n,'день','дня','дней')+(met?' · сегодня засчитан':' · сегодня ещё не засчитан');
+  const f=$('#stFreeze'); f.className='stat ice'+(State.meta.fz.n?'':' off'); f.firstChild.innerHTML=IC(State.meta.fz.n?'ice':'iceOff',24); f.lastChild.textContent=State.meta.fz.n;
+  const lg=$('#logo'); if(lg&&!lg.firstChild) lg.innerHTML=mascot('calm',44,{head:1});
   const xp=D().xp, g=State.settings.xpGoal, r=$('#stRing');
-  r.className='ring'+(xp>=g?' full':''); r.innerHTML=ringSVG(xp/g)+`<b>${xp>=g?'✓':xp}</b>`; r.title='XP сегодня: '+xp+' из '+g;
+  r.className='ring'+(xp>=g?' full':''); r.innerHTML=ringSVG(xp/g)+`<b>${xp>=g?IC('bolt',18):xp}</b>`; r.title='XP сегодня: '+xp+' из '+g;
 }
 
 /*==================================================================
@@ -1214,7 +1452,7 @@ function charBox(ch,opts){
     ${type?`<div class="lbl">Тип: ${TYPES[type]}${type==='p'&&(sem||phon)?` — смысловая часть <b class="han">${esc(sem||'—')}</b>, звуковая <b class="han">${esc(phon||'—')}</b>`:''}</div>`:''}`}
     ${(()=>{ const st=strokesOf(ch); return st.length?`<details class="strk"><summary>Порядок черт (${st.length}) — по таблице черт курса</summary><ol>${st.map(x=>`<li>${strokeImg(x.n,18)}${esc(x.name)}${x.n?` <span class="lbl">№${x.n}</span>`:' <span class="lbl">(нет в таблице)</span>'}</li>`).join('')}</ol></details>`:''; })()}
     ${EVO.includes(ch)?`<div class="evo"><div class="lbl">Эволюция написания (таблица курса):</div><img src="evolution/${ch.codePointAt(0).toString(16)}.jpg" loading="lazy" alt="эволюция ${ch}"><div class="evocap"><span>Инь, гадат. надписи</span><span>Чжоу, бронза</span><span>сяо-чжуань</span><span>лишу</span><span>кайшу</span><span>цаошу</span><span>синшу</span><span>сокращ.</span></div></div>`:''}
-    ${opts&&opts.actions?`<div class="actionrow" style="margin-top:6px"><button class="say" data-say="${ch}">🔊 Слушать</button><button class="say" data-draw="${ch}">笔 Прописи</button></div>`:''}
+    ${opts&&opts.actions?`<div class="actionrow" style="margin-top:6px"><button class="say" data-say="${ch}">${SPK()} Слушать</button><button class="say" data-draw="${ch}">${IC('brushW',18)} Прописи</button></div>`:''}
   </div>`;
 }
 function hzBtn(c){ const b=el('button','han',c); b.dataset.c=c; b.setAttribute('aria-label','разбор '+c); return b; }
@@ -1232,10 +1470,10 @@ $('#sheet').addEventListener('click',e=>{
   if(e.target.id==='sheet'){ closeSheet(); return; }
   const wb=e.target.closest('[data-word]'); if(wb){ closeSheet(); go('card',{id:+wb.dataset.word, from:State.route}); }
 });
-// глобально: тап по иероглифу — разбор; кнопки 🔊 / 笔 внутри разбора
+// глобально: тап по иероглифу — разбор; кнопки «Слушать» / «Прописи» внутри разбора
 document.addEventListener('click',e=>{
   const h=e.target.closest('[data-c]'); if(h){ e.preventDefault(); e.stopPropagation(); openChar(h.dataset.c); return; }
-  const sb=e.target.closest('[data-say]'); if(sb){ Speech.say(sb.dataset.say, sb.dataset.rate?+sb.dataset.rate:undefined); return; }
+  const sb=e.target.closest('[data-say]'); if(sb){ Speech.say(sb.dataset.say, sb.dataset.rate?+sb.dataset.rate:undefined, sb.dataset.py); return; }
   const db=e.target.closest('[data-draw]'); if(db){ closeSheet(); go('draw',{chars:[db.dataset.draw], title:db.dataset.draw, back:State.route}); }
 },true);
 
@@ -1327,9 +1565,12 @@ function render(){
     lessons:viewLessons,lesson:viewLesson,extra:viewExtra,strokes:viewStrokes,card:viewCard,session:viewSession,draw:viewDraw,
     tests:viewTests,test:viewTest,keys:viewKeys,radical:viewRadical,dict:viewDict,list:viewList,progress:viewProgress,settings:viewSettings};
   const s=$('#screen'); s.innerHTML=''; (V[State.route.name]||viewPath)(s);
+  Resume.later();
 }
 $('#nav').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) go(b.dataset.nav); });
 $('#stStreak').onclick=$('#stFreeze').onclick=$('#stRing').onclick=()=>go('progress');
+$('#logo').onclick=()=>go('path');
+document.querySelectorAll('[data-ic]').forEach(e=>{ e.innerHTML=IC(e.dataset.ic,28); });
 // Клавиатура: Пробел/Enter — показать/дальше, 1/← и 2/→ — оценка, 1–4 — варианты, Backspace — отменить
 document.addEventListener('keydown',e=>{
   if(e.target&&/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
@@ -1342,13 +1583,58 @@ document.addEventListener('keydown',e=>{
 });
 
 /*==================================================================
+  ПРОДОЛЖЕНИЕ С ТОГО ЖЕ МЕСТА: телефон выгружает свёрнутое приложение из памяти,
+  и при возврате страница загружается заново. Поэтому экран, незаконченный урок
+  (PLAY), карточки (SESSION), разбор (DEC), предложения (SENT), пробная (MOCK),
+  проверочная (T) и прокрутка сохраняются в localStorage (синхронно — успевает при
+  сворачивании) и восстанавливаются при запуске, если прошло меньше 12 часов.
+==================================================================*/
+const Resume=(()=>{
+  const KEY='zhu-resume', MAX_AGE=12*3600e3;
+  let t=null, enabled=false;
+  const rep=(k,v)=>v instanceof Set?{__set:[...v]}:typeof v==='function'?undefined:v;
+  const rev=(k,v)=>v&&typeof v==='object'&&Array.isArray(v.__set)?new Set(v.__set):v;
+  function snap(){
+    return {v:1,ts:Date.now(),route:State.route,tab:State.tab,y:Math.round(window.scrollY||0),
+      play:PLAY,session:SESSION,dec:DEC,sent:SENT,mock:MOCK,test:T};
+  }
+  function save(){
+    if(!enabled) return;
+    try{ localStorage.setItem(KEY,JSON.stringify(snap(),rep)); }catch(e){}
+  }
+  function later(){ clearTimeout(t); t=setTimeout(save,250); }
+  function clear(){ try{ localStorage.removeItem(KEY); }catch(e){} }
+  // восстановить; true — если экран восстановлен (иначе стартуем с Пути)
+  function restore(){
+    enabled=true;
+    let s=null; try{ s=JSON.parse(localStorage.getItem(KEY)||'null',rev); }catch(e){ s=null; }
+    if(!s||s.v!==1||!s.route||!s.route.name||Date.now()-s.ts>MAX_AGE) return false;
+    try{
+      PLAY=s.play||null; SESSION=s.session||null; DEC=s.dec||null; SENT=s.sent||null; MOCK=s.mock||null; T=s.test||null;
+      if(PLAY){ PLAY.opts=PLAY.opts||{}; if(PLAY.opts.kind==='daily') PLAY.opts.more=dailyPortion;
+        PLAY.fails=PLAY.fails instanceof Set?PLAY.fails:new Set(); PLAY.sents=PLAY.sents instanceof Set?PLAY.sents:new Set(); }
+      const name=s.route.name;
+      if(name==='play'&&!PLAY || name==='session'&&!SESSION) return false;
+      State.route=s.route; if(s.tab) State.tab=s.tab;
+      render();
+      if(s.y&&!['play','session'].includes(name)) setTimeout(()=>window.scrollTo(0,s.y),30);
+      return true;
+    }catch(e){ PLAY=SESSION=DEC=SENT=MOCK=T=null; clear(); return false; }
+  }
+  document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') save(); });
+  window.addEventListener('pagehide',save);
+  window.addEventListener('scroll',later,{passive:true});
+  return {save,later,restore,clear};
+})();
+
+/*==================================================================
   ПУТЬ (главный экран): шапка «Семестр» + задания дня + дорожка узлов.
   Разделы: «Ключи» (11 юнитов по ~20 в порядке изучения) и «Уроки 1–30»;
   контрольные из настроек — «босс»-узлы после юнита последнего урока.
   Корона юнита (0–5) — из памяти: ≥80% элементов со стабильностью FSRS ≥1/3/7/21/60 дней.
 ==================================================================*/
 let UNITS=null;
-const UCOL=['#f25a1e','#1cb0f6','#ce82ff','#ff9600','#2b70c9','#ff4b4b','#00a8a8','#e5a000'];
+const UCOL=[['#ff9600','#e07b00'],['#1cb0f6','#1899d6'],['#ce82ff','#a568cc'],['#2b70c9','#1f5aa8'],['#ff4b4b','#ea2b2b']];   // цвет юнита и его «кромка»
 const CROWN_S=[1,3,7,21,60];
 const ZZ=[0,46,70,46,0,-46,-70,-46];
 const PATH_OPEN={};                   // ручное раскрытие/сворачивание юнитов и групп
@@ -1359,18 +1645,19 @@ function buildUnits(){
   KEY_UNITS.forEach((ns,i)=>{
     const id='K'+(i+1), items=ns.map(n=>'r:'+n), a=Math.round(i*214/11);
     const nodes=chunk(items,7).map((c,j)=>({id:id+'n'+(j+1),type:'learn',icon:'部',title:'Ключи '+(a+j*7+1)+'–'+(a+j*7+c.length),items:c}));
-    nodes.push({id:id+'rev',type:'review',alt:1,icon:'🔁',title:'Повторение ключей',items});
-    U.push({id,sec:'keys',title:'Ключи · юнит '+(i+1),sub:ns.slice(0,8).map(n=>RADS[n-1][4][0]).join(' '),items,nodes,color:UCOL[(i+2)%UCOL.length]});
+    nodes.push({id:id+'rev',type:'review',alt:1,icon:'cycle',title:'Повторение ключей',items});
+    U.push({id,sec:'keys',title:'Ключи · юнит '+(i+1),sub:ns.slice(0,8).map(n=>RADS[n-1][4][0]).join(' '),items,nodes,color:UCOL[(i+1)%UCOL.length]});
   });
   for(let L=1;L<=NL;L++){
     const id='L'+L, words=lessonKeys(L), main=words.filter(k=>!EXTRA_OF[k]), ext=words.filter(k=>EXTRA_OF[k]), nodes=[];
-    chunk(main,7).forEach((c,j,a)=>nodes.push({id:id+'w'+(j+1),type:'learn',icon:'✨',title:'Новые слова'+(a.length>1?' '+(j+1):''),items:c}));
-    chunk(ext,7).forEach((c,j,a)=>nodes.push({id:id+'x'+(j+1),type:'learn',icon:'➕',title:EXTRA_OF[c[0]].split(' · ')[0]+(a.length>1?' '+(j+1):''),items:c}));
-    chunk(LESSON_CHARS[L].map(c=>'key:'+c).filter(validKey),8).forEach((c,j,a)=>nodes.push({id:id+'c'+(j+1),type:'chars',alt:1,icon:'🧩',title:'Иероглифы: ключи'+(a.length>1?' '+(j+1):''),items:c}));
-    if(lessonSents(L).length) nodes.push({id:id+'s',type:'sent',alt:1,icon:'💬',title:'Предложения',L});
-    nodes.push({id:id+'rev',type:'review',alt:1,icon:'🔁',title:'Повторение урока',items:words});
+    chunk(main,7).forEach((c,j,a)=>nodes.push({id:id+'w'+(j+1),type:'learn',icon:'star',title:'Новые слова'+(a.length>1?' '+(j+1):''),items:c}));
+    chunk(ext,7).forEach((c,j,a)=>nodes.push({id:id+'x'+(j+1),type:'learn',icon:'star',title:EXTRA_OF[c[0]].split(' · ')[0]+(a.length>1?' '+(j+1):''),items:c}));
+    chunk(LESSON_CHARS[L].map(c=>'key:'+c).filter(validKey),8).forEach((c,j,a)=>nodes.push({id:id+'c'+(j+1),type:'chars',alt:1,icon:'splitW',title:'Иероглифы: разбор'+(a.length>1?' '+(j+1):''),items:c}));
+    nodes.push({id:id+'h',type:'hear',alt:1,icon:'headphones',title:'Тоны на слух',L});
+    if(lessonSents(L).length) nodes.push({id:id+'s',type:'sent',alt:1,icon:'chatW',title:'Предложения',L});
+    nodes.push({id:id+'rev',type:'review',alt:1,icon:'cycle',title:'Повторение урока',items:words});
     TESTS.filter(t=>t.lesson===L).forEach(t=>nodes.push({id:id+'t'+t.id,type:'test',alt:1,icon:'考',title:t.kind[0].toUpperCase()+t.kind.slice(1),tid:t.id}));
-    nodes.push({id:id+'m',type:'mini',alt:1,icon:'📝',title:'Мини-контрольная',L});
+    nodes.push({id:id+'m',type:'mini',alt:1,icon:'pencilW',title:'Мини-контрольная',L});
     U.push({id,sec:'lessons',L,title:'Урок '+L,sub:lessonTitle(L),items:words,nodes,color:UCOL[(L-1)%UCOL.length]});
   }
   return U;
@@ -1402,7 +1689,7 @@ function nodeState(u,n,open){
 }
 function examBosses(L){
   return (SEM().exams||[]).filter(e=>e.date&&(e.lessons||[]).length&&Math.max(...e.lessons)===L)
-    .map(e=>({id:'E'+e.date+':'+e.lessons.join(','),type:'exam',icon:'👑',title:e.title||'Контрольная',lessons:e.lessons,date:e.date}));
+    .map(e=>({id:'E'+e.date+':'+e.lessons.join(','),type:'exam',icon:'trophy',title:e.title||'Контрольная',lessons:e.lessons,date:e.date}));
 }
 
 // — запуск узла
@@ -1421,6 +1708,9 @@ function openNode(u,n,st){
     playStart(got.filter(isDue).concat(got.filter(k=>!isDue(k)).sort((a,b)=>stab(a)-stab(b))).slice(0,12),{...base,kind:'review'});
   }else if(n.type==='sent'){
     playStart(shuffle(lessonSents(n.L)).slice(0,8).map(x=>'sent:'+x.id),{...base,kind:'sent'});
+  }else if(n.type==='hear'){
+    const ws=lessonKeys(n.L).map(k=>BYK[k]).filter(Boolean);
+    startToneDrill(ws,{...base,kind:'tones'});
   }else if(n.type==='test') go('test',{home:1,tid:n.tid});
   else if(n.type==='mini') go('mock',{setup:{lessons:[n.L],node:n.id,title:'Мини-контрольная · урок '+n.L}});
   else if(n.type==='exam') go('mock',{setup:{lessons:n.lessons,node:n.id,title:n.title}});
@@ -1478,11 +1768,11 @@ function viewPath(s){
   else if(!d.met&&new Date().getHours()>=19&&streakLen()>0) mst='sad';
   else if(d.met) { mst='happy'; say='День засчитан — серия '+streakLen()+' '+plural(streakLen(),'день','дня','дней')+'!'; }
   v.insertAdjacentHTML('beforeend',mascotRow(mst,say));
-  if(PLAY&&!PLAY.end&&playLeft()){ const cb=el('button','btn blue','▶ Продолжить урок ('+playLeft()+')'); cb.style.marginBottom='12px'; cb.onclick=()=>go('play'); v.appendChild(cb); }
+  if(PLAY&&!PLAY.end&&playLeft()){ const cb=el('button','btn blue',IC('play',16)+' Продолжить урок ('+playLeft()+')'); cb.style.marginBottom='12px'; cb.onclick=()=>go('play'); v.appendChild(cb); }
   if(SEM().on) v.appendChild(semCard());
   v.appendChild(planCard(plan));
   const wk=weekInfo();
-  if(wk.chest==='ready'){ const ch=el('div','hero chest',`<span class="cico">🎁</span><div style="flex:1"><b style="color:var(--title)">Недельный сундук!</b><div class="note" style="margin:2px 0 0">Цель недели ${wk.goal} XP выполнена</div></div>`);
+  if(wk.chest==='ready'){ const ch=el('div','hero chest',`<span class="cico">${IC('chest',52)}</span><div style="flex:1"><b style="color:var(--title)">Недельный сундук!</b><div class="note" style="margin:2px 0 0">Цель недели ${wk.goal} XP выполнена</div></div>`);
     ch.style.marginTop='12px'; const ob=el('button','btn gold mini','Открыть'); ob.onclick=()=>{ ch.classList.add('open'); const g=openChest(); Sfx.done(); confetti(); setTimeout(()=>{ toast('+'+g+' XP'); render(); },900); }; ch.appendChild(ob); v.appendChild(ch); }
   v.appendChild(pathEl());
   s.appendChild(v);
@@ -1499,14 +1789,14 @@ function semCard(){
     <div class="row2"><div class="cell"><b>${dl!=null&&dl>=0?dl:'—'}</b><span>${dl!=null&&dl>=0?plural(dl,'день','дня','дней')+' до конца':'дата не задана'}</span></div>
       <div class="cell"><b>${wq.quota}</b><span>новых сегодня</span></div>
       <div class="cell"><b>${pace?pace.toString().replace('.',','):'—'}</b><span>нужный темп, слов/день</span></div></div>
-    ${ne?`<div class="info">📝 ${esc(ne.title||'Контрольная')} — ${fmtDate(ne.date)} (${whenText(daysTo(ne.date))})${(ne.lessons||[]).length?', уроки '+esc(ne.lessons.join(', ')):''}</div>`:`<div class="note">Даты контрольных не заданы — добавь их в Настройках → Семестр.</div>`}
+    ${ne?`<div class="info">${IC('calendar',18)} ${esc(ne.title||'Контрольная')} — ${fmtDate(ne.date)} (${whenText(daysTo(ne.date))})${(ne.lessons||[]).length?', уроки '+esc(ne.lessons.join(', ')):''}</div>`:`<div class="note">Даты контрольных не заданы — добавь их в Настройках → Семестр.</div>`}
     ${fc.date?`<div class="note">В текущем темпе (${(Math.round(fc.avg*10)/10).toString().replace('.',',')} слов/день за 2 недели) новые слова закончатся к ${fmtDate(fc.date)}${fc.date>sem.newWordsUntil?' — <b style="color:var(--bad-text)">позже плана ('+fmtDate(sem.newWordsUntil)+')</b>':''}.</div>`:''}
-    ${wq.late?`<div class="warn">⚠︎ Срок новых слов (${fmtDate(sem.newWordsUntil)}) прошёл, осталось ${wq.remaining}. Квота считается до ${fmtDate(sem.endDate)}.</div>`:''}
+    ${wq.late?`<div class="warn">${IC('warn',18)} Срок новых слов (${fmtDate(sem.newWordsUntil)}) прошёл, осталось ${wq.remaining}. Квота считается до ${fmtDate(sem.endDate)}.</div>`:''}
     ${bg?`<div class="warn">Отстаёшь от группы на ${bg} ${plural(bg,'слово','слова','слов')} (уроки 1–${groupL()}) — они идут первыми.</div>`:''}`;
   const row=el('div','actionrow');
   const t=dayType();
   if(t==='away'){ const b=el('button','btn ghost mini','Я сегодня дома'); b.onclick=()=>{ sem.awayDays=sem.awayDays.filter(x=>x!==todayStr()); save('settings'); render(); }; row.appendChild(b); }
-  else{ const b=el('button','btn ghost mini','🚆 Я сегодня уезжаю'); b.onclick=()=>{ sem.awayDays=uniq(sem.awayDays.concat([todayStr()])).sort(); save('settings'); toast('Отмечено: сегодня поездка — только повторения'); render(); }; row.appendChild(b); }
+  else{ const b=el('button','btn ghost mini',IC('suitcase',18)+' Я сегодня уезжаю'); b.onclick=()=>{ sem.awayDays=uniq(sem.awayDays.concat([todayStr()])).sort(); save('settings'); toast('Отмечено: сегодня поездка — только повторения'); render(); }; row.appendChild(b); }
   if((t==='away'||t==='holiday')&&semRemaining()){ const m=el('button','btn ghost mini',D().more?'✓ Учу больше':'Учить больше'); m.onclick=()=>{ D().more=D().more?0:1; save('meta'); render(); }; row.appendChild(m); }
   c.appendChild(row);
   return c;
@@ -1515,23 +1805,24 @@ function planCard(plan){
   const c=el('div','hero'); c.style.marginTop='12px';
   const dq=dailyQueue().length;
   c.innerHTML=`<div class="kind">Сегодня · ${esc(DAY_NAMES[plan.type])}${plan.minutes?' · ≈'+plan.minutes+' мин':' · план выполнен'}${SEM().on&&plan.type==='normal'?' (норма ~'+SEM().minutesNormal+')':''}</div>`;
-  const b=el('button','btn',dq?'▶ Урок дня':'✓ Урок дня пройден'); b.style.margin='10px 0 6px'; b.disabled=!dq; b.dataset.key='space'; b.onclick=startDaily;
+  const b=el('button','btn',dq?IC('play',16)+' Урок дня':IC('check',16)+' Урок дня пройден'); b.style.margin='10px 0 6px'; b.disabled=!dq; b.dataset.key='space'; b.onclick=startDaily;
   c.appendChild(b);
   plan.items.forEach(it=>{
     const pct=it.need?Math.min(100,it.cur/it.need*100):(it.done?100:0);
-    const q=el('button','quest'+(it.done?' done':''),`<span class="qi">${it.done?'✅':it.icon}</span><span class="qm"><b>${esc(it.title)}${it.quest?' <span class="star">★</span>':''}</b><small>${esc(it.sub)}${!it.done&&it.min?' · ≈'+it.min+' мин':''}</small>
-      <span class="bar${it.done?' ok':''}"><i style="width:${pct}%"></i></span></span><span class="chev">›</span>`);
+    const q=el('button','quest'+(it.done?' done':''),`<span class="qi">${it.done?IC('checkOk',28):icn(it.icon,28)}</span><span class="qm"><b>${esc(it.title)}${it.quest?' <span class="star">'+IC('star',14)+'</span>':''}</b><small>${esc(it.sub)}${!it.done&&it.min?' · ≈'+it.min+' мин':''}</small>
+      <span class="bar${it.done?' ok':''}"><i style="width:${pct}%"></i></span></span><span class="chev">${IC('chev',16)}</span>`);
     q.onclick=()=>startPart(it.id); c.appendChild(q);
   });
   const d=D();
-  c.appendChild(el('div','note',d.q?`★ Все задания дня выполнены — бонус +${XP.quests} XP получен`:`★ Выполни 3 задания дня — бонус +${XP.quests} XP`));
+  c.appendChild(el('div','note',d.q?`${IC('chest',18)} Все задания дня выполнены — бонус +${XP.quests} XP получен`:`<span class="star">${IC('star',14)}</span> — задания дня: выполни все 3 — бонус +${XP.quests} XP`));
   return c;
 }
 function unitBanner(u,i,list,open){
   const cr=unitCrowns(u), done=learnNodes(u).filter(nodeDone).length, all=learnNodes(u).length, ck=u.nodes.filter(nodeCracked).length;
   const b=el('button','ubanner'+(open?'':' locked'),`<div class="ut"><small>${esc(u.title)}</small><b class="${u.sec==='keys'?'han':''}">${esc(u.sub)}</b>
-    ${u.sec==='lessons'&&u.L===groupL()?'<span class="tag">📍 Здесь группа</span>':''}${ck?`<span class="tag">🔧 повторить: ${ck}</span>`:''}</div><div class="crowns">${open?'👑 '+cr:'🔒'}<div style="font-size:11px;opacity:.9">${done}/${all}</div></div>`);
-  if(open) b.style.background=u.color;
+    ${u.sec==='lessons'&&u.L===groupL()?`<span class="tag">${IC('pin',14)} Здесь группа</span>`:''}${ck?`<span class="tag">${IC('dumbbell',14)} повторить: ${ck}</span>`:''}</div>
+    <div class="crowns">${open?IC('crown',24)+'<b>'+cr+'</b>':IC('lock',22)}<small>${done}/${all}</small></div>`);
+  if(open){ b.style.background=u.color[0]; b.style.boxShadow='0 4px 0 '+u.color[1]; }
   b.onclick=()=>{ PATH_OPEN[u.id]=!unitExpanded(u,i,list); render(); };
   return b;
 }
@@ -1539,18 +1830,55 @@ function unitExpanded(u,i,list){
   if(u.id in PATH_OPEN) return PATH_OPEN[u.id];
   return unitOpen(u,i,list)&&!unitComplete(u);
 }
+let PATH_POP=null;                    // открытая подсказка узла (как у Duolingo: тап → карточка с «Начать»)
+function nodeGlyph(n,st){
+  if(st==='done'&&n.type==='learn') return IC('check',34);
+  if(n.icon==='部'||n.icon==='考') return `<span class="han">${n.icon}</span>`;
+  return IC(n.icon||'star',n.type==='exam'?40:34);
+}
+function nodeDesc(n,st){
+  const it=n.items||[], nw=it.filter(isNew).length, due=it.filter(isDue).length;
+  if(st==='locked') return n.type==='learn'?'Сначала пройди предыдущие узлы — или «Перепрыгни» тестом':'Откроется после первых слов юнита';
+  if(n.type==='learn') return nw?`${nw} ${n.items[0]&&isRad(n.items[0])?plural(nw,'новый ключ','новых ключа','новых ключей'):plural(nw,'новое слово','новых слова','новых слов')}${due?' · повторить '+due:''}`:due?'Пора повторить: '+due:'Пройдено — можно потренироваться';
+  if(n.type==='chars') return `Разбор ${it.length} ${plural(it.length,'иероглифа','иероглифов','иероглифов')}: тип, ключ, фонетик`;
+  if(n.type==='sent') return 'Перевод предложений урока RU→中 и 中→RU';
+  if(n.type==='hear') return 'Слоги и слова урока в записи носителей: угадай тон';
+  if(n.type==='review') return due?'К сроку: '+due:'Повторение всего юнита';
+  if(n.type==='test') return 'Проверочная: полный цикл подготовки';
+  if(n.type==='mini') return 'Мини-контрольная: слова и предложения урока';
+  if(n.type==='exam') return 'Контрольная '+fmtDate(n.date)+' · уроки '+n.lessons.join(', ');
+  return '';
+}
+function nodePop(u,n,st,x){
+  const p=el('div','npop'+(st==='locked'?' locked':''));
+  if(st!=='locked'&&u){ p.style.background=u.color[0]; p.style.setProperty('--lip',u.color[1]); p.style.setProperty('--npbg',u.color[0]); }
+  p.style.setProperty('--ax',x+'px');
+  p.innerHTML=`<b>${esc(n.title)}</b><small>${esc(nodeDesc(n,st))}</small>`;
+  if(st!=='locked'){ const b=el('button','popbtn',st==='done'?'Повторить':'Начать'+(n.type==='learn'||n.type==='chars'||n.type==='sent'||n.type==='review'?' · +'+XP.task+' XP':''));
+    b.style.color=u?u.color[0]:'var(--primary-text)'; b.dataset.key='space'; b.onclick=()=>{ PATH_POP=null; openNode(u,n,st); }; p.appendChild(b); }
+  return p;
+}
 function renderNodes(host,u,open,curId){
   const p=el('div','path');
   u.nodes.forEach((n,j)=>{
-    const st=nodeState(u,n,open), isCur=n.id===curId;
-    const w=el('div','pnode '+st+(n.alt?' alt':'')+(isCur?' cur':''));
-    w.style.transform=`translateX(${ZZ[j%ZZ.length]}px)`;
-    if(isCur) w.appendChild(el('div','startbubble','Начать'));
-    const b=el('button','disc '+(n.icon==='部'||n.icon==='考'?'han':''),st==='locked'?'🔒':st==='done'&&n.type==='learn'?'✓':n.icon);
+    const st=nodeState(u,n,open), isCur=n.id===curId, x=ZZ[j%ZZ.length];
+    const w=el('div','pnode '+st+(isCur?' cur':''));
+    w.style.transform=`translateX(${x}px)`;
+    if(st!=='locked'){ w.style.setProperty('--nc',u.color[0]); w.style.setProperty('--nl',u.color[1]); }
+    if(isCur){
+      const it=n.items||[], f=it.length?it.filter(k=>!isNew(k)).length/it.length:0, R=44, C=2*Math.PI*R;
+      w.insertAdjacentHTML('beforeend',`<svg class="nring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="${R}" fill="none" stroke="#e5e5e5" stroke-width="9"/>
+        <circle cx="50" cy="50" r="${R}" fill="none" stroke="${u.color[0]}" stroke-width="9" stroke-linecap="round" stroke-dasharray="${(C*f).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 50 50)"/></svg>`);
+      w.appendChild(el('div','startbubble','Начать'));
+      w.insertAdjacentHTML('beforeend',`<div class="pmascot ${x>=0?'l':'r'}">${mascot('calm',86)}</div>`);
+    }
+    const b=el('button','disc',nodeGlyph(n,st));
     b.setAttribute('aria-label',n.title+(st==='locked'?' (закрыт)':st==='cracked'?' (пора повторить)':st==='done'?' (пройден)':''));
-    b.onclick=()=>openNode(u,n,st); w.appendChild(b);
-    w.appendChild(el('div','lab',esc(n.title)+(st==='cracked'?' · <span style="color:var(--gold-lip)">повторить</span>':'')));
+    b.onclick=e=>{ e.stopPropagation(); PATH_POP=PATH_POP===n.id?null:n.id; render(); };
+    w.appendChild(b);
+    if(st==='cracked') w.insertAdjacentHTML('beforeend',`<span class="nbadge" title="пора повторить">${IC('dumbbell',22)}</span>`);
     p.appendChild(w);
+    if(PATH_POP===n.id) p.appendChild(nodePop(u,n,st,x));
   });
   host.appendChild(p);
 }
@@ -1558,7 +1886,7 @@ function renderBoss(host,L){
   examBosses(L).forEach(n=>{
     const done=!!State.meta.nodes[n.id], d=daysTo(n.date);
     const w=el('div','pnode boss'+(done?' done':''));
-    const b=el('button','disc',done?'✓':'👑'); b.setAttribute('aria-label',n.title); b.onclick=()=>openNode(null,n,'avail'); w.appendChild(b);
+    const b=el('button','disc',done?IC('check',38):IC('trophy',46)); b.setAttribute('aria-label',n.title); b.onclick=()=>openNode(null,n,'avail'); w.appendChild(b);
     w.appendChild(el('div','lab',`${esc(n.title)} · ${fmtDate(n.date)}${d!=null&&d>=0?' ('+whenText(d)+')':''}<br>уроки ${esc(n.lessons.join(', '))}`));
     const p=el('div','path'); p.appendChild(w); host.appendChild(p);
   });
@@ -1579,8 +1907,7 @@ function pathEl(){
       if(x.kind!=='show'&&run.length>=3&&!PATH_OPEN[gid]){
         const lbl=sec==='lessons'?'Уроки '+x.u.L+'–'+info[m].u.L:'Ключи · юниты '+(x.i+1)+'–'+(info[m].i+1);
         const crowns=run.reduce((a,y)=>a+unitCrowns(y.u),0), ck=run.reduce((a,y)=>a+y.u.nodes.filter(nodeCracked).length,0);
-        const g=el('button','ubanner'+(x.kind==='locked'?' locked':''),`<div class="ut"><small>${x.kind==='done'?'пройдено':'закрыто'} · нажми, чтобы раскрыть</small><b>${esc(lbl)}</b>${ck?`<span class="tag">🔧 повторить: ${ck}</span>`:''}</div><div class="crowns">${x.kind==='done'?'👑 '+crowns:'🔒'}</div>`);
-        if(x.kind==='done') g.style.background='var(--gold)';
+        const g=el('button','ubanner group'+(x.kind==='locked'?' locked':' donegrp'),`<div class="ut"><small>${x.kind==='done'?'Пройдено':'Закрыто'} · раскрыть</small><b>${esc(lbl)}</b>${ck?`<span class="tag">${IC('dumbbell',14)} повторить: ${ck}</span>`:''}</div><div class="crowns">${x.kind==='done'?IC('crown',24)+'<b>'+crowns+'</b>':IC('lock',22)}</div>`);
         g.onclick=()=>{ PATH_OPEN[gid]=true; render(); };
         wrap.appendChild(g);
         if(sec==='lessons') run.forEach(y=>renderBoss(wrap,y.u.L));
@@ -1588,7 +1915,7 @@ function pathEl(){
         wrap.appendChild(unitBanner(y.u,y.i,list,y.open));
         if(unitExpanded(y.u,y.i,list)){
           renderNodes(wrap,y.u,y.open,curId);
-          if(!y.open){ const j=el('button','ujump','⤼ Перепрыгнуть сюда · тест, нужно 80%'); j.onclick=()=>jumpStart(y.u); wrap.appendChild(j); }
+          if(!y.open){ const j=el('button','ujump','Перепрыгнуть сюда · тест, нужно 80%'); j.onclick=()=>jumpStart(y.u); wrap.appendChild(j); }
         }
         if(sec==='lessons') renderBoss(wrap,y.u.L);
       });
@@ -1686,7 +2013,10 @@ function buildTasks(items,opts){
 function playStart(items,opts){
   opts=opts||{};
   items=uniq(items).filter(k=>k.startsWith('sent:')||validKey(k));
-  const tasks=buildTasks(items,opts);
+  playTasks(buildTasks(items,opts),opts);
+}
+function playTasks(tasks,opts){
+  opts=opts||{};
   if(!tasks.length){ toast('Нечего повторять — всё сделано'); return; }
   const it={};
   tasks.forEach(t=>{ if(t.k&&!t.ungraded&&!t.t.endsWith('intro')){ (it[t.k]=it[t.k]||{left:0,wasNew:isNew(t.k)}).left++; } });
@@ -1705,16 +2035,23 @@ function viewPlay(s){
   const x=P.cur; if(!x.t0) x.t0=Date.now();
   const v=el('div','view');
   const top=el('div','playtop');
-  const xb=el('button','x','✕'); xb.setAttribute('aria-label','Выйти'); xb.onclick=()=>{ hideFB(); go('path'); };
+  const xb=el('button','x',IC('x',22)); xb.setAttribute('aria-label','Выйти'); xb.onclick=()=>{ hideFB(); go('path'); };
   top.appendChild(xb);
   top.appendChild(el('div','bar',`<i style="width:${Math.min(100,P.done/Math.max(1,P.total)*100)|0}%"></i>`));
-  top.appendChild(el('div','combo'+(P.combo>=3?' hot':''),P.combo>=2?'🔥'+P.combo:''));
+  top.appendChild(el('div','combo'+(P.combo>=3?' hot':''),P.combo>=2?IC('flame',20)+P.combo:''));
   v.appendChild(top);
-  if(x.retry) v.appendChild(el('div','kind','↻ Ещё раз')).style.marginBottom='6px';
+  if(x.retry) v.appendChild(el('div','kind retry',IC('cycle',16)+' Ещё раз — исправим ошибку')).style.marginBottom='6px';
   const stage=el('div',''); v.appendChild(stage); s.appendChild(v);
   const w=x.k&&BYK[x.k];
   ({intro:tIntro,choice:tChoice,produce:tProduce,listen:tListen,pinyin:tPinyin,tones:tTones,recall:tRecall,write:tWrite,build:tBuild,
-    pairs:tPairs,assemble:tAssemble,rintro:tRadIntro,keyname:tKeyName,keyform:tKeyForm,keyvar:tKeyVar}[x.t]||tChoice)(stage,w||x,x);
+    pairs:tPairs,assemble:tAssemble,rintro:tRadIntro,keyname:tKeyName,keyform:tKeyForm,keyvar:tKeyVar,hear:tHear}[x.t]||tChoice)(stage,w||x,x);
+  footify(stage);
+}
+// Главная кнопка задания («Проверить», «Дальше», «Уже знаю/Дальше») — в нижнюю панель, как у Duolingo
+function footify(stage){
+  const last=[...stage.children].reverse().find(e=>e.matches('.actionrow,button.btn'));
+  if(!last||!last.querySelector&&!last.matches('button')) return;
+  const f=el('div','playfoot'), inn=el('div','in'); inn.appendChild(last); f.appendChild(inn); stage.appendChild(f);
 }
 // Ответ на задание: ok — верно; info: {right, fast, hard, noFB, extra, okHtml}
 function playAnswer(ok,info){
@@ -1782,12 +2119,12 @@ function playEnd(s){
   const P=PLAY, v=el('div','view endwrap');
   if(P.opts.test) return jumpEnd(s);
   const acc=P.first?Math.round(P.firstOk/P.first*100):100, sec=Math.round(((P.t1||Date.now())-P.t0)/1000);
-  v.innerHTML=mascot(P.errors?'happy':'cheer',110)+`<h2>${P.perfect?'Без единой ошибки!':'Урок пройден!'}</h2>
+  v.innerHTML=mascot(P.errors?'happy':'cheer',150)+`<h2>${P.perfect?'Без единой ошибки!':'Урок пройден!'}</h2>
     <div class="note" style="margin-top:0">${esc(P.title)}</div>
-    <div class="endstats"><div class="estat"><small>Всего XP</small><b id="xpCount">${P.xp}</b></div>
-      <div class="estat acc"><small>Точность</small><b>${acc}%</b></div>
-      <div class="estat time"><small>Время</small><b>${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}</b></div></div>`;
-  if(P.best>=5) v.appendChild(el('p','note','Лучшее комбо: 🔥'+P.best));
+    <div class="endstats"><div class="estat"><small>Всего XP</small><b>${IC('bolt',22)}<span id="xpCount">${P.xp}</span></b></div>
+      <div class="estat acc"><small>${acc>=90?'Отлично':acc>=70?'Хорошо':'Точность'}</small><b>${IC('target',22)}${acc}%</b></div>
+      <div class="estat time"><small>Время</small><b>${IC('timer',22)}${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}</b></div></div>`;
+  if(P.best>=5) v.appendChild(el('p','note','Лучшее комбо: '+IC('flame',16)+P.best));
   const more=P.opts.more?P.opts.more():[];
   const nb=el('button','btn',more.length?'Дальше: следующая порция':'Дальше по пути'); nb.dataset.key='space';
   nb.onclick=()=>{ if(more.length) playStart(P.opts.more(),P.opts); else { PLAY=null; go('path'); } };
@@ -1807,17 +2144,17 @@ function head(stage,text){ stage.appendChild(el('div','qh',text)); }
 function tIntro(stage,w){
   const L=WORD_L[w.key];
   const c=el('div','qcard introcard');
-  c.innerHTML=`<div class="newtag">✦ Новое слово${EXTRA_OF[w.key]?' · '+esc(EXTRA_OF[w.key]):L?' · урок '+L:''}</div>${wordHead(w,80)}
+  c.innerHTML=`<div class="newtag">${IC('sparkle',14)} Новое слово${EXTRA_OF[w.key]?' · '+esc(EXTRA_OF[w.key]):L?' · урок '+L:''}</div>${wordHead(w,80)}
     <div class="reveal" style="border:0;margin-top:4px;padding-top:4px"><div class="py">${pinyinHTML(w.p)}</div>${palladius(w.p)?`<div class="palla">${esc(palladius(w.p))}</div>`:''}<div class="tr">${esc(meaning(w))}</div>
     ${w.ex?`<div class="han" style="font-size:17px;margin-top:10px;color:var(--title)">${wrapHz(w.ex[0])}</div><div class="en">${pinyinHTML(w.ex[1])}</div><div class="en">${esc(w.ex[2])}</div>`:''}
-    <div class="actionrow" style="justify-content:center"><button class="say" data-say="${esc(w.s)}">🔊 Слово</button>${w.ex?`<button class="say" data-say="${esc(w.ex[0])}">🔊 Пример</button>`:''}</div></div>`;
+    <div class="actionrow" style="justify-content:center"><button class="say" ${sayA(w)}>${SPK()} Слово</button>${w.ex?`<button class="say" data-say="${esc(w.ex[0])}">${SPK()} Пример</button>`:''}</div></div>`;
   stage.appendChild(c);
   const bk=el('details','strk'); bk.style.marginTop='10px'; bk.innerHTML=`<summary>Разбор по иероглифам и ключам</summary>${hanOf(w.s).filter(c=>HZ.c[c]).map(c=>decompHTML(c,{short:1,w})).join('')}`; stage.appendChild(bk);
   const row=el('div','actionrow');
   const kn=el('button','btn ghost','Уже знаю'); kn.onclick=()=>introKnown(w.key);
   const nx=el('button','btn','Дальше'); nx.dataset.key='space'; nx.onclick=playNext;
   row.appendChild(kn); row.appendChild(nx); stage.appendChild(row);
-  Speech.has()&&Speech.say(w.s);
+  Speech.has()&&sayW(w);
 }
 function introKnown(k){
   const P=PLAY, it=P.items[k];
@@ -1838,22 +2175,22 @@ function optionBox(stage,opts,right,done,cls){
 function distractWords(w){ const L=WORD_L[w.key]; const near=WORDS.filter(x=>x!==w&&x.ru&&(L?WORD_L[x.key]&&Math.abs(WORD_L[x.key]-L)<=6:x.hsk===w.hsk)); return near.length>=8?near:WORDS; }
 function tChoice(stage,w,x){
   head(stage,'Выбери перевод');
-  const c=el('div','qcard'); c.style.minHeight='20vh'; c.innerHTML=wordHead(w)+`<button class="say" data-say="${esc(w.s)}" style="margin-top:6px">🔊</button>`; stage.appendChild(c);
+  const c=el('div','qcard'); c.style.minHeight='20vh'; c.innerHTML=wordHead(w)+`<button class="say" ${sayA(w)} style="margin-top:6px" aria-label="Слушать">${SPK(20)}</button>`; stage.appendChild(c);
   const right=meaning(w), opts=shuffle(others(distractWords(w).map(meaning),right,3).concat([right]));
-  optionBox(stage,opts.map(o=>[o,esc(o)]),right,ok=>{ Speech.has()&&Speech.say(w.s); playAnswer(ok,{right:rightWord(w),okHtml:pinyinHTML(w.p)}); });
+  optionBox(stage,opts.map(o=>[o,esc(o)]),right,ok=>{ Speech.has()&&sayW(w); playAnswer(ok,{right:rightWord(w),okHtml:pinyinHTML(w.p)}); });
 }
 function tProduce(stage,w){
   head(stage,'Как написать иероглифами?');
   const c=el('div','qcard'); c.style.minHeight='14vh'; c.innerHTML=`<div class="qbig">«${esc(meaning(w))}»</div>`; stage.appendChild(c);
   const n=hanOf(w.s).length, pool=distractWords(w).filter(x=>hanOf(x.s).length===n);
   const opts=shuffle(others((pool.length>=6?pool:WORDS).map(x=>x.s),w.s,3).concat([w.s]));
-  optionBox(stage,opts.map(o=>[o,'<span class="han" style="font-size:28px">'+esc(o)+'</span>']),w.s,ok=>{ Speech.has()&&Speech.say(w.s); playAnswer(ok,{right:rightWord(w),okHtml:pinyinHTML(w.p)}); },'two');
+  optionBox(stage,opts.map(o=>[o,'<span class="han" style="font-size:28px">'+esc(o)+'</span>']),w.s,ok=>{ Speech.has()&&sayW(w); playAnswer(ok,{right:rightWord(w),okHtml:pinyinHTML(w.p)}); },'two');
 }
 function tListen(stage,w,x){
   head(stage,'Что ты слышишь?');
   const c=el('div','qcard'); c.style.minHeight='16vh';
-  c.innerHTML=`<button class="iconbtn primary" style="width:80px;height:80px;font-size:34px;border-radius:22px" data-say="${esc(w.s)}" aria-label="Слушать">🔊</button><button class="linkbtn" data-say="${esc(w.s)}" data-rate=".5">🐢 медленно</button>`;
-  stage.appendChild(c); if(!x.played){ x.played=1; setTimeout(()=>Speech.say(w.s),200); }
+  c.innerHTML=`<button class="iconbtn primary" style="width:80px;height:80px;font-size:34px;border-radius:22px" ${sayA(w)} aria-label="Слушать">${SPK(42)}</button><button class="linkbtn" ${sayA(w)} data-rate=".5">${SLOW()} медленно</button>`;
+  stage.appendChild(c); if(!x.played){ x.played=1; setTimeout(()=>sayW(w),200); }
   const n=hanOf(w.s).length, pool=distractWords(w).filter(x=>hanOf(x.s).length===n);
   const opts=shuffle(others((pool.length>=6?pool:WORDS).map(x=>x.s),w.s,3).concat([w.s]));
   optionBox(stage,opts.map(o=>[o,'<span class="han" style="font-size:28px">'+esc(o)+'</span>']),w.s,ok=>playAnswer(ok,{right:rightWord(w),okHtml:esc(meaning(w))}),'two');
@@ -1864,7 +2201,7 @@ function tPinyin(stage,w){
   const inp=el('input','tinput'); inp.placeholder='пиньинь (тоны можно не ставить)'; inp.autocapitalize='off'; inp.autocomplete='off'; inp.spellcheck=false; stage.appendChild(inp);
   const chk=el('button','btn showbtn','Проверить'); chk.disabled=true; stage.appendChild(chk);
   inp.oninput=()=>{ chk.disabled=!inp.value.trim(); };
-  const check=()=>{ if(!inp.value.trim()) return; const ok=toneless(inp.value)===toneless(w.p); inp.disabled=true; chk.remove(); Speech.has()&&Speech.say(w.s);
+  const check=()=>{ if(!inp.value.trim()) return; const ok=toneless(inp.value)===toneless(w.p); inp.disabled=true; chk.remove(); Speech.has()&&sayW(w);
     playAnswer(ok,{right:rightWord(w)+(inp.value?`<br><small>ты написал: ${esc(inp.value)}</small>`:''),okHtml:pinyinHTML(w.p)}); };
   inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); check(); } });
   chk.onclick=check; setTimeout(()=>inp.focus(),60);
@@ -1877,7 +2214,7 @@ function toneRows(host,chars,sylls,done){
     row.appendChild(el('span','han',esc(ch)));
     const seg=el('div','seg');
     if(sylls[i]==='r') seg.innerHTML='<span class="lbl" style="align-self:center">эрхуа r</span>';
-    else TONE_MARKS.forEach(([m,l],t)=>{ const b=el('button','',`${m}<small>${l}</small>`); b.onclick=()=>{ sel[i]=t+1; [...seg.children].forEach((x,j)=>x.classList.toggle('on',j===t)); chk.disabled=sel.some(v=>v==null); }; seg.appendChild(b); });
+    else TONE_MARKS.forEach(([m,l],t)=>{ const b=el('button','t'+(t+1),`${toneIcon(t+1,30)}<small>${l}</small>`); b.setAttribute('aria-label','тон '+(t+1)+' '+m); b.onclick=()=>{ sel[i]=t+1; [...seg.children].forEach((x,j)=>x.classList.toggle('on',j===t)); chk.disabled=sel.some(v=>v==null); }; seg.appendChild(b); });
     row.appendChild(seg); box.appendChild(row);
   });
   host.appendChild(box);
@@ -1890,16 +2227,19 @@ function toneRows(host,chars,sylls,done){
     chk.remove(); done(ok);
   };
 }
-function tTones(stage,w){
-  head(stage,'Выбери тоны');
-  const c=el('div','qcard'); c.style.minHeight='10vh'; c.innerHTML=`<div class="qbig">${esc(meaning(w))}</div><button class="say" data-say="${esc(w.s)}" style="margin-top:8px">🔊 Послушать</button>`; stage.appendChild(c);
-  toneRows(stage,hanOf(w.s),wordSylls(w),ok=>{ Speech.has()&&Speech.say(w.s); playAnswer(ok,{right:rightWord(w),okHtml:pinyinHTML(w.p)}); });
+function tTones(stage,w,task){
+  head(stage,task&&task.hearOnly?'Послушай и выбери тоны':'Выбери тоны');
+  const c=el('div','qcard'); c.style.minHeight='10vh';
+  c.innerHTML=`<div class="qbig">${task&&task.hearOnly?`<span class="han" style="font-size:44px">${esc(w.s)}</span>`:esc(meaning(w))}</div>
+    <div class="actionrow" style="justify-content:center;margin-top:8px"><button class="say" ${sayA(w)}>${SPK()} Послушать</button><button class="say" ${sayA(w)} data-rate=".5">${SLOW()} по слогам</button></div>`;
+  stage.appendChild(c); if(task&&!task.played){ task.played=1; setTimeout(()=>sayW(w),250); }
+  toneRows(stage,hanOf(w.s),wordSylls(w),ok=>{ Speech.has()&&sayW(w); playAnswer(ok,{right:rightWord(w),okHtml:pinyinHTML(w.p)}); });
 }
 function tRecall(stage,w){
   head(stage,'Вспомни и напиши иероглифами');
   const c=el('div','qcard'); c.style.minHeight='22vh'; c.innerHTML=`<div class="qbig">«${esc(meaning(w))}»</div><div class="qsub">на бумаге, потом сверь</div>`; stage.appendChild(c);
   const sb=el('button','btn showbtn','Показать ответ'); sb.dataset.key='space'; stage.appendChild(sb);
-  sb.onclick=()=>{ sb.remove(); c.innerHTML+=`<div class="reveal">${wordHead(w,64)}<div class="py">${pinyinHTML(w.p)}</div></div>`; Speech.has()&&Speech.say(w.s);
+  sb.onclick=()=>{ sb.remove(); c.innerHTML+=`<div class="reveal">${wordHead(w,64)}<div class="py">${pinyinHTML(w.p)}</div></div>`; Speech.has()&&sayW(w);
     const bar=el('div','gradebar');
     const b1=el('button','grade g1','Ошибся<small>1 · ←</small>'); b1.dataset.key='1'; b1.onclick=()=>playAnswer(false,{noFB:true});
     const b2=el('button','grade g3','Написал верно<small>2 · →</small>'); b2.dataset.key='2'; b2.onclick=()=>playAnswer(true,{noFB:true});
@@ -1925,7 +2265,7 @@ function tBuild(stage,x,task){
   }
   head(stage,zh?'Переведи на китайский':'Переведи на русский');
   const c=el('div','qcard'); c.style.minHeight='0'; c.style.padding='16px';
-  c.innerHTML=zh?`<div class="qbig" style="font-size:19px">${esc(sn.ru)}</div>`:`<div class="han zhl" style="font-size:24px">${wrapHz(sn.zh)}</div><button class="say" data-say="${esc(sn.zh)}" style="margin-top:6px">🔊</button>`;
+  c.innerHTML=zh?`<div class="qbig" style="font-size:19px">${esc(sn.ru)}</div>`:`<div class="han zhl" style="font-size:24px">${wrapHz(sn.zh)}</div><button class="say" data-say="${esc(sn.zh)}" style="margin-top:6px" aria-label="Слушать">${SPK(20)}</button>`;
   stage.appendChild(c);
   const area=el('div','tl area'), pool=el('div','tl'); stage.appendChild(area); stage.appendChild(pool);
   const pick=[];
@@ -2031,7 +2371,7 @@ function tAssemble(stage,x,task){
 function tRadIntro(stage,x){
   const n=x.n, r=RADS[n-1], ex=(KEY_CHARS[n]||[]).slice(0,5);
   const c=el('div','qcard introcard');
-  c.innerHTML=`<div class="newtag">✦ Новый ключ №${n}</div><div class="qhz han" style="font-size:84px">${esc(r[4][0])}</div>
+  c.innerHTML=`<div class="newtag">${IC('sparkle',14)} Новый ключ №${n}</div><div class="qhz han" style="font-size:84px">${esc(r[4][0])}</div>
     ${r[4].length>1?`<div class="han" style="font-size:22px;color:var(--text2)">другие формы: ${esc([...r[4]].slice(1).join(' '))}</div>`:''}
     <div class="reveal" style="border:0;padding-top:4px"><div class="py">${pinyinHTML(r[2])}</div><div class="tr">${esc(r[3])}</div><div class="en">${r[1]} ${plural(r[1],'черта','черты','черт')}</div>
     ${ex.length?`<div class="en" style="margin-top:8px">В иероглифах уроков: <span class="han" style="font-size:24px;color:var(--title)">${ex.map(ch=>`<span class="hz" data-c="${ch}">${ch}</span>`).join(' ')}</span></div>`:'<div class="en">В словах уроков 1–30 не встречается — учим для полноты таблицы.</div>'}
@@ -2067,6 +2407,60 @@ function tKeyVar(stage,x){
 }
 
 /*==================================================================
+  ТОНЫ НА СЛУХ: слог в записи носителя → выбери тон 1–4 (график высоты голоса);
+  ошибка — «Сравни»: тот же слог во всех тонах. Слова из 2–3 знаков — тоны каждого слога.
+  Слабые слоги (meta.toneErr) попадаются чаще. В FSRS не идёт — это тренировка слуха.
+==================================================================*/
+const TONE_NAMES=['','ровный высокий','восходящий','низкий, с подъёмом','резкий нисходящий'];
+function sylMark(n){                                    // 'xie4' → 'xiè'
+  const t=+n.slice(-1), b=n.slice(0,-1).replace(/v/g,'ü'); if(!(t>=1&&t<=4)) return b;
+  const M={a:'āáǎà',e:'ēéěè',i:'īíǐì',o:'ōóǒò',u:'ūúǔù','ü':'ǖǘǚǜ'};
+  let i=b.search(/[ae]/); if(i<0) i=b.indexOf('ou'); if(i<0){ const m=[...b.matchAll(/[iouü]/g)]; i=m.length?m[m.length-1].index:-1; }
+  return i<0?b:b.slice(0,i)+M[b[i]][t-1]+b.slice(i+1);
+}
+let SYL_EX=null;                                        // слог → односложное слово курса с этим чтением
+function sylExample(n){
+  if(!SYL_EX){ SYL_EX={}; COURSE.map(k=>BYK[k]).filter(w=>w&&hanOf(w.s).length===1).forEach(w=>{ const ss=Speech.sylls(w.s,w.p); if(ss&&!SYL_EX[ss[0]]) SYL_EX[ss[0]]=w; }); }
+  return SYL_EX[n]||null;
+}
+function toneDrillTasks(words){
+  const err=State.meta.toneErr||{}, syl={}, multi=[];
+  words.forEach(w=>{ const ss=Speech.sylls(w.s,w.p); if(!ss) return; ss.forEach(n=>{ syl[n]=1; });
+    if(ss.length>=2&&ss.length<=3&&wordSylls(w)) multi.push(w); });
+  let pool=Object.keys(syl); if(pool.length<6) pool=pool.concat(shuffle([...AUD.s]).slice(0,12));
+  const pick=uniq(shuffle(pool).sort((a,b)=>(err[b]||0)-(err[a]||0))).slice(0,7);
+  const tasks=shuffle(pick).map(n=>({t:'hear',sy:n,ungraded:1}));
+  shuffle(multi).slice(0,3).forEach((w,i)=>tasks.splice(2+i*3,0,{t:'tones',k:w.key,ungraded:1,hearOnly:1}));
+  return tasks;
+}
+function startToneDrill(words,opts){
+  const ws=(words&&words.length?words:COURSE.filter(k=>!isNew(k)).map(k=>BYK[k]).filter(Boolean));
+  playTasks(toneDrillTasks(ws.length?ws:COURSE.slice(0,40).map(k=>BYK[k])),Object.assign({title:'Тоны на слух',kind:'tones'},opts||{}));
+}
+function tHear(stage,x,task){
+  const n=task.sy, t=+n.slice(-1), base=n.slice(0,-1), ex=sylExample(n);
+  head(stage,'Какой тон ты слышишь?');
+  const c=el('div','qcard'); c.style.minHeight='0';
+  c.innerHTML=`<button class="iconbtn primary bigsay" aria-label="Слушать">${SPK(44)}</button>
+    <div class="qsub" style="margin-top:12px">слог <b style="color:var(--title);font-size:20px">${esc(base.replace(/v/g,'ü'))}</b></div>
+    <button class="linkbtn" data-slow>${SLOW()} медленнее</button>`;
+  const play=r=>{ Speech.stop(); try{ const a=new Audio('./audio/s/'+n+'.mp3'); if(r) a.playbackRate=r; a.play().catch(()=>{}); }catch(e){} };
+  c.querySelector('.bigsay').onclick=()=>play(); c.querySelector('[data-slow]').onclick=()=>play(.75);
+  stage.appendChild(c); if(!task.played){ task.played=1; setTimeout(()=>play(),250); }
+  const opts=[1,2,3,4].map(k=>[k,`<span class="tonechoice">${toneIcon(k,44)}<b>${k}</b><small>${TONE_NAMES[k]}</small></span>`]);
+  const right=`<span style="font-size:22px">${pinyinHTML(sylMark(n))}</span> — тон ${t}, ${TONE_NAMES[t]}`+(ex?`<br><span class="han">${esc(ex.s)}</span> ${esc(meaning(ex))}`:'');
+  optionBox(stage,opts,t,ok=>{
+    const err=State.meta.toneErr=State.meta.toneErr||{};
+    if(ok){ if(err[n]) err[n]=Math.max(0,err[n]-1); } else err[n]=(err[n]||0)+1;
+    const cmp=el('div','actionrow cmprow'); cmp.style.justifyContent='center';
+    [1,2,3,4].filter(k=>AUD.s.has(base+k)).forEach(k=>{ const b=el('button','say t'+k,`${toneIcon(k,22)} ${esc(sylMark(base+k))}`);
+      b.onclick=()=>{ try{ new Audio('./audio/s/'+base+k+'.mp3').play().catch(()=>{}); }catch(e){} }; cmp.appendChild(b); });
+    const extra=el('div',''); extra.appendChild(el('div','lbl','Сравни все тоны этого слога:')).style.marginBottom='6px'; extra.appendChild(cmp);
+    playAnswer(ok,{right,okHtml:right,extra:ok?null:extra});
+  },'two');
+}
+
+/*==================================================================
   УРОКИ
 ==================================================================*/
 function viewLessons(s){
@@ -2097,10 +2491,10 @@ function viewExtra(s){
   v.appendChild(el('h2','title',esc(x.title)));
   v.appendChild(el('p','note',`${x.words.length} слов, в работе ${learnedCount(keys)} · в «Уроке дня» идут после урока ${L}.<br>${esc(x.note||'')}<br>Источник: ${esc(x.src||'')}`));
   const act=el('div','actionrow');
-  const b1=el('button','btn','▶ Учить'); b1.onclick=()=>playStart(poolQueue(keys,8),{title:x.title,kind:'learn',more:()=>poolQueue(keys,8)});
+  const b1=el('button','btn',IC('play',16)+' Учить'); b1.onclick=()=>playStart(poolQueue(keys,8),{title:x.title,kind:'learn',more:()=>poolQueue(keys,8)});
   const b2=el('button','btn ghost','笔 Прописи'); b2.onclick=()=>go('draw',{chars,title:x.title,back:{name:'extra',L,id}});
   act.appendChild(b1); act.appendChild(b2); v.appendChild(act);
-  const b3=el('button','btn mini ghost','🔊 Прослушать'); b3.style.marginTop='10px'; b3.onclick=()=>playAll(x.words); v.appendChild(b3);
+  const b3=el('button','btn mini ghost',SPK()+' Прослушать'); b3.style.marginTop='10px'; b3.onclick=()=>playAll(x.words); v.appendChild(b3);
   const list=el('div','rowlist'); list.style.marginTop='12px'; x.words.forEach(w=>list.appendChild(witem(w))); v.appendChild(list);
   s.appendChild(v);
 }
@@ -2113,14 +2507,14 @@ function viewLesson(s){
   v.appendChild(el('h2','title','Урок '+L+' · '+esc(lessonTitle(L))));
   v.appendChild(el('p','note',`<span class="han" style="font-size:15px;color:var(--paper)">${esc(LESSONS[L].sub||'')}</span> · ${ws.length} слов, в работе ${learnedCount(ws.map(w=>w.key))} · новых иероглифов ${LESSON_CHARS[L].length} · новых ключей в разборе ${LESSON_KEYS[L].length}`));
   const act=el('div','actionrow');
-  const b1=el('button','btn','▶ Учить урок'); b1.onclick=()=>playStart(poolQueue(keys,8),{title:'Урок '+L,kind:'learn',more:()=>poolQueue(keys,8)});
+  const b1=el('button','btn',IC('play',16)+' Учить урок'); b1.onclick=()=>playStart(poolQueue(keys,8),{title:'Урок '+L,kind:'learn',more:()=>poolQueue(keys,8)});
   const real=TESTS.find(t=>t.lesson===L);
   const b2=el('button','btn ghost','考 '+(real?'Проверочная':'К проверочной')); b2.onclick=()=>go('test',{home:1,tid:(real||autoTest(L)).id});
   act.appendChild(b1); act.appendChild(b2); v.appendChild(act);
   const act2=el('div','actionrow');
-  const b0=el('button','btn mini ghost','🃏 Карточки'); b0.onclick=()=>startSession(poolQueue(keys),mode,'Урок '+L,()=>poolQueue(keys)); act2.appendChild(b0);
+  const b0=el('button','btn mini ghost',IC('cards',18)+' Карточки'); b0.onclick=()=>startSession(poolQueue(keys),mode,'Урок '+L,()=>poolQueue(keys)); act2.appendChild(b0);
   const b3=el('button','btn mini ghost','笔 Прописи урока'); b3.onclick=()=>go('draw',{chars:LESSON_CHARS[L].slice(),title:'Урок '+L+' · новые иероглифы',back:{name:'lesson',L}});
-  const b4=el('button','btn mini ghost','🔊 Прослушать'); b4.onclick=()=>playAll(ws);
+  const b4=el('button','btn mini ghost',SPK()+' Прослушать'); b4.onclick=()=>playAll(ws);
   act2.appendChild(b3); act2.appendChild(b4); v.appendChild(act2);
   lessonExtras(L).forEach(x=>{ const xb=el('button','item rowbtn','＋ '+esc(x.title)+' · '+x.words.length+' слов ›'); xb.style.marginTop='10px'; xb.onclick=()=>go('extra',{L,id:x.id}); v.appendChild(xb); });
   const mc=el('div','chips'); mc.appendChild(el('span','note','Режим карточек:')).style.margin='6px 4px 0 0';
@@ -2150,7 +2544,7 @@ function witem(w){
   it.onclick=()=>go('card',{id:w.id,from:State.route}); return it;
 }
 let playT;
-function playAll(ws){ let i=0; clearTimeout(playT); (function nxt(){ if(i>=ws.length) return; Speech.say(ws[i].s); i++; playT=setTimeout(nxt,1200); })(); toast('Проигрываю '+ws.length+' слов'); }
+function playAll(ws){ let i=0; clearTimeout(playT); (function nxt(){ if(i>=ws.length) return; sayW(ws[i]); i++; playT=setTimeout(nxt,1200); })(); toast('Проигрываю '+ws.length+' слов'); }
 
 /*==================================================================
   КАРТОЧКА СЛОВА
@@ -2166,10 +2560,10 @@ function viewCard(s){
     <div class="bigtr">${esc(w.ru||meaning(w))}</div>
     ${w.ru&&w.en?`<div class="bigen">${esc(w.en.slice(0,2).join('; '))}</div>`:''}
     <div class="tagrow">${(w.k||[]).map(n=>`<span class="pill k">Урок ${n}</span>`).join('')}${w.hsk?`<span class="pill hsk">HSK ${w.hsk}</span>`:''}${EXTRA_OF[w.key]?`<span class="pill k">${esc(EXTRA_OF[w.key])}</span>`:''}${statusOf(w.key)!=='new'?'<span class="pill ok">в работе</span>':''}</div>
-    <div class="cardbtns"><button class="iconbtn primary" id="cSay" aria-label="Слушать">🔊</button><button class="iconbtn" id="cDraw" aria-label="Прописи">笔</button></div>`;
+    <div class="cardbtns"><button class="iconbtn primary" id="cSay" aria-label="Слушать">${SPK(26)}</button><button class="iconbtn" id="cDraw" aria-label="Прописи">${IC('brush',26)}</button></div>`;
   v.appendChild(card);
   const meta=el('div','meta');
-  if(w.ex) meta.appendChild(mr('Пример',`<div class="han zhl">${wrapHz(w.ex[0])}</div><div>${pinyinHTML(w.ex[1])}</div><div style="color:var(--paper-dim)">${esc(w.ex[2])}</div><button class="say" data-say="${esc(w.ex[0])}" style="margin-top:6px">🔊 Пример</button>`));
+  if(w.ex) meta.appendChild(mr('Пример',`<div class="han zhl">${wrapHz(w.ex[0])}</div><div>${pinyinHTML(w.ex[1])}</div><div style="color:var(--paper-dim)">${esc(w.ex[2])}</div><button class="say" data-say="${esc(w.ex[0])}" style="margin-top:6px">${SPK()} Пример</button>`));
   if(w.cl&&w.cl.length) meta.appendChild(mr('Счётное слово',w.cl.map(c=>'<span class="han">'+wrapHz(c)+'</span>').join('  ')));
   if(w.alt&&w.alt.length) meta.appendChild(mr('Ещё чтение',w.alt.map(a=>pinyinHTML(a.p)+(a.en&&a.en[0]?' — '+esc(a.en[0]):'')).join('<br>')));
   if(w.ra) meta.appendChild(mr('Перевод','<span style="color:var(--muted)">из открытого словаря — можно перепроверить</span>'));
@@ -2179,7 +2573,7 @@ function viewCard(s){
   v.appendChild(el('p','eyebrow','Разбор по иероглифам'));
   v.appendChild(el('div','',breakdown(w.s)));
   s.appendChild(v);
-  $('#cSay').onclick=()=>Speech.say(w.s);
+  $('#cSay').onclick=()=>sayW(w);
   $('#cDraw').onclick=()=>go('draw',{chars:hanOf(w.s),title:w.d||w.s,back:{name:'card',id:w.id,from}});
 }
 function mr(k,v){ return el('div','mr',`<div class="k">${k}</div><div class="v">${v}</div>`); }
@@ -2218,8 +2612,8 @@ function viewSession(s){
   if(SESSION.current!==key){ SESSION.current=key; SESSION.cur=null; }
   const v=el('div','view qwrap');
   const hdr=el('div',''); hdr.style.cssText='display:flex;align-items:center;justify-content:space-between';
-  const back=el('button','back','✕ '+esc(SESSION.title||'Завершить')); back.onclick=()=>{ SESSION.finished=true; go('practice'); }; hdr.appendChild(back);
-  if(SESSION.last){ const ub=el('button','back','↩ Отменить'); ub.dataset.key='undo'; ub.onclick=undoLast; hdr.appendChild(ub); }
+  const back=el('button','back',IC('x',14)+' '+esc(SESSION.title||'Завершить')); back.onclick=()=>{ SESSION.finished=true; go('practice'); }; hdr.appendChild(back);
+  if(SESSION.last){ const ub=el('button','back',IC('undo',14)+' Отменить'); ub.dataset.key='undo'; ub.onclick=undoLast; hdr.appendChild(ub); }
   v.appendChild(hdr);
   v.appendChild(el('div','progress',`<i style="width:${Math.min(100,SESSION.done/Math.max(1,SESSION.total)*100)|0}%"></i>`));
   const stage=el('div',''); v.appendChild(stage); s.appendChild(v);
@@ -2275,10 +2669,10 @@ function undoLast(){
 // — знакомство с новым словом
 function qIntro(stage,w){
   const c=el('div','qcard');
-  c.innerHTML=`<div class="qprompt" style="color:var(--cinnabar-2)">✦ Новое слово${EXTRA_OF[w.key]?' · '+esc(EXTRA_OF[w.key]):WORD_L[w.key]?' · урок '+WORD_L[w.key]:''}</div>
+  c.innerHTML=`<div class="qprompt" style="color:var(--cinnabar-2)">${IC('sparkle',14)} Новое слово${EXTRA_OF[w.key]?' · '+esc(EXTRA_OF[w.key]):WORD_L[w.key]?' · урок '+WORD_L[w.key]:''}</div>
     <div class="qhz han" style="font-size:84px">${esc(w.d||w.s)}</div>
     <div class="reveal" style="margin-top:10px"><div class="py">${pinyinHTML(w.p)}</div>${palladius(w.p)?`<div class="palla">${esc(palladius(w.p))}</div>`:''}<div class="tr">${esc(meaning(w))}</div>
-    ${w.ex?`<div class="en han" style="font-size:16px;margin-top:8px">${wrapHz(w.ex[0])}</div><div class="en">${pinyinHTML(w.ex[1])}</div><div class="en">${esc(w.ex[2])}</div><button class="say" data-say="${esc(w.ex[0])}" style="margin-top:6px">🔊 Пример</button>`:''}</div>
+    ${w.ex?`<div class="en han" style="font-size:16px;margin-top:8px">${wrapHz(w.ex[0])}</div><div class="en">${pinyinHTML(w.ex[1])}</div><div class="en">${esc(w.ex[2])}</div><button class="say" data-say="${esc(w.ex[0])}" style="margin-top:6px">${SPK()} Пример</button>`:''}</div>
 `;
   stage.appendChild(c);
   const row=el('div','actionrow');
@@ -2287,13 +2681,13 @@ function qIntro(stage,w){
   row.appendChild(known); row.appendChild(go2); stage.appendChild(row);
   stage.appendChild(el('p','eyebrow','Разбор по иероглифам'));
   stage.appendChild(el('div','',breakdown(w.s)));
-  Speech.has()&&Speech.say(w.s);
+  Speech.has()&&sayW(w);
 }
 // — 汉字 → перевод и пиньинь (самопроверка)
 function qRecog(stage,w){
   stage.appendChild(el('div','qprompt','Что значит и как читается?'));
   const c=el('div','qcard'); c.innerHTML=`<div class="qhz han">${esc(w.d||w.s)}</div>`; stage.appendChild(c);
-  const rev=()=>{ c.innerHTML=`<div class="qhz han" style="font-size:72px">${wrapHz(w.d||w.s)}</div>`+answerHTML(w); Speech.has()&&Speech.say(w.s); gradeSelf(stage); stage.appendChild(el('div','',breakdown(w.s))); };
+  const rev=()=>{ c.innerHTML=`<div class="qhz han" style="font-size:72px">${wrapHz(w.d||w.s)}</div>`+answerHTML(w); Speech.has()&&sayW(w); gradeSelf(stage); stage.appendChild(el('div','',breakdown(w.s))); };
   showBtn(stage,rev);
 }
 // — 汉字 → 4 перевода
@@ -2302,7 +2696,7 @@ function qChoice(stage,w){
   const c=el('div','qcard'); c.style.minHeight='24vh'; c.innerHTML=`<div class="qhz han">${esc(w.d||w.s)}</div>`; stage.appendChild(c);
   const right=meaning(w);
   const opts=shuffle(others(distractWords(w).map(meaning),right,3).concat([right]));
-  choiceBox(stage,opts.map(o=>[o,esc(o)]),right,ok=>{ c.innerHTML=`<div class="qhz han" style="font-size:64px">${wrapHz(w.d||w.s)}</div>`+answerHTML(w); Speech.has()&&Speech.say(w.s); gradeAuto(stage,ok?3:1); });
+  choiceBox(stage,opts.map(o=>[o,esc(o)]),right,ok=>{ c.innerHTML=`<div class="qhz han" style="font-size:64px">${wrapHz(w.d||w.s)}</div>`+answerHTML(w); Speech.has()&&sayW(w); gradeAuto(stage,ok?3:1); });
 }
 // — перевод → выбрать 汉字
 function qProduce(stage,w){
@@ -2311,7 +2705,7 @@ function qProduce(stage,w){
   const n=hanOf(w.s).length;
   const pool=distractWords(w).filter(x=>hanOf(x.s).length===n);
   const opts=shuffle(others((pool.length>=6?pool:WORDS).map(x=>x.s),w.s,3).concat([w.s]));
-  choiceBox(stage,opts.map(o=>[o,'<span class="han" style="font-size:28px">'+esc(o)+'</span>']),w.s,ok=>{ c.innerHTML=`<div class="qhz han" style="font-size:64px">${wrapHz(w.d||w.s)}</div>`+answerHTML(w); Speech.has()&&Speech.say(w.s); gradeAuto(stage,ok?3:1); });
+  choiceBox(stage,opts.map(o=>[o,'<span class="han" style="font-size:28px">'+esc(o)+'</span>']),w.s,ok=>{ c.innerHTML=`<div class="qhz han" style="font-size:64px">${wrapHz(w.d||w.s)}</div>`+answerHTML(w); Speech.has()&&sayW(w); gradeAuto(stage,ok?3:1); });
 }
 function choiceBox(stage,opts,right,done){
   const box=el('div','choices');
@@ -2326,7 +2720,7 @@ function choiceBox(stage,opts,right,done){
 function qRecall(stage,w){
   stage.appendChild(el('div','qprompt','Вспомни и напиши иероглифами'));
   const c=el('div','qcard'); c.style.minHeight='28vh'; c.innerHTML=`<div class="qbig">${esc(meaning(w))}</div><div class="qsub">напиши на бумаге или в уме, потом сверь</div>`; stage.appendChild(c);
-  showBtn(stage,()=>{ c.innerHTML=`<div class="qbig">${esc(meaning(w))}</div><div class="qhz han" style="font-size:72px;margin-top:8px">${wrapHz(w.d||w.s)}</div>`+answerHTML(w); Speech.has()&&Speech.say(w.s); gradeSelf(stage); stage.appendChild(el('div','',breakdown(w.s))); });
+  showBtn(stage,()=>{ c.innerHTML=`<div class="qbig">${esc(meaning(w))}</div><div class="qhz han" style="font-size:72px;margin-top:8px">${wrapHz(w.d||w.s)}</div>`+answerHTML(w); Speech.has()&&sayW(w); gradeSelf(stage); stage.appendChild(el('div','',breakdown(w.s))); });
 }
 // — ввод пиньиня
 function qPinyin(stage,w){
@@ -2337,7 +2731,7 @@ function qPinyin(stage,w){
   const check=()=>{
     const ok=!!inp.value.trim()&&toneless(inp.value)===toneless(w.p);
     c.innerHTML=`<div class="qhz han" style="font-size:64px">${wrapHz(w.d||w.s)}</div>`+answerHTML(w,`<div class="verdict ${ok?'ok':'bad'}">${ok?'✓ верно':'ты написал: '+esc(inp.value||'—')}</div>`);
-    inp.remove(); chk.remove(); Speech.has()&&Speech.say(w.s); gradeAuto(stage,ok?3:1);
+    inp.remove(); chk.remove(); Speech.has()&&sayW(w); gradeAuto(stage,ok?3:1);
   };
   inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); check(); } });
   chk.onclick=check; setTimeout(()=>inp.focus(),60);
@@ -2346,8 +2740,8 @@ function qPinyin(stage,w){
 function qListen(stage,w){
   stage.appendChild(el('div','qprompt','Послушай: что это?'));
   const c=el('div','qcard'); c.style.minHeight='24vh';
-  c.innerHTML=`<button class="iconbtn primary" style="width:70px;height:70px;font-size:30px" data-say="${esc(w.s)}" aria-label="Слушать">🔊</button><button class="linkbtn" data-say="${esc(w.s)}" data-rate=".5">🐢 медленно</button>`;
-  stage.appendChild(c); setTimeout(()=>Speech.say(w.s),150);
+  c.innerHTML=`<button class="iconbtn primary" style="width:70px;height:70px;font-size:30px" ${sayA(w)} aria-label="Слушать">${SPK(36)}</button><button class="linkbtn" ${sayA(w)} data-rate=".5">${SLOW()} медленно</button>`;
+  stage.appendChild(c); setTimeout(()=>sayW(w),150);
   showBtn(stage,()=>{ c.innerHTML=`<div class="qhz han" style="font-size:64px">${wrapHz(w.d||w.s)}</div>`+answerHTML(w); gradeSelf(stage); });
 }
 // — тоны каждого слога
@@ -2357,11 +2751,11 @@ function toneTask(host,chars,sylls,done){
   chars.forEach((ch,i)=>{
     const fixed=sylls[i]==='r';
     const b=el('button','tc'+(fixed?' fix':''),`<span class="han">${esc(ch)}</span><span class="tm">${fixed?'':'?'}</span><span class="tp">${esc(fixed?'r':toneless(sylls[i]))}</span>`);
-    if(!fixed) b.onclick=()=>{ sel[i]=sel[i]==null?1:sel[i]===5?1:sel[i]+1; b.querySelector('.tm').textContent=TM[sel[i]]; };
+    if(!fixed) b.onclick=()=>{ sel[i]=sel[i]==null?1:sel[i]===5?1:sel[i]+1; b.querySelector('.tm').innerHTML=toneIcon(sel[i],26); };
     box.appendChild(b);
   });
   host.appendChild(box);
-  host.appendChild(el('p','note','Нажимай на слог: ˉ ˊ ˇ ˋ · (лёгкий). 一 и 不 — с изменённым тоном, как в учебнике.')).style.textAlign='center';
+  host.appendChild(el('p','note','Нажимай на слог: тон 1 → 2 → 3 → 4 → лёгкий (график — как меняется высота голоса). 一 и 不 — с изменённым тоном, как в учебнике.')).style.textAlign='center';
   const chk=el('button','btn showbtn','Проверить'); chk.dataset.key='space'; host.appendChild(chk);
   chk.onclick=()=>{
     const idx=sylls.map((s,i)=>i).filter(i=>sylls[i]!=='r');
@@ -2375,16 +2769,16 @@ function toneTask(host,chars,sylls,done){
 function qTones(stage,w){
   stage.appendChild(el('div','qprompt','Расставь тоны'));
   const c=el('div','qcard'); c.style.minHeight='16vh';
-  c.innerHTML=`<div class="qbig">${esc(meaning(w))}</div><button class="say" data-say="${esc(w.s)}" style="margin-top:10px">🔊 Послушать</button>`;
+  c.innerHTML=`<div class="qbig">${esc(meaning(w))}</div><button class="say" ${sayA(w)} style="margin-top:10px">${SPK()} Послушать</button>`;
   stage.appendChild(c);
-  toneTask(stage,hanOf(w.s),wordSylls(w),ok=>{ stage.appendChild(el('div','reveal',`<div class="py" style="text-align:center">${pinyinHTML(w.p)}</div><div class="verdict ${ok?'ok':'bad'}" style="text-align:center">${ok?'✓ все тоны верны':'есть ошибки'}</div>`)); Speech.has()&&Speech.say(w.s); gradeAuto(stage,ok?3:1); });
+  toneTask(stage,hanOf(w.s),wordSylls(w),ok=>{ stage.appendChild(el('div','reveal',`<div class="py" style="text-align:center">${pinyinHTML(w.p)}</div><div class="verdict ${ok?'ok':'bad'}" style="text-align:center">${ok?'✓ все тоны верны':'есть ошибки'}</div>`)); Speech.has()&&sayW(w); gradeAuto(stage,ok?3:1); });
 }
 // — написать иероглиф по чертам (hanzi-writer), по переводу или на слух
 function hwData(c,onC,onErr){
   if(window.HZDATA&&window.HZDATA[c]){ onC(window.HZDATA[c]); return; }
   fetch('https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/'+c+'.json').then(r=>r.json()).then(d=>{ if(window.HZDATA) window.HZDATA[c]=d; onC(d); }).catch(()=>onErr&&onErr());
 }
-const HWC={stroke:'#e23d2e',outline:'#e2d3b8',draw:'#2b211b',hl:'#c98a0e'};
+const HWC={stroke:'#3c3c3c',outline:'#e5e5e5',draw:'#ff9600',hl:'#1cb0f6'};   // прописи: написанное — тёмным, контур — светло-серым, рука — оранжевым, подсказка — голубым
 function writeQuiz(host,chars,onDone){
   let idx=0, mistakes=0; host.innerHTML='<div class="writer" id="wq"></div><div class="drawhint" id="wqHint"></div>';
   function mount(){
@@ -2406,14 +2800,14 @@ function qWrite(stage,w){
   const c=el('div','card'); c.style.padding='14px';
   c.innerHTML=`<div class="qbig">${esc(meaning(w))}</div><div class="qsub" style="margin-top:4px">${pinyinHTML(w.p)}</div><div id="wqHost"></div>`;
   stage.appendChild(c);
-  writeQuiz($('#wqHost'),hanOf(w.s),m=>{ c.appendChild(el('div','',answerHTML(w,`<div class="verdict ${m===0?'ok':m<=3?'':'bad'}">${m===0?'✓ без ошибок':'ошибок в чертах: '+m}</div>`))); Speech.has()&&Speech.say(w.s); gradeAuto(stage,writeGrade(m)); });
+  writeQuiz($('#wqHost'),hanOf(w.s),m=>{ c.appendChild(el('div','',answerHTML(w,`<div class="verdict ${m===0?'ok':m<=3?'':'bad'}">${m===0?'✓ без ошибок':'ошибок в чертах: '+m}</div>`))); Speech.has()&&sayW(w); gradeAuto(stage,writeGrade(m)); });
   const giveup=el('button','linkbtn','Не помню — показать'); giveup.onclick=()=>{ giveup.remove(); c.appendChild(el('div','',`<div class="qhz han" style="font-size:60px">${wrapHz(w.d||w.s)}</div>`+answerHTML(w))); gradeAuto(stage,1); }; stage.appendChild(giveup);
 }
 function qDictate(stage,w){
   stage.appendChild(el('div','qprompt','Диктант: напиши на слух'));
   const c=el('div','card'); c.style.padding='14px';
-  c.innerHTML=`<button class="iconbtn primary" style="width:56px;height:56px;font-size:24px;margin:0 auto" data-say="${esc(w.s)}" aria-label="Слушать">🔊</button><div id="wqHost"></div>`;
-  stage.appendChild(c); setTimeout(()=>Speech.say(w.s),200);
+  c.innerHTML=`<button class="iconbtn primary" style="width:56px;height:56px;font-size:24px;margin:0 auto" ${sayA(w)} aria-label="Слушать">${SPK(28)}</button><div id="wqHost"></div>`;
+  stage.appendChild(c); setTimeout(()=>sayW(w),200);
   writeQuiz($('#wqHost'),hanOf(w.s),m=>{ c.appendChild(el('div','',answerHTML(w,`<div class="verdict ${m===0?'ok':m<=3?'':'bad'}">${m===0?'✓ без ошибок':'ошибок в чертах: '+m}</div>`))); gradeAuto(stage,writeGrade(m)); });
   const giveup=el('button','linkbtn','Не помню — показать'); giveup.onclick=()=>{ giveup.remove(); c.appendChild(el('div','',`<div class="qhz han" style="font-size:60px">${wrapHz(w.d||w.s)}</div>`+answerHTML(w))); gradeAuto(stage,1); }; stage.appendChild(giveup);
 }
@@ -2422,7 +2816,7 @@ function radChars(n,limit){ const lc=Object.keys(CHAR_L).filter(c=>radOf(c)===n)
 function radIntro(stage,n){
   const r=RADS[n-1], ex=(KEY_CHARS[n]||[]).slice(0,8);
   const c=el('div','qcard');
-  c.innerHTML=`<div class="qprompt" style="color:var(--cinnabar-2)">✦ Новый ключ №${n}${KEY_L[n]?' · урок '+KEY_L[n]:''}</div>
+  c.innerHTML=`<div class="qprompt" style="color:var(--cinnabar-2)">${IC('sparkle',14)} Новый ключ №${n}${KEY_L[n]?' · урок '+KEY_L[n]:''}</div>
     <div class="qhz han" style="font-size:80px">${esc(r[4][0])}</div>
     ${r[4].length>1?`<div class="han" style="font-size:22px;color:var(--paper-dim)">другие формы: ${esc([...r[4]].slice(1).join(' '))}</div>`:''}
     <div class="reveal"><div class="py">${pinyinHTML(r[2])}</div><div class="tr">${esc(r[3])}</div><div class="en">${r[1]} ${plural(r[1],'черта','черты','черт')}</div>
@@ -2483,7 +2877,7 @@ function viewDraw(s){
   const c=el('div','card'); c.style.padding='14px';
   const rr=RIDX[ch]!=null?RADS[RIDX[ch]]:null;
   c.innerHTML=`<div class="bigpy">${h?pinyinHTML(h[7])+' · '+esc(h[6]||''):rr?pinyinHTML(rr[2])+' · ключ «'+esc(rr[3])+'»':''}</div><div id="writer"></div><div class="drawhint" id="drawHint"></div>
-    <div class="cardbtns"><button class="iconbtn" id="dAnim" aria-label="Анимация">▶</button><button class="iconbtn" id="dRedo" aria-label="Заново">↻</button><button class="iconbtn" id="dOut" aria-label="Контур">◐</button><button class="iconbtn primary" data-say="${ch}" aria-label="Слушать">🔊</button></div>`;
+    <div class="cardbtns"><button class="iconbtn" id="dAnim" aria-label="Анимация">${IC('play',22)}</button><button class="iconbtn" id="dRedo" aria-label="Заново">${IC('undo',22)}</button><button class="iconbtn" id="dOut" aria-label="Контур">${IC('eye',22)}</button><button class="iconbtn primary" data-say="${ch}" aria-label="Слушать">${SPK(26)}</button></div>`;
   v.appendChild(c);
   if(chars.length>1){
     const nav=el('div','actionrow');
@@ -2495,7 +2889,7 @@ function viewDraw(s){
     v.appendChild(g);
   }
   v.appendChild(el('div','',breakdown(ch)));
-  if(typeof HanziWriter==='undefined') v.appendChild(el('p','note','⚠︎ Библиотека прописей не загрузилась (нужна сеть при первом запуске).'));
+  if(typeof HanziWriter==='undefined') v.appendChild(el('p','note',IC('warn',16)+' Библиотека прописей не загрузилась (нужна сеть при первом запуске).'));
   s.appendChild(v);
   let outline=true;
   const mount=()=>{
@@ -2605,7 +2999,7 @@ function tHome(v,t){
   }
   v.appendChild(head);
   const row=el('div','actionrow');
-  const cb=el('button','btn mini ghost','📄 Шпаргалка: все предложения'); cb.onclick=()=>tGo('cheat'); row.appendChild(cb);
+  const cb=el('button','btn mini ghost',IC('clipboard',18)+' Шпаргалка: все предложения'); cb.onclick=()=>tGo('cheat'); row.appendChild(cb);
   v.appendChild(row);
   const list=el('div','list'); list.style.marginTop='12px';
   t.blocks.forEach((b,bi)=>{
@@ -2632,7 +3026,7 @@ function tCheat(v,t){
 function unitItem(u,src){
   return el('div','item',`${src?`<div class="kind" style="color:var(--muted)">${esc(src)}</div>`:''}<div class="han zhl">${wrapHz(u.zh)}</div><div class="pyl">${esc(u.py)}</div><div class="rul">${esc(u.ru)}</div>
     ${u.parts?`<div class="parts">${u.parts.map(p=>`<div><span class="han" style="font-size:17px">${wrapHz(p[1])}</span> <span class="pyl">${esc(p[2])}</span><br><span class="rul">${esc(p[0])}</span></div>`).join('')}</div>`:''}
-    <div class="actionrow" style="margin-top:8px"><button class="say" data-say="${esc(u.zh)}">▶ Слушать</button><button class="say" data-say="${esc(u.zh)}" data-rate=".5">🐢 Медленно</button></div>`);
+    <div class="actionrow" style="margin-top:8px"><button class="say" data-say="${esc(u.zh)}">${SPK()} Слушать</button><button class="say" data-say="${esc(u.zh)}" data-rate=".5">${SLOW()} Медленно</button></div>`);
 }
 function frags(b){ const o=[]; b.u.forEach(u=>{ (u.parts||[]).forEach(p=>o.push({ru:p[0],zh:p[1],py:p[2],src:b.title+', отрывок'})); o.push({ru:u.ru,zh:u.zh,py:u.py,src:b.title}); }); return o; }
 function wholes(b){ return b.u.map(u=>({ru:u.ru,zh:u.zh,py:u.py,src:b.title})); }
@@ -2698,19 +3092,19 @@ function tRun(v,t){
   const c=el('div','qcard'); c.style.minHeight='30vh'; v.appendChild(c);
   const stage=el('div',''); v.appendChild(stage);
   const ans=html=>{ c.appendChild(el('div','reveal',html)); };
-  const audio=f=>{ c.innerHTML+=`<div class="actionrow" style="justify-content:center;width:100%"><button class="btn mini" data-say="${esc(f.zh)}">▶ Слушать</button><button class="btn mini ghost" data-say="${esc(f.zh)}" data-rate=".5">🐢 Медленно</button></div>
+  const audio=f=>{ c.innerHTML+=`<div class="actionrow" style="justify-content:center;width:100%"><button class="btn mini" data-say="${esc(f.zh)}">${SPK()} Слушать</button><button class="btn mini ghost" data-say="${esc(f.zh)}" data-rate=".5">${SLOW()} Медленно</button></div>
     <button class="linkbtn" id="tTxt">Нет звука? Показать иероглифы</button><div class="han zhl" id="tTx" hidden>${esc(f.zh)}</div>`;
     $('#tTxt').onclick=()=>{ $('#tTx').hidden=!$('#tTx').hidden; };
     if(T.played!==x){ T.played=x; setTimeout(()=>Speech.say(f.zh),150); } };
   if(x.k==='flash'){
     const w=x.w;
     if(x.dir==='zh'){ c.innerHTML=`<div class="qprompt">Что значит?</div><div class="qhz han" style="font-size:68px">${esc(w[0])}</div>`;
-      showBtn(stage,()=>{ ans(`<div class="py">${pinyinHTML(w[1])}</div><div class="tr">${esc(w[2])}</div>`); Speech.say(hanOf(w[0]).join('')); tSelf(stage,t); stage.appendChild(el('div','',breakdown(w[0]))); }); }
+      showBtn(stage,()=>{ ans(`<div class="py">${pinyinHTML(w[1])}</div><div class="tr">${esc(w[2])}</div>`); Speech.say(hanOf(w[0]).join(''),undefined,w[1]); tSelf(stage,t); stage.appendChild(el('div','',breakdown(w[0]))); }); }
     else{ c.innerHTML=`<div class="qprompt">Напиши иероглифами</div><div class="qbig">${esc(w[2])}</div><div class="qsub">на бумаге, потом сверь</div>`;
-      showBtn(stage,()=>{ ans(`<div class="qhz han" style="font-size:60px">${wrapHz(w[0])}</div><div class="py">${pinyinHTML(w[1])}</div>`); Speech.say(hanOf(w[0]).join('')); tSelf(stage,t); stage.appendChild(el('div','',breakdown(w[0]))); }); }
+      showBtn(stage,()=>{ ans(`<div class="qhz han" style="font-size:60px">${wrapHz(w[0])}</div><div class="py">${pinyinHTML(w[1])}</div>`); Speech.say(hanOf(w[0]).join(''),undefined,w[1]); tSelf(stage,t); stage.appendChild(el('div','',breakdown(w[0]))); }); }
   }else if(x.k==='tone'){
     const u=x.u, sy=u.sy.split(' ');
-    c.innerHTML=`<div class="qprompt">Тоны</div><div class="rul" style="font-size:16px">${esc(u.ru)}</div><button class="say" data-say="${esc(u.zh)}" style="margin-top:8px">▶ Послушать</button>`;
+    c.innerHTML=`<div class="qprompt">Тоны</div><div class="rul" style="font-size:16px">${esc(u.ru)}</div><button class="say" data-say="${esc(u.zh)}" style="margin-top:8px">${SPK()} Послушать</button>`;
     toneTask(c,hanOf(u.zh),sy,ok=>{ ans(`<div class="pyl" style="font-size:17px">${esc(u.py)}</div><div class="verdict ${ok?'ok':'bad'}">${ok?'Все тоны верны':'Есть ошибки — пример вернётся'}</div>`); tNextBtn(stage,t,ok); });
   }else if(x.k==='tiles'){
     const tl=x.x, pool=shuffle(tl.seg.map((s,i)=>({s,i}))), pick=[];
@@ -2777,8 +3171,8 @@ function viewKeys(s){
   const all=KEY_ORDER.slice(), la=learnedCount(all.map(n=>'r:'+n)), kq=todayKeysQuota();
   v.appendChild(el('p','note',`Колода «Ключи» — все 214, в порядке изучения: сначала частые в иероглифах уроков 1–30 (口, 一, 人, 木…), в конце — ${all.filter(n=>!KEY_CHARS[n]).length}, которых в уроках нет. Введено ${la} из 214; сегодня новых — ${kq.quota} (осталось ${kq.left}). Номера — по Канси; названия — таблица ДВФУ.`));
   const act=el('div','actionrow');
-  const b1=el('button','btn','▶ Учить ключи'); const q1=()=>poolQueue(all.map(n=>'r:'+n),8); b1.onclick=()=>playStart(q1(),{title:'Ключи',kind:'learn',more:q1});
-  const b2=el('button','btn ghost','🃏 Карточки'); const q2=()=>poolQueue(all.map(n=>'r:'+n)); b2.onclick=()=>startSession(q2(),'auto','Все ключи',q2);
+  const b1=el('button','btn',IC('play',16)+' Учить ключи'); const q1=()=>poolQueue(all.map(n=>'r:'+n),8); b1.onclick=()=>playStart(q1(),{title:'Ключи',kind:'learn',more:q1});
+  const b2=el('button','btn ghost',IC('cards',18)+' Карточки'); const q2=()=>poolQueue(all.map(n=>'r:'+n)); b2.onclick=()=>startSession(q2(),'auto','Все ключи',q2);
   act.appendChild(b1); act.appendChild(b2); v.appendChild(act);
   const tabs=el('div','tabs');
   [['order','По порядку изучения'],['all','По номеру']].forEach(([id,t])=>{ const b=el('button','tab'+(scope===id?' on':''),t); b.onclick=()=>go('keys',{scope:id}); tabs.appendChild(b); });
@@ -2811,7 +3205,7 @@ function viewRadical(s){
     ${r[4].length>1?`<div class="han" style="font-size:22px;color:var(--paper-dim);margin-bottom:6px">${esc([...r[4]].slice(1).join('  '))}</div>`:''}
     <div class="bigpy">${pinyinHTML(r[2])}</div><div class="bigtr">${esc(r[3])}</div>
     <div class="tagrow"><span class="pill">Ключ №${n}</span><span class="pill">${r[1]} ${plural(r[1],'черта','черты','черт')}</span>${KEY_L[n]?`<span class="pill k">урок ${KEY_L[n]}</span>`:''}<span class="pill">№${KEY_ORDER.indexOf(n)+1} в порядке изучения</span>${st!=='new'?'<span class="pill ok">в работе</span>':''}</div>
-    <div class="cardbtns"><button class="iconbtn primary" data-say="${esc(r[4][0])}" aria-label="Слушать">🔊</button><button class="iconbtn" data-draw="${esc(r[4][0])}" aria-label="Прописи">笔</button></div>`;
+    <div class="cardbtns"><button class="iconbtn primary" data-say="${esc(r[4][0])}" aria-label="Слушать">${SPK(26)}</button><button class="iconbtn" data-draw="${esc(r[4][0])}" aria-label="Прописи">${IC('brush',26)}</button></div>`;
   v.appendChild(card);
   const p2=RAD2[n];
   if(p2){ const ex=p2.e&&HZ.c[p2.e]?`<span class="hz han" data-c="${p2.e}" style="font-size:20px">${esc(p2.e)}</span>`:`<span class="han" style="font-size:20px">${esc(p2.e||'')}</span>`;
@@ -2870,7 +3264,7 @@ function viewList(s){
   const back=el('button','back','‹ Словарь'); back.onclick=()=>go('dict'); v.appendChild(back);
   v.appendChild(el('h2','title','HSK '+l));
   v.appendChild(el('p','note',ws.length+' слов, в работе '+learnedCount(keys)+'. Порядок — по частотности.'));
-  const act=el('div','actionrow'); const b=el('button','btn','▶ Учить HSK '+l); const q=()=>poolQueue(keys); b.onclick=()=>startSession(q(),'auto','HSK '+l,q); act.appendChild(b); v.appendChild(act);
+  const act=el('div','actionrow'); const b=el('button','btn',IC('play',16)+' Учить HSK '+l); const q=()=>poolQueue(keys); b.onclick=()=>startSession(q(),'auto','HSK '+l,q); act.appendChild(b); v.appendChild(act);
   const list=el('div','rowlist'); list.style.marginTop='12px'; ws.slice(0,State.route.all?ws.length:150).forEach(w=>list.appendChild(witem(w))); v.appendChild(list);
   if(!State.route.all&&ws.length>150){ const m=el('button','btn ghost','Показать все '+ws.length); m.style.marginTop='10px'; m.onclick=()=>go('list',{hsk:l,all:1}); v.appendChild(m); }
   s.appendChild(v);
@@ -2955,13 +3349,20 @@ function viewSettings(s){
   // — голос
   v.appendChild(el('p','eyebrow','Озвучка'));
   const b6=el('div','meta'), voices=Speech.list();
-  const r3=setRow(b6,'Голос',esc(Speech.source()));
+  setRow(b6,'Живые голоса — чёткие тоны','слова и слоги — записи носителей (audio-cmn); выключи, чтобы всё читал голос устройства',
+    switchEl(()=>S.voiceRec!==false,x=>{ S.voiceRec=x; ss(); Speech.say('你好',undefined,'nǐ hǎo'); }));
+  const dl=el('button','btn mini ghost',IC('headphones',18)+' Скачать');
+  dl.onclick=async()=>{ const fs=Speech.files(); let n=0; dl.disabled=true;
+    for(let i=0;i<fs.length;i+=12){ await Promise.all(fs.slice(i,i+12).map(u=>fetch(u).then(r=>{ if(r.ok) n++; }).catch(()=>{}))); dl.textContent=Math.round((i+12)/fs.length*100)+'%'; }
+    dl.disabled=false; dl.innerHTML=IC('check',16)+' Готово'; toast(n===fs.length?'Записи сохранены — озвучка работает без интернета':'Скачано '+n+' из '+fs.length+' — проверь интернет'); };
+  setRow(b6,'Записи для офлайна','≈6 МБ: '+AUD.w.size+' слов и '+AUD.s.size+' слогов; без скачивания они сохраняются по мере прослушивания',dl);
+  const r3=setRow(b6,'Голос устройства',esc(Speech.voice()?Speech.voice().name:'для предложений и слов без записи'));
   if(voices.length>1){
     const sel=el('select'); sel.appendChild(el('option','','Авто')).value='';
     voices.forEach(vo=>{ const o=el('option','',esc(vo.name+' ('+vo.lang+')')); o.value=vo.name; if(S.voiceName===vo.name) o.selected=true; sel.appendChild(o); });
-    sel.onchange=()=>{ S.voiceName=sel.value||null; Speech.setPref(S.voiceName); save('settings'); Speech.say('你好'); };
+    sel.onchange=()=>{ S.voiceName=sel.value||null; Speech.setPref(S.voiceName); save('settings'); Speech.say('你好，我很好。'); };
     r3.appendChild(sel);
-  }else{ const t=el('button','btn mini ghost','🔊 Проверить'); t.onclick=()=>{ Speech.say('你好'); toast(Speech.voice()?'🔊 '+Speech.voice().name:'Китайский голос не найден'); }; r3.appendChild(t); }
+  }else{ const t=el('button','btn mini ghost',SPK()+' Проверить'); t.onclick=()=>{ Speech.say('你好，我很好。'); toast(Speech.voice()?'Голос: '+Speech.voice().name:'Китайский голос не найден'); }; r3.appendChild(t); }
   v.appendChild(b6);
   // — сброс
   const b7=el('div','meta'); b7.style.marginTop='18px';
@@ -2973,7 +3374,7 @@ function viewSettings(s){
   const learned=Object.keys(State.cards).filter(k=>validKey(k)&&!isNew(k));
   v.appendChild(el('p','note',`В работе: ${learned.filter(k=>BYK[k]).length} слов, ${learned.filter(isRad).length} ключей, ${learned.filter(isKC).length} разборов · всего повторений: ${Object.values(State.meta.rev||{}).reduce((a,b)=>a+b,0)}.<br>
     Хранилище: ${Store.persistent()?'на устройстве (IndexedDB) — прогресс у каждого браузера свой':'в памяти (превью)'}.<br>
-    Данные: Кондрашевский, том 1 (30 уроков, ${COURSE.length} слов, из них ${COURSE.filter(k=>EXTRA_OF[k]).length} — из списка группы и презентации) + HSK 1–6. Тип иероглифа и ключ — по «Пособию по иероглифике» А.Ф. Кондрашевского (ч. 1; 456 из 587 знаков уроков), строение и остальные знаки — 汉典 («Шовэнь») и Make Me a Hanzi; ключ Канси — Unihan, названия ключей — таблица ДВФУ. Интервалы — FSRS-5.`));
+    Данные: Кондрашевский, том 1 (30 уроков, ${COURSE.length} слов, из них ${COURSE.filter(k=>EXTRA_OF[k]).length} — из списка группы и презентации) + HSK 1–6. Тип иероглифа и ключ — по «Пособию по иероглифике» А.Ф. Кондрашевского (ч. 1; 456 из 587 знаков уроков), строение и остальные знаки — 汉典 («Шовэнь») и Make Me a Hanzi; ключ Канси — Unihan, названия ключей — таблица ДВФУ. Озвучка — записи носителей из открытой базы audio-cmn (H. Lopez; слоги — Chen Wang, слова — Yue Tan; CC BY-SA). Интервалы — FSRS-5.`));
   s.appendChild(v);
 }
 
@@ -3022,23 +3423,24 @@ function viewPractice(s){
   v.appendChild(el('h2','title','Повторение'));
   const due=dueKeys().length, tough=Object.keys(State.cards).filter(k=>validKey(k)&&(cardOf(k).lapses||0)>=3);
   const rows=[
-    ['🔁','Повторить всё к сроку',due?due+' к сроку — слова, ключи, разборы':'к сроку ничего нет',()=>startPart('rev')],
-    ['🧩','Разбор на ключи','как на контрольной: тип, ключ, фонетик, пиньинь, перевод',()=>go('decomp')],
-    ['🔤','Разбери иероглиф (игра)','части, тип, фонетик, ключ',()=>{ const q=decompQueue(8); if(!q.length){ toast('Сначала выучи несколько слов'); return; } playStart(q,{title:'Разбери иероглиф',kind:'chars'}); }],
-    ['💬','Перевод предложений','RU→中 и 中→RU, целиком или отрывками',()=>go('sent')],
-    ['➕','Свои предложения',State.sets.length?State.sets.length+' '+plural(State.sets.length,'набор','набора','наборов'):'добавить от преподавателя',()=>go('addsent')],
-    ['📝','Пробная контрольная','5 слов + 10 предложений, таймер',()=>go('mock')],
+    ['cycleC','Повторить всё к сроку',due?due+' к сроку — слова, ключи, разборы':'к сроку ничего нет',()=>startPart('rev')],
+    ['split','Разбор на ключи','как на контрольной: тип, ключ, фонетик, пиньинь, перевод',()=>go('decomp')],
+    ['target','Разбери иероглиф (игра)','части, тип, фонетик, ключ',()=>{ const q=decompQueue(8); if(!q.length){ toast('Сначала выучи несколько слов'); return; } playStart(q,{title:'Разбери иероглиф',kind:'chars'}); }],
+    ['headphones','Тоны на слух','записи носителей: какой тон? слабые слоги — чаще',()=>startToneDrill()],
+    ['chat','Перевод предложений','RU→中 и 中→RU, целиком или отрывками',()=>go('sent')],
+    ['plus','Свои предложения',State.sets.length?State.sets.length+' '+plural(State.sets.length,'набор','набора','наборов'):'добавить от преподавателя',()=>go('addsent')],
+    ['pencil','Пробная контрольная','5 слов + 10 предложений, таймер',()=>go('mock')],
     ['考','Проверочные','полный цикл подготовки по урокам',()=>go('tests')],
-    ['🃏','Карточки (классика)','самопроверка, 4 кнопки оценки',()=>go('cards')],
+    ['cards','Карточки (классика)','самопроверка, 4 кнопки оценки',()=>go('cards')],
     ['部','Ключи-справочник','214 ключей: формы, названия, примеры',()=>go('keys')],
     ['笔','Прописи','новые иероглифы урока группы',()=>go('draw',{chars:LESSON_CHARS[groupL()].slice(),title:'Урок '+groupL(),back:{name:'practice'}})],
   ];
-  if(tough.length) rows.push(['⚠️','Трудные слова',tough.length+' — 3 и больше ошибок',()=>playStart(shuffle(tough).slice(0,12),{title:'Трудные',kind:'review'})]);
-  if(State.meta.reports.length) rows.push(['🐞','Ошибки разбора',State.meta.reports.length+' — отправь список Claude',()=>go('reports')]);
+  if(tough.length) rows.push(['warn','Трудные слова',tough.length+' — 3 и больше ошибок',()=>playStart(shuffle(tough).slice(0,12),{title:'Трудные',kind:'review'})]);
+  if(State.meta.reports.length) rows.push(['flag','Ошибки разбора',State.meta.reports.length+' — отправь список Claude',()=>go('reports')]);
   if(SESSION&&!SESSION.finished){ const rem=SESSION.queue.length+SESSION.again.length+(SESSION.current!=null?1:0);
-    if(rem>0) rows.unshift(['▶','Продолжить карточки',rem+' осталось · '+(SESSION.title||''),()=>go('session')]); }
+    if(rem>0) rows.unshift(['play','Продолжить карточки',rem+' осталось · '+(SESSION.title||''),()=>go('session')]); }
   const list=el('div','rowlist');
-  rows.forEach(([ic,t,sub,fn])=>{ const r=el('button','row',`<span class="ri ${/^[一-鿿]/.test(ic)?'han':''}">${ic}</span><div class="tt"><b>${esc(t)}</b><small>${esc(sub)}</small></div><span class="chev">›</span>`); r.onclick=fn; list.appendChild(r); });
+  rows.forEach(([ic,t,sub,fn])=>{ const r=el('button','row',`<span class="ri">${icn(ic,32)}</span><div class="tt"><b>${esc(t)}</b><small>${esc(sub)}</small></div><span class="chev">${IC('chev',16)}</span>`); r.onclick=fn; list.appendChild(r); });
   v.appendChild(list); s.appendChild(v);
 }
 
@@ -3086,7 +3488,7 @@ function viewDecomp(s){
   }
   const k=DEC.q[0], ch=kcChar(k);
   const w=Object.keys(State.cards).map(x=>BYK[x]).filter(x=>x&&x.s.includes(ch)).sort((a,b)=>a.s.length-b.s.length)[0];
-  const top=el('div','playtop'); const xb=el('button','x','✕'); xb.onclick=()=>{ DEC=null; render(); }; top.appendChild(xb);
+  const top=el('div','playtop'); const xb=el('button','x',IC('x',22)); xb.onclick=()=>{ DEC=null; render(); }; top.appendChild(xb);
   top.appendChild(el('div','bar',`<i style="width:${DEC.n/(DEC.n+DEC.q.length)*100}%"></i>`)); top.appendChild(el('div','combo',DEC.q.length+''));
   v.appendChild(top);
   head(v,'Разбери иероглиф');
@@ -3096,7 +3498,7 @@ function viewDecomp(s){
   const sb=el('button','btn showbtn','Показать ответ'); sb.dataset.key='space'; v.appendChild(sb);
   sb.onclick=()=>{
     sb.remove(); v.appendChild(el('div','',decompHTML(ch,{w})));
-    const rep=el('button','linkbtn','🐞 Сообщить об ошибке разбора'); rep.onclick=()=>reportDecomp(ch); v.appendChild(rep);
+    const rep=el('button','linkbtn',IC('flag',16)+' Сообщить об ошибке разбора'); rep.onclick=()=>reportDecomp(ch); v.appendChild(rep);
     const bar=el('div','gradebar four');
     [['Не помню',1,'g1'],['Трудно',2,'g2'],['Помню',3,'g3'],['Легко',4,'g4']].forEach(([t,g,cl],i)=>{ const b=el('button','grade '+cl,`${t}<small>${i+1}</small>`); b.dataset.ch=String(i+1); b.onclick=()=>decGrade(k,g); bar.appendChild(b); });
     v.appendChild(bar);
@@ -3151,20 +3553,20 @@ function viewSent(s){
     const pool=sentPool(), ls=lessonFilter(O.lm,O.pick);
     v.appendChild(el('p','note',`Уроки: ${esc(ls.join(', '))||'—'} · предложений: ${pool.length} · сегодня переведено ${D().sent} из 5. RU→中 — пиши на бумаге, потом сверь.`));
     if(SENT&&SENT.done) v.appendChild(el('div','info',`Готово: ${SENT.n}, с первого раза верно ${SENT.ok}.`));
-    const b=el('button','btn','▶ 10 предложений'); b.dataset.key='space'; b.disabled=!pool.length; b.style.marginTop='12px';
+    const b=el('button','btn',IC('play',16)+' 10 предложений'); b.dataset.key='space'; b.disabled=!pool.length; b.style.marginTop='12px';
     b.onclick=()=>{ const err=State.meta.sentErr; const q=shuffle(pool).sort((a,b)=>(err[b.id]||0)-(err[a.id]||0)).slice(0,10);
       SENT={q:q.map((x,i)=>({x,dir:O.dir==='mix'?(i%2?'zh':'ru'):O.dir})),n:0,ok:0,first:{}}; render(); };
     v.appendChild(b);
     s.appendChild(v); return;
   }
   const it=SENT.q[0], x=it.x, ru=it.dir==='ru';
-  const top=el('div','playtop'); const xb=el('button','x','✕'); xb.onclick=()=>{ SENT=null; render(); }; top.appendChild(xb);
+  const top=el('div','playtop'); const xb=el('button','x',IC('x',22)); xb.onclick=()=>{ SENT=null; render(); }; top.appendChild(xb);
   top.appendChild(el('div','bar',`<i style="width:${SENT.n/(SENT.n+SENT.q.length)*100}%"></i>`)); top.appendChild(el('div','combo',SENT.q.length+''));
   v.appendChild(top);
   head(v,ru?'Переведи на китайский':'Переведи на русский');
   const c=el('div','qcard'); c.style.minHeight='20vh';
   c.innerHTML=(ru?`<div class="qbig" style="font-size:20px">${esc(x.ru)}</div><div class="qsub">иероглифами на бумаге</div>`
-    :`<div class="han zhl" style="font-size:26px">${wrapHz(x.zh)}</div><div class="actionrow" style="justify-content:center"><button class="say" data-say="${esc(x.zh)}">🔊</button><button class="say" data-say="${esc(x.zh)}" data-rate=".5">🐢</button></div>`)
+    :`<div class="han zhl" style="font-size:26px">${wrapHz(x.zh)}</div><div class="actionrow" style="justify-content:center"><button class="say" data-say="${esc(x.zh)}" aria-label="Слушать">${SPK(20)}</button><button class="say" data-say="${esc(x.zh)}" data-rate=".5">${SLOW()}</button></div>`)
     +`<div class="lbl" style="margin-top:10px">${esc(x.src||'')}${x.L?' · урок '+x.L:''}</div>`;
   v.appendChild(c);
   if(!ru) setTimeout(()=>Speech.say(x.zh),150);
@@ -3292,7 +3694,7 @@ function viewMock(s){
     [['Неверно',0,'g1'],['Частично',.5,'half'],['Верно',1,'g3']].forEach(([lab,val,cl],j)=>{ const b=el('button','grade '+cl,`${lab}<small>${j+1}</small>`); b.dataset.ch=String(j+1);
       b.onclick=()=>{ MOCK.marks[MOCK.i]=val; MOCK.i++; if(MOCK.i>=tasks.length) mockFinish(); render(); }; bar.appendChild(b); });
     v.appendChild(bar);
-    if(MOCK.i>0){ const u=el('button','linkbtn','↩ Назад к предыдущему'); u.onclick=()=>{ MOCK.i--; render(); }; v.appendChild(u); }
+    if(MOCK.i>0){ const u=el('button','linkbtn',IC('back',14)+' Назад к предыдущему'); u.onclick=()=>{ MOCK.i--; render(); }; v.appendChild(u); }
     s.appendChild(v); return;
   }
   // итог
@@ -3327,9 +3729,9 @@ function viewProgress(s){
   v.appendChild(el('h2','title','Прогресс'));
   const totalXP=Object.values(State.meta.daily).reduce((a,r)=>a+(r.xp||0),0);
   v.appendChild(el('div','stats4',`
-    <div class="stbox"><span class="si">🔥</span><div><b>${streakLen()}</b><small>${plural(streakLen(),'день','дня','дней')} подряд</small></div></div>
-    <div class="stbox"><span class="si">⚡</span><div><b>${totalXP}</b><small>XP всего · сегодня ${d.xp}</small></div></div>
-    <div class="stbox"><span class="si">📚</span><div><b>${st.learned}</b><small>слов из ${st.total}</small></div></div>
+    <div class="stbox"><span class="si">${IC('flame',30)}</span><div><b>${streakLen()}</b><small>${plural(streakLen(),'день','дня','дней')} подряд</small></div></div>
+    <div class="stbox"><span class="si">${IC('bolt',30)}</span><div><b>${totalXP}</b><small>XP всего · сегодня ${d.xp}</small></div></div>
+    <div class="stbox"><span class="si">${IC('books',30)}</span><div><b>${st.learned}</b><small>слов из ${st.total}</small></div></div>
     <div class="stbox"><span class="si han">部</span><div><b>${kl}</b><small>ключей из 214</small></div></div>`));
   // тепловая карта: 20 недель, столбец — неделя (пн…вс)
   v.appendChild(el('p','eyebrow','Дни занятий'));
@@ -3352,7 +3754,7 @@ function viewProgress(s){
     <div class="cell" style="flex:1;text-align:center"><b style="font-size:20px">${wk.last}</b><div class="lbl">прошлая</div></div>
     <div class="cell" style="flex:1;text-align:center"><b style="font-size:20px;color:var(--gold-lip)">${Math.max(wk.best,wk.cur)}</b><div class="lbl">рекорд</div></div></div>
     <div class="bar gold" style="margin-top:12px"><i style="width:${Math.min(100,wk.cur/wk.goal*100)}%"></i></div>
-    <div class="note">Недельная цель — ${wk.goal} XP (5 дневных целей): ${wk.chest==='opened'?'сундук открыт ✓':wk.chest==='ready'?'сундук ждёт на Пути 🎁':'осталось '+(wk.goal-wk.cur)+' XP до сундука'}.</div>`;
+    <div class="note">Недельная цель — ${wk.goal} XP (5 дневных целей): ${wk.chest==='opened'?'сундук открыт ✓':wk.chest==='ready'?'сундук ждёт на Пути':'осталось '+(wk.goal-wk.cur)+' XP до сундука'}.</div>`;
   v.appendChild(wb);
   // XP и точность по неделям
   v.appendChild(el('p','eyebrow','XP и точность по неделям'));
@@ -3382,13 +3784,13 @@ function viewProgress(s){
   // короны
   v.appendChild(el('p','eyebrow','Короны уроков (из памяти FSRS)'));
   const cg=el('div','crowngrid');
-  pathUnits().filter(u=>u.sec==='lessons').forEach(u=>{ const c=unitCrowns(u); cg.appendChild(el('div','c'+c,`${u.L}<b>${c?'👑'+c:'·'}</b>`)); });
+  pathUnits().filter(u=>u.sec==='lessons').forEach(u=>{ const c=unitCrowns(u); cg.appendChild(el('div','c'+c,`${u.L}<b>${c?IC('crown',14)+c:'·'}</b>`)); });
   v.appendChild(cg);
   v.appendChild(el('p','note','Корона k — у 80% слов урока стабильность памяти не меньше 1 / 3 / 7 / 21 / 60 дней.'));
   // достижения
   v.appendChild(el('p','eyebrow','Достижения'));
   const ag=el('div','achs');
-  ACH.forEach(a=>{ const got=State.meta.ach[a.id]; ag.appendChild(el('div','ach'+(got?' got':''),`<div class="ai ${a.ic==='部'?'han':''}">${a.ic}</div><b>${esc(a.t)}</b><small>${got?fmtDate(got):esc(a.d)}</small>`)); });
+  ACH.forEach(a=>{ const got=State.meta.ach[a.id]; ag.appendChild(el('div','ach'+(got?' got':''),`<div class="ai">${icn(a.ic,40)}</div><b>${esc(a.t)}</b><small>${got?fmtDate(got):esc(a.d)}</small>`)); });
   v.appendChild(ag);
   if(State.meta.mocks.length){
     v.appendChild(el('p','eyebrow','Пробные контрольные'));
@@ -3401,6 +3803,10 @@ function viewProgress(s){
 /*==================================================================
   СТАРТ
 ==================================================================*/
+// Экран загрузки: держим не меньше 0,9 с от открытия (чтобы не мигал), потом плавно убираем; статус-бар — снова белый
+const Splash={hide(){ const sp=document.getElementById('splash'); if(!sp) return;
+  const wait=Math.max(0,900-(performance.now?performance.now():0));
+  setTimeout(()=>{ sp.classList.add('out'); const m=document.querySelector('meta[name=theme-color]'); if(m) m.content='#ffffff'; setTimeout(()=>sp.remove(),400); },wait); }};
 (async function(){
   await loadState();
   applyFreezes();
@@ -3408,7 +3814,8 @@ function viewProgress(s){
   window.HZDATA=null;
   fetch('./hanzi-data.json').then(r=>r.ok?r.json():null).then(d=>{ window.HZDATA=d||{}; }).catch(()=>{ window.HZDATA={}; });
   if('serviceWorker' in navigator){ try{ navigator.serviceWorker.register('./service-worker.js'); }catch(e){} }
-  go('path');
+  if(!Resume.restore()) go('path');      // вернуться туда, где был (урок, карточки, экран), если свернул приложение
+  Splash.hide();
 })();
 
 </script>

@@ -86,7 +86,10 @@ function buildTasks(items,opts){
 function playStart(items,opts){
   opts=opts||{};
   items=uniq(items).filter(k=>k.startsWith('sent:')||validKey(k));
-  const tasks=buildTasks(items,opts);
+  playTasks(buildTasks(items,opts),opts);
+}
+function playTasks(tasks,opts){
+  opts=opts||{};
   if(!tasks.length){ toast('Нечего повторять — всё сделано'); return; }
   const it={};
   tasks.forEach(t=>{ if(t.k&&!t.ungraded&&!t.t.endsWith('intro')){ (it[t.k]=it[t.k]||{left:0,wasNew:isNew(t.k)}).left++; } });
@@ -105,16 +108,23 @@ function viewPlay(s){
   const x=P.cur; if(!x.t0) x.t0=Date.now();
   const v=el('div','view');
   const top=el('div','playtop');
-  const xb=el('button','x','✕'); xb.setAttribute('aria-label','Выйти'); xb.onclick=()=>{ hideFB(); go('path'); };
+  const xb=el('button','x',IC('x',22)); xb.setAttribute('aria-label','Выйти'); xb.onclick=()=>{ hideFB(); go('path'); };
   top.appendChild(xb);
   top.appendChild(el('div','bar',`<i style="width:${Math.min(100,P.done/Math.max(1,P.total)*100)|0}%"></i>`));
-  top.appendChild(el('div','combo'+(P.combo>=3?' hot':''),P.combo>=2?'🔥'+P.combo:''));
+  top.appendChild(el('div','combo'+(P.combo>=3?' hot':''),P.combo>=2?IC('flame',20)+P.combo:''));
   v.appendChild(top);
-  if(x.retry) v.appendChild(el('div','kind','↻ Ещё раз')).style.marginBottom='6px';
+  if(x.retry) v.appendChild(el('div','kind retry',IC('cycle',16)+' Ещё раз — исправим ошибку')).style.marginBottom='6px';
   const stage=el('div',''); v.appendChild(stage); s.appendChild(v);
   const w=x.k&&BYK[x.k];
   ({intro:tIntro,choice:tChoice,produce:tProduce,listen:tListen,pinyin:tPinyin,tones:tTones,recall:tRecall,write:tWrite,build:tBuild,
-    pairs:tPairs,assemble:tAssemble,rintro:tRadIntro,keyname:tKeyName,keyform:tKeyForm,keyvar:tKeyVar}[x.t]||tChoice)(stage,w||x,x);
+    pairs:tPairs,assemble:tAssemble,rintro:tRadIntro,keyname:tKeyName,keyform:tKeyForm,keyvar:tKeyVar,hear:tHear}[x.t]||tChoice)(stage,w||x,x);
+  footify(stage);
+}
+// Главная кнопка задания («Проверить», «Дальше», «Уже знаю/Дальше») — в нижнюю панель, как у Duolingo
+function footify(stage){
+  const last=[...stage.children].reverse().find(e=>e.matches('.actionrow,button.btn'));
+  if(!last||!last.querySelector&&!last.matches('button')) return;
+  const f=el('div','playfoot'), inn=el('div','in'); inn.appendChild(last); f.appendChild(inn); stage.appendChild(f);
 }
 // Ответ на задание: ok — верно; info: {right, fast, hard, noFB, extra, okHtml}
 function playAnswer(ok,info){
@@ -182,12 +192,12 @@ function playEnd(s){
   const P=PLAY, v=el('div','view endwrap');
   if(P.opts.test) return jumpEnd(s);
   const acc=P.first?Math.round(P.firstOk/P.first*100):100, sec=Math.round(((P.t1||Date.now())-P.t0)/1000);
-  v.innerHTML=mascot(P.errors?'happy':'cheer',110)+`<h2>${P.perfect?'Без единой ошибки!':'Урок пройден!'}</h2>
+  v.innerHTML=mascot(P.errors?'happy':'cheer',150)+`<h2>${P.perfect?'Без единой ошибки!':'Урок пройден!'}</h2>
     <div class="note" style="margin-top:0">${esc(P.title)}</div>
-    <div class="endstats"><div class="estat"><small>Всего XP</small><b id="xpCount">${P.xp}</b></div>
-      <div class="estat acc"><small>Точность</small><b>${acc}%</b></div>
-      <div class="estat time"><small>Время</small><b>${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}</b></div></div>`;
-  if(P.best>=5) v.appendChild(el('p','note','Лучшее комбо: 🔥'+P.best));
+    <div class="endstats"><div class="estat"><small>Всего XP</small><b>${IC('bolt',22)}<span id="xpCount">${P.xp}</span></b></div>
+      <div class="estat acc"><small>${acc>=90?'Отлично':acc>=70?'Хорошо':'Точность'}</small><b>${IC('target',22)}${acc}%</b></div>
+      <div class="estat time"><small>Время</small><b>${IC('timer',22)}${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}</b></div></div>`;
+  if(P.best>=5) v.appendChild(el('p','note','Лучшее комбо: '+IC('flame',16)+P.best));
   const more=P.opts.more?P.opts.more():[];
   const nb=el('button','btn',more.length?'Дальше: следующая порция':'Дальше по пути'); nb.dataset.key='space';
   nb.onclick=()=>{ if(more.length) playStart(P.opts.more(),P.opts); else { PLAY=null; go('path'); } };
@@ -207,17 +217,17 @@ function head(stage,text){ stage.appendChild(el('div','qh',text)); }
 function tIntro(stage,w){
   const L=WORD_L[w.key];
   const c=el('div','qcard introcard');
-  c.innerHTML=`<div class="newtag">✦ Новое слово${EXTRA_OF[w.key]?' · '+esc(EXTRA_OF[w.key]):L?' · урок '+L:''}</div>${wordHead(w,80)}
+  c.innerHTML=`<div class="newtag">${IC('sparkle',14)} Новое слово${EXTRA_OF[w.key]?' · '+esc(EXTRA_OF[w.key]):L?' · урок '+L:''}</div>${wordHead(w,80)}
     <div class="reveal" style="border:0;margin-top:4px;padding-top:4px"><div class="py">${pinyinHTML(w.p)}</div>${palladius(w.p)?`<div class="palla">${esc(palladius(w.p))}</div>`:''}<div class="tr">${esc(meaning(w))}</div>
     ${w.ex?`<div class="han" style="font-size:17px;margin-top:10px;color:var(--title)">${wrapHz(w.ex[0])}</div><div class="en">${pinyinHTML(w.ex[1])}</div><div class="en">${esc(w.ex[2])}</div>`:''}
-    <div class="actionrow" style="justify-content:center"><button class="say" data-say="${esc(w.s)}">🔊 Слово</button>${w.ex?`<button class="say" data-say="${esc(w.ex[0])}">🔊 Пример</button>`:''}</div></div>`;
+    <div class="actionrow" style="justify-content:center"><button class="say" ${sayA(w)}>${SPK()} Слово</button>${w.ex?`<button class="say" data-say="${esc(w.ex[0])}">${SPK()} Пример</button>`:''}</div></div>`;
   stage.appendChild(c);
   const bk=el('details','strk'); bk.style.marginTop='10px'; bk.innerHTML=`<summary>Разбор по иероглифам и ключам</summary>${hanOf(w.s).filter(c=>HZ.c[c]).map(c=>decompHTML(c,{short:1,w})).join('')}`; stage.appendChild(bk);
   const row=el('div','actionrow');
   const kn=el('button','btn ghost','Уже знаю'); kn.onclick=()=>introKnown(w.key);
   const nx=el('button','btn','Дальше'); nx.dataset.key='space'; nx.onclick=playNext;
   row.appendChild(kn); row.appendChild(nx); stage.appendChild(row);
-  Speech.has()&&Speech.say(w.s);
+  Speech.has()&&sayW(w);
 }
 function introKnown(k){
   const P=PLAY, it=P.items[k];
@@ -238,22 +248,22 @@ function optionBox(stage,opts,right,done,cls){
 function distractWords(w){ const L=WORD_L[w.key]; const near=WORDS.filter(x=>x!==w&&x.ru&&(L?WORD_L[x.key]&&Math.abs(WORD_L[x.key]-L)<=6:x.hsk===w.hsk)); return near.length>=8?near:WORDS; }
 function tChoice(stage,w,x){
   head(stage,'Выбери перевод');
-  const c=el('div','qcard'); c.style.minHeight='20vh'; c.innerHTML=wordHead(w)+`<button class="say" data-say="${esc(w.s)}" style="margin-top:6px">🔊</button>`; stage.appendChild(c);
+  const c=el('div','qcard'); c.style.minHeight='20vh'; c.innerHTML=wordHead(w)+`<button class="say" ${sayA(w)} style="margin-top:6px" aria-label="Слушать">${SPK(20)}</button>`; stage.appendChild(c);
   const right=meaning(w), opts=shuffle(others(distractWords(w).map(meaning),right,3).concat([right]));
-  optionBox(stage,opts.map(o=>[o,esc(o)]),right,ok=>{ Speech.has()&&Speech.say(w.s); playAnswer(ok,{right:rightWord(w),okHtml:pinyinHTML(w.p)}); });
+  optionBox(stage,opts.map(o=>[o,esc(o)]),right,ok=>{ Speech.has()&&sayW(w); playAnswer(ok,{right:rightWord(w),okHtml:pinyinHTML(w.p)}); });
 }
 function tProduce(stage,w){
   head(stage,'Как написать иероглифами?');
   const c=el('div','qcard'); c.style.minHeight='14vh'; c.innerHTML=`<div class="qbig">«${esc(meaning(w))}»</div>`; stage.appendChild(c);
   const n=hanOf(w.s).length, pool=distractWords(w).filter(x=>hanOf(x.s).length===n);
   const opts=shuffle(others((pool.length>=6?pool:WORDS).map(x=>x.s),w.s,3).concat([w.s]));
-  optionBox(stage,opts.map(o=>[o,'<span class="han" style="font-size:28px">'+esc(o)+'</span>']),w.s,ok=>{ Speech.has()&&Speech.say(w.s); playAnswer(ok,{right:rightWord(w),okHtml:pinyinHTML(w.p)}); },'two');
+  optionBox(stage,opts.map(o=>[o,'<span class="han" style="font-size:28px">'+esc(o)+'</span>']),w.s,ok=>{ Speech.has()&&sayW(w); playAnswer(ok,{right:rightWord(w),okHtml:pinyinHTML(w.p)}); },'two');
 }
 function tListen(stage,w,x){
   head(stage,'Что ты слышишь?');
   const c=el('div','qcard'); c.style.minHeight='16vh';
-  c.innerHTML=`<button class="iconbtn primary" style="width:80px;height:80px;font-size:34px;border-radius:22px" data-say="${esc(w.s)}" aria-label="Слушать">🔊</button><button class="linkbtn" data-say="${esc(w.s)}" data-rate=".5">🐢 медленно</button>`;
-  stage.appendChild(c); if(!x.played){ x.played=1; setTimeout(()=>Speech.say(w.s),200); }
+  c.innerHTML=`<button class="iconbtn primary" style="width:80px;height:80px;font-size:34px;border-radius:22px" ${sayA(w)} aria-label="Слушать">${SPK(42)}</button><button class="linkbtn" ${sayA(w)} data-rate=".5">${SLOW()} медленно</button>`;
+  stage.appendChild(c); if(!x.played){ x.played=1; setTimeout(()=>sayW(w),200); }
   const n=hanOf(w.s).length, pool=distractWords(w).filter(x=>hanOf(x.s).length===n);
   const opts=shuffle(others((pool.length>=6?pool:WORDS).map(x=>x.s),w.s,3).concat([w.s]));
   optionBox(stage,opts.map(o=>[o,'<span class="han" style="font-size:28px">'+esc(o)+'</span>']),w.s,ok=>playAnswer(ok,{right:rightWord(w),okHtml:esc(meaning(w))}),'two');
@@ -264,7 +274,7 @@ function tPinyin(stage,w){
   const inp=el('input','tinput'); inp.placeholder='пиньинь (тоны можно не ставить)'; inp.autocapitalize='off'; inp.autocomplete='off'; inp.spellcheck=false; stage.appendChild(inp);
   const chk=el('button','btn showbtn','Проверить'); chk.disabled=true; stage.appendChild(chk);
   inp.oninput=()=>{ chk.disabled=!inp.value.trim(); };
-  const check=()=>{ if(!inp.value.trim()) return; const ok=toneless(inp.value)===toneless(w.p); inp.disabled=true; chk.remove(); Speech.has()&&Speech.say(w.s);
+  const check=()=>{ if(!inp.value.trim()) return; const ok=toneless(inp.value)===toneless(w.p); inp.disabled=true; chk.remove(); Speech.has()&&sayW(w);
     playAnswer(ok,{right:rightWord(w)+(inp.value?`<br><small>ты написал: ${esc(inp.value)}</small>`:''),okHtml:pinyinHTML(w.p)}); };
   inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); check(); } });
   chk.onclick=check; setTimeout(()=>inp.focus(),60);
@@ -277,7 +287,7 @@ function toneRows(host,chars,sylls,done){
     row.appendChild(el('span','han',esc(ch)));
     const seg=el('div','seg');
     if(sylls[i]==='r') seg.innerHTML='<span class="lbl" style="align-self:center">эрхуа r</span>';
-    else TONE_MARKS.forEach(([m,l],t)=>{ const b=el('button','',`${m}<small>${l}</small>`); b.onclick=()=>{ sel[i]=t+1; [...seg.children].forEach((x,j)=>x.classList.toggle('on',j===t)); chk.disabled=sel.some(v=>v==null); }; seg.appendChild(b); });
+    else TONE_MARKS.forEach(([m,l],t)=>{ const b=el('button','t'+(t+1),`${toneIcon(t+1,30)}<small>${l}</small>`); b.setAttribute('aria-label','тон '+(t+1)+' '+m); b.onclick=()=>{ sel[i]=t+1; [...seg.children].forEach((x,j)=>x.classList.toggle('on',j===t)); chk.disabled=sel.some(v=>v==null); }; seg.appendChild(b); });
     row.appendChild(seg); box.appendChild(row);
   });
   host.appendChild(box);
@@ -290,16 +300,19 @@ function toneRows(host,chars,sylls,done){
     chk.remove(); done(ok);
   };
 }
-function tTones(stage,w){
-  head(stage,'Выбери тоны');
-  const c=el('div','qcard'); c.style.minHeight='10vh'; c.innerHTML=`<div class="qbig">${esc(meaning(w))}</div><button class="say" data-say="${esc(w.s)}" style="margin-top:8px">🔊 Послушать</button>`; stage.appendChild(c);
-  toneRows(stage,hanOf(w.s),wordSylls(w),ok=>{ Speech.has()&&Speech.say(w.s); playAnswer(ok,{right:rightWord(w),okHtml:pinyinHTML(w.p)}); });
+function tTones(stage,w,task){
+  head(stage,task&&task.hearOnly?'Послушай и выбери тоны':'Выбери тоны');
+  const c=el('div','qcard'); c.style.minHeight='10vh';
+  c.innerHTML=`<div class="qbig">${task&&task.hearOnly?`<span class="han" style="font-size:44px">${esc(w.s)}</span>`:esc(meaning(w))}</div>
+    <div class="actionrow" style="justify-content:center;margin-top:8px"><button class="say" ${sayA(w)}>${SPK()} Послушать</button><button class="say" ${sayA(w)} data-rate=".5">${SLOW()} по слогам</button></div>`;
+  stage.appendChild(c); if(task&&!task.played){ task.played=1; setTimeout(()=>sayW(w),250); }
+  toneRows(stage,hanOf(w.s),wordSylls(w),ok=>{ Speech.has()&&sayW(w); playAnswer(ok,{right:rightWord(w),okHtml:pinyinHTML(w.p)}); });
 }
 function tRecall(stage,w){
   head(stage,'Вспомни и напиши иероглифами');
   const c=el('div','qcard'); c.style.minHeight='22vh'; c.innerHTML=`<div class="qbig">«${esc(meaning(w))}»</div><div class="qsub">на бумаге, потом сверь</div>`; stage.appendChild(c);
   const sb=el('button','btn showbtn','Показать ответ'); sb.dataset.key='space'; stage.appendChild(sb);
-  sb.onclick=()=>{ sb.remove(); c.innerHTML+=`<div class="reveal">${wordHead(w,64)}<div class="py">${pinyinHTML(w.p)}</div></div>`; Speech.has()&&Speech.say(w.s);
+  sb.onclick=()=>{ sb.remove(); c.innerHTML+=`<div class="reveal">${wordHead(w,64)}<div class="py">${pinyinHTML(w.p)}</div></div>`; Speech.has()&&sayW(w);
     const bar=el('div','gradebar');
     const b1=el('button','grade g1','Ошибся<small>1 · ←</small>'); b1.dataset.key='1'; b1.onclick=()=>playAnswer(false,{noFB:true});
     const b2=el('button','grade g3','Написал верно<small>2 · →</small>'); b2.dataset.key='2'; b2.onclick=()=>playAnswer(true,{noFB:true});
@@ -325,7 +338,7 @@ function tBuild(stage,x,task){
   }
   head(stage,zh?'Переведи на китайский':'Переведи на русский');
   const c=el('div','qcard'); c.style.minHeight='0'; c.style.padding='16px';
-  c.innerHTML=zh?`<div class="qbig" style="font-size:19px">${esc(sn.ru)}</div>`:`<div class="han zhl" style="font-size:24px">${wrapHz(sn.zh)}</div><button class="say" data-say="${esc(sn.zh)}" style="margin-top:6px">🔊</button>`;
+  c.innerHTML=zh?`<div class="qbig" style="font-size:19px">${esc(sn.ru)}</div>`:`<div class="han zhl" style="font-size:24px">${wrapHz(sn.zh)}</div><button class="say" data-say="${esc(sn.zh)}" style="margin-top:6px" aria-label="Слушать">${SPK(20)}</button>`;
   stage.appendChild(c);
   const area=el('div','tl area'), pool=el('div','tl'); stage.appendChild(area); stage.appendChild(pool);
   const pick=[];
@@ -431,7 +444,7 @@ function tAssemble(stage,x,task){
 function tRadIntro(stage,x){
   const n=x.n, r=RADS[n-1], ex=(KEY_CHARS[n]||[]).slice(0,5);
   const c=el('div','qcard introcard');
-  c.innerHTML=`<div class="newtag">✦ Новый ключ №${n}</div><div class="qhz han" style="font-size:84px">${esc(r[4][0])}</div>
+  c.innerHTML=`<div class="newtag">${IC('sparkle',14)} Новый ключ №${n}</div><div class="qhz han" style="font-size:84px">${esc(r[4][0])}</div>
     ${r[4].length>1?`<div class="han" style="font-size:22px;color:var(--text2)">другие формы: ${esc([...r[4]].slice(1).join(' '))}</div>`:''}
     <div class="reveal" style="border:0;padding-top:4px"><div class="py">${pinyinHTML(r[2])}</div><div class="tr">${esc(r[3])}</div><div class="en">${r[1]} ${plural(r[1],'черта','черты','черт')}</div>
     ${ex.length?`<div class="en" style="margin-top:8px">В иероглифах уроков: <span class="han" style="font-size:24px;color:var(--title)">${ex.map(ch=>`<span class="hz" data-c="${ch}">${ch}</span>`).join(' ')}</span></div>`:'<div class="en">В словах уроков 1–30 не встречается — учим для полноты таблицы.</div>'}
@@ -464,4 +477,58 @@ function tKeyVar(stage,x){
   const c=el('div','qcard'); c.style.minHeight='16vh'; c.innerHTML=`<div class="qhz han">${esc(v)}</div>`; stage.appendChild(c);
   const opts=shuffle(others(KEY_ORDER.filter(y=>y!==n).map(y=>RADS[y-1][4][0]),forms[0],3).concat([forms[0]]));
   optionBox(stage,opts.map(o=>[o,'<span class="han" style="font-size:30px">'+esc(o)+'</span>']),forms[0],ok=>playAnswer(ok,{right:radRight(n),okHtml:radRight(n)}),'two');
+}
+
+/*==================================================================
+  ТОНЫ НА СЛУХ: слог в записи носителя → выбери тон 1–4 (график высоты голоса);
+  ошибка — «Сравни»: тот же слог во всех тонах. Слова из 2–3 знаков — тоны каждого слога.
+  Слабые слоги (meta.toneErr) попадаются чаще. В FSRS не идёт — это тренировка слуха.
+==================================================================*/
+const TONE_NAMES=['','ровный высокий','восходящий','низкий, с подъёмом','резкий нисходящий'];
+function sylMark(n){                                    // 'xie4' → 'xiè'
+  const t=+n.slice(-1), b=n.slice(0,-1).replace(/v/g,'ü'); if(!(t>=1&&t<=4)) return b;
+  const M={a:'āáǎà',e:'ēéěè',i:'īíǐì',o:'ōóǒò',u:'ūúǔù','ü':'ǖǘǚǜ'};
+  let i=b.search(/[ae]/); if(i<0) i=b.indexOf('ou'); if(i<0){ const m=[...b.matchAll(/[iouü]/g)]; i=m.length?m[m.length-1].index:-1; }
+  return i<0?b:b.slice(0,i)+M[b[i]][t-1]+b.slice(i+1);
+}
+let SYL_EX=null;                                        // слог → односложное слово курса с этим чтением
+function sylExample(n){
+  if(!SYL_EX){ SYL_EX={}; COURSE.map(k=>BYK[k]).filter(w=>w&&hanOf(w.s).length===1).forEach(w=>{ const ss=Speech.sylls(w.s,w.p); if(ss&&!SYL_EX[ss[0]]) SYL_EX[ss[0]]=w; }); }
+  return SYL_EX[n]||null;
+}
+function toneDrillTasks(words){
+  const err=State.meta.toneErr||{}, syl={}, multi=[];
+  words.forEach(w=>{ const ss=Speech.sylls(w.s,w.p); if(!ss) return; ss.forEach(n=>{ syl[n]=1; });
+    if(ss.length>=2&&ss.length<=3&&wordSylls(w)) multi.push(w); });
+  let pool=Object.keys(syl); if(pool.length<6) pool=pool.concat(shuffle([...AUD.s]).slice(0,12));
+  const pick=uniq(shuffle(pool).sort((a,b)=>(err[b]||0)-(err[a]||0))).slice(0,7);
+  const tasks=shuffle(pick).map(n=>({t:'hear',sy:n,ungraded:1}));
+  shuffle(multi).slice(0,3).forEach((w,i)=>tasks.splice(2+i*3,0,{t:'tones',k:w.key,ungraded:1,hearOnly:1}));
+  return tasks;
+}
+function startToneDrill(words,opts){
+  const ws=(words&&words.length?words:COURSE.filter(k=>!isNew(k)).map(k=>BYK[k]).filter(Boolean));
+  playTasks(toneDrillTasks(ws.length?ws:COURSE.slice(0,40).map(k=>BYK[k])),Object.assign({title:'Тоны на слух',kind:'tones'},opts||{}));
+}
+function tHear(stage,x,task){
+  const n=task.sy, t=+n.slice(-1), base=n.slice(0,-1), ex=sylExample(n);
+  head(stage,'Какой тон ты слышишь?');
+  const c=el('div','qcard'); c.style.minHeight='0';
+  c.innerHTML=`<button class="iconbtn primary bigsay" aria-label="Слушать">${SPK(44)}</button>
+    <div class="qsub" style="margin-top:12px">слог <b style="color:var(--title);font-size:20px">${esc(base.replace(/v/g,'ü'))}</b></div>
+    <button class="linkbtn" data-slow>${SLOW()} медленнее</button>`;
+  const play=r=>{ Speech.stop(); try{ const a=new Audio('./audio/s/'+n+'.mp3'); if(r) a.playbackRate=r; a.play().catch(()=>{}); }catch(e){} };
+  c.querySelector('.bigsay').onclick=()=>play(); c.querySelector('[data-slow]').onclick=()=>play(.75);
+  stage.appendChild(c); if(!task.played){ task.played=1; setTimeout(()=>play(),250); }
+  const opts=[1,2,3,4].map(k=>[k,`<span class="tonechoice">${toneIcon(k,44)}<b>${k}</b><small>${TONE_NAMES[k]}</small></span>`]);
+  const right=`<span style="font-size:22px">${pinyinHTML(sylMark(n))}</span> — тон ${t}, ${TONE_NAMES[t]}`+(ex?`<br><span class="han">${esc(ex.s)}</span> ${esc(meaning(ex))}`:'');
+  optionBox(stage,opts,t,ok=>{
+    const err=State.meta.toneErr=State.meta.toneErr||{};
+    if(ok){ if(err[n]) err[n]=Math.max(0,err[n]-1); } else err[n]=(err[n]||0)+1;
+    const cmp=el('div','actionrow cmprow'); cmp.style.justifyContent='center';
+    [1,2,3,4].filter(k=>AUD.s.has(base+k)).forEach(k=>{ const b=el('button','say t'+k,`${toneIcon(k,22)} ${esc(sylMark(base+k))}`);
+      b.onclick=()=>{ try{ new Audio('./audio/s/'+base+k+'.mp3').play().catch(()=>{}); }catch(e){} }; cmp.appendChild(b); });
+    const extra=el('div',''); extra.appendChild(el('div','lbl','Сравни все тоны этого слога:')).style.marginBottom='6px'; extra.appendChild(cmp);
+    playAnswer(ok,{right,okHtml:right,extra:ok?null:extra});
+  },'two');
 }

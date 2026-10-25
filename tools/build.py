@@ -34,6 +34,7 @@ def main():
         "/*__RAD2__*/": (DATA / "rad_petrosyan.json").read_text(encoding="utf-8"),
         "/*__KCHARS__*/": (DATA / "kondr_chars.json").read_text(encoding="utf-8"),
         "/*__ETYM__*/": (DATA / "etym.json").read_text(encoding="utf-8"),
+        "/*__AUDIO__*/": (DATA / "audio.json").read_text(encoding="utf-8"),
     }
     for ph, body in parts.items():
         if tpl.count(ph) != 1:

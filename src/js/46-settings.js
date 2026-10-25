@@ -76,13 +76,20 @@ function viewSettings(s){
   // — голос
   v.appendChild(el('p','eyebrow','Озвучка'));
   const b6=el('div','meta'), voices=Speech.list();
-  const r3=setRow(b6,'Голос',esc(Speech.source()));
+  setRow(b6,'Живые голоса — чёткие тоны','слова и слоги — записи носителей (audio-cmn); выключи, чтобы всё читал голос устройства',
+    switchEl(()=>S.voiceRec!==false,x=>{ S.voiceRec=x; ss(); Speech.say('你好',undefined,'nǐ hǎo'); }));
+  const dl=el('button','btn mini ghost',IC('headphones',18)+' Скачать');
+  dl.onclick=async()=>{ const fs=Speech.files(); let n=0; dl.disabled=true;
+    for(let i=0;i<fs.length;i+=12){ await Promise.all(fs.slice(i,i+12).map(u=>fetch(u).then(r=>{ if(r.ok) n++; }).catch(()=>{}))); dl.textContent=Math.round((i+12)/fs.length*100)+'%'; }
+    dl.disabled=false; dl.innerHTML=IC('check',16)+' Готово'; toast(n===fs.length?'Записи сохранены — озвучка работает без интернета':'Скачано '+n+' из '+fs.length+' — проверь интернет'); };
+  setRow(b6,'Записи для офлайна','≈6 МБ: '+AUD.w.size+' слов и '+AUD.s.size+' слогов; без скачивания они сохраняются по мере прослушивания',dl);
+  const r3=setRow(b6,'Голос устройства',esc(Speech.voice()?Speech.voice().name:'для предложений и слов без записи'));
   if(voices.length>1){
     const sel=el('select'); sel.appendChild(el('option','','Авто')).value='';
     voices.forEach(vo=>{ const o=el('option','',esc(vo.name+' ('+vo.lang+')')); o.value=vo.name; if(S.voiceName===vo.name) o.selected=true; sel.appendChild(o); });
-    sel.onchange=()=>{ S.voiceName=sel.value||null; Speech.setPref(S.voiceName); save('settings'); Speech.say('你好'); };
+    sel.onchange=()=>{ S.voiceName=sel.value||null; Speech.setPref(S.voiceName); save('settings'); Speech.say('你好，我很好。'); };
     r3.appendChild(sel);
-  }else{ const t=el('button','btn mini ghost','🔊 Проверить'); t.onclick=()=>{ Speech.say('你好'); toast(Speech.voice()?'🔊 '+Speech.voice().name:'Китайский голос не найден'); }; r3.appendChild(t); }
+  }else{ const t=el('button','btn mini ghost',SPK()+' Проверить'); t.onclick=()=>{ Speech.say('你好，我很好。'); toast(Speech.voice()?'Голос: '+Speech.voice().name:'Китайский голос не найден'); }; r3.appendChild(t); }
   v.appendChild(b6);
   // — сброс
   const b7=el('div','meta'); b7.style.marginTop='18px';
@@ -94,6 +101,6 @@ function viewSettings(s){
   const learned=Object.keys(State.cards).filter(k=>validKey(k)&&!isNew(k));
   v.appendChild(el('p','note',`В работе: ${learned.filter(k=>BYK[k]).length} слов, ${learned.filter(isRad).length} ключей, ${learned.filter(isKC).length} разборов · всего повторений: ${Object.values(State.meta.rev||{}).reduce((a,b)=>a+b,0)}.<br>
     Хранилище: ${Store.persistent()?'на устройстве (IndexedDB) — прогресс у каждого браузера свой':'в памяти (превью)'}.<br>
-    Данные: Кондрашевский, том 1 (30 уроков, ${COURSE.length} слов, из них ${COURSE.filter(k=>EXTRA_OF[k]).length} — из списка группы и презентации) + HSK 1–6. Тип иероглифа и ключ — по «Пособию по иероглифике» А.Ф. Кондрашевского (ч. 1; 456 из 587 знаков уроков), строение и остальные знаки — 汉典 («Шовэнь») и Make Me a Hanzi; ключ Канси — Unihan, названия ключей — таблица ДВФУ. Интервалы — FSRS-5.`));
+    Данные: Кондрашевский, том 1 (30 уроков, ${COURSE.length} слов, из них ${COURSE.filter(k=>EXTRA_OF[k]).length} — из списка группы и презентации) + HSK 1–6. Тип иероглифа и ключ — по «Пособию по иероглифике» А.Ф. Кондрашевского (ч. 1; 456 из 587 знаков уроков), строение и остальные знаки — 汉典 («Шовэнь») и Make Me a Hanzi; ключ Канси — Unihan, названия ключей — таблица ДВФУ. Озвучка — записи носителей из открытой базы audio-cmn (H. Lopez; слоги — Chen Wang, слова — Yue Tan; CC BY-SA). Интервалы — FSRS-5.`));
   s.appendChild(v);
 }
