@@ -24,11 +24,14 @@ await T('focus-week',()=>{ const s=sem({exams:[{date:'2026-10-30',title:'К',les
 await T('after-newWordsUntil',()=>{ const s=sem(); ok(ev(`capacity('2026-12-28',${s})`)===1&&ev(`capacity('2026-12-29',${s})`)===0&&ev(`capacity('2027-01-15',${s})`)===0,'после 28.12 — 0');
   ok(ev(`dayType('2026-12-29',${s})`)==='consol'&&ev(`dayType('2027-01-05',${s})`)==='holiday','тип: закрепление / каникулы');
   const q=ev(`wordsQuota({remaining:20,today:'2027-01-12',sem:${s}})`); ok(q.late&&q.quota>0,'опоздание: считаем до endDate: '+JSON.stringify(q)); });
-await T('decomp-谢',()=>{ ok(JSON.stringify(ev("keysOf('谢')"))==='[["讠",149],["身",158],["寸",41]]','ключи 谢'); ok(ev("charPy('谢')")==='xiè'&&ev("charRu('谢')")==='благодарить','пиньинь/перевод');
-  const t=ev("decompHTML('谢',{mode:'keys'})").replace(/<[^>]+>/g,''); ok(/讠 \(149, yán, «речь»\) \+ 身 \(158, shēn, «тело \(человека\)»\) \+ 寸 \(41, cùn, «вершок»\)/.test(t),'формат разбора: '+t);
-  ok(/состав: ⿰讠射/.test(t)&&/ключ Канси: 讠 \(149\)/.test(t),'состав и ключ Канси');
-  const t2=ev("decompHTML('谢',{mode:'ids'})").replace(/<[^>]+>/g,''); ok(/= 讠 \(149, yán, «речь»\) \+ 射/.test(t2)&&/до ключей:/.test(t2),'режим «первый уровень»: '+t2); });
-await T('char-in-word',()=>{ ok(ev("charPyIn('乐',BYS['音乐'])")==='yuè'&&ev("charPy('乐')")==='lè','乐 в 音乐'); ok(ev("charPyIn('不',BYS['不客气'])")===ev("charPy('不')"),'不 — словарное'); });
+await T('decomp-谢',()=>{ ok(JSON.stringify(ev("keysOf('谢')"))==='[["讠",149]]','ключи 谢 — только 讠 (射 — фонетик, на ключи не дробится): '+JSON.stringify(ev("keysOf('谢')"))); ok(ev("charPy('谢')")==='xiè'&&ev("charRu('谢')")==='благодарить','пиньинь/перевод');
+  const t=ev("decompHTML('谢')").replace(/<[^>]+>/g,' ').replace(/\s+/g,' ');
+  ok(/фоноидеограмма/.test(t)&&/Ключ: 讠 №149 yán «речь»/.test(t)&&/射 фонетик — даёт только звучание shè/.test(t)&&/she, xie/.test(t),'формат разбора: '+t);
+  ok(/Пособию по иероглифике.*урок 8/.test(t),'источник — пособие: '+t);
+  const p=ev("decompHTML('谢',{plain:1})").replace(/<[^>]+>/g,' '); ok(/фоноидеограмма/.test(p)&&/讠 149 «речь»/.test(p)&&/射 shè — фонетик/.test(p),'краткий разбор: '+p);
+  // типы по пособию: 好 идеограмма, 我 изобразительный, 一 условный знак, 是 фоноидеограмма; 天 — два словарных ключа
+  ok(ev("[ET['好'][0],ET['我'][0],ET['一'][0],ET['是'][0]].join('')")==='igzp','типы по пособию');
+  ok(JSON.stringify(ev("ET['天'][5][0]"))==='[37,1]'&&/в разных словарях/.test(ev("keyLine('天')")),'несколько ключей 天'); });
 await T('chars-587',()=>{ ok(K.chars.length===587,'в JSON не 587'); const bad=ev(`${JSON.stringify(K.chars.map(c=>c.c))}.filter(c=>!charPy(c)||!charRu(c)||!keysOf(c).length||!keysOf(c).every(([f,n])=>f&&n>=1&&n<=214)||!CHAR_L[c])`);
   ok(!bad.length,'без пиньиня/перевода/ключей: '+bad.join('')); });
 await T('keys-deck',()=>{ ev(`State.cards={}; State.meta=freshMeta(); State.settings.semester=${sem({newWordsUntil:ev("addDays(todayStr(),60)"),holidays:{from:'2000-01-01',to:'2000-01-02',capacity:.3}})}`);
@@ -79,6 +82,6 @@ await T('mock-flow',()=>{ ev("State.meta=freshMeta(); MOCK=null; go('mock',{setu
 await T('report-error',()=>{ ev("State.meta=freshMeta(); reportDecomp('喝')"); A.doc.getElementById('repTx').value='喝 = 口 + 曷'; A.doc.getElementById('repOk').click();
   ok(ev("State.meta.reports.length")===1&&ev("State.meta.reports[0].note")==='喝 = 口 + 曷','ошибка разбора не сохранена'); ev("go('reports')"); ok(/喝 = 口 \+ 曷/.test(A.doc.querySelector('#screen textarea').value),'список ошибок'); });
 await T('decomp-mode',()=>{ ev("State.cards={}; State.meta=freshMeta(); State.cards['谢谢']={state:1,S:5,D:5,due:Date.now()+9e9,last:Date.now(),reps:2,lapses:0}; DEC=null; go('decomp')");
-  ok(ev("decompQueue().includes('key:谢')"),'谢 из выученного слова в очереди'); click(/^На бумаге/); click(/Показать ответ/); ok(/讠 \(149/.test(txt()),'ответ-разбор');
+  ok(ev("decompQueue().includes('key:谢')"),'谢 из выученного слова в очереди'); click(/^На бумаге/); click(/Показать ответ/); ok(/Ключ: 讠 №149/.test(txt())&&/фоноидеограмма/.test(txt()),'ответ-разбор');
   A.doc.querySelector('#screen [data-ch="3"]').click(); ok(ev("State.cards['key:谢'].state")===1&&ev("D().dec")===1,'оценка в колоду key:'); });
 A.finish('accept (ТЗ §9): квоты, фокус-неделя, разбор 谢, ключи, XP/серия/заморозки, короны, 587 знаков, предложения, пробная, путь');

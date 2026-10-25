@@ -364,46 +364,68 @@ function tPairs(stage,x,task){
   task.order[1].forEach(i=>{ const b=el('button','choice',esc(meaning(ws[i]))); b.dataset.i=i; b.onclick=()=>{ R.querySelectorAll('.sel').forEach(e=>e.classList.remove('sel')); b.classList.add('sel'); selR=i; tryMatch(); }; R.appendChild(b); });
 }
 // — Собери иероглиф из ключей: выбрать ключи (правильные + 3–4 лишних), затем название каждого
-function keyLabel(f,n){ const r=RADS[n-1]; return r?`<span class="kchip"><span class="han">${esc(f)}</span><small>${n} · ${esc(r[2])} · «${esc(r[3])}»</small></span>`:`<span class="han">${esc(f)}</span>`; }
+const TYPE_OPTS=[['g','Изобразительный'],['z','Условный знак'],['i','Идеограмма'],['p','Фоноидеограмма']];   // как в пособии
+// ключ для вопроса «Какой ключ?» — только если в пособии у знака один ключ
+const keyAsk=ch=>{ const e=ET[ch], b=e&&e[5]; return b&&b[0].length===1?b[0][0]:0; };
+function canAssemble(ch){ const e=ET[ch]; return !!e&&e[6]!==0&&e[1].length>=2&&e[1].every(p=>p[1]!=='w'); }   // части видны в написании
+let PART_POOL=null;   // части из разборов знаков уроков — для лишних плиток
+function partPool(){ if(PART_POOL) return PART_POOL; const s=new Set();
+  Object.keys(CHAR_L).forEach(c=>{ const e=ET[c]; if(e) e[1].forEach(p=>{ if(p[1]!=='w'&&[...p[0]].length===1) s.add(p[0]); }); });
+  return PART_POOL=[...s]; }
+// «Разбери иероглиф»: из каких частей (если составной) → тип → какая часть даёт звук (у фоноидеограммы) → ключ
 function tAssemble(stage,x,task){
-  const ch=task.ch, ks=keysOf(ch), need=uniq(ks.map(k=>k[1]));
-  if(!task.tiles){
-    const forms={}; ks.forEach(([f,n])=>{ if(!forms[n]) forms[n]=f; });
-    const strokesOfKey=n=>RADS[n-1][1], sc=need.map(strokesOfKey);
-    const cand=KEY_ORDER.slice(0,120).filter(n=>!need.includes(n)).sort((a,b)=>Math.min(...sc.map(s=>Math.abs(s-strokesOfKey(a))))-Math.min(...sc.map(s=>Math.abs(s-strokesOfKey(b))))||Math.random()-.5);
-    const extra=shuffle(cand.slice(0,10)).slice(0,need.length>2?3:4);
-    task.tiles=shuffle(need.map(n=>({n,f:forms[n]})).concat(extra.map(n=>({n,f:RADS[n-1][4][0]}))));
-    task.step=0;
-  }
-  const w=hanOf(ch);
-  head(stage,task.step===0?'Из каких ключей состоит иероглиф?':'Как называется ключ?');
+  const ch=task.ch, e=ET[ch], right=decompHTML(ch,{short:1,plain:1});
+  const reset=()=>{ task.step=null; task.tiles=null; };
   const c=el('div','qcard'); c.style.minHeight='0'; c.innerHTML=`<div class="qhz han" style="font-size:80px">${esc(ch)}</div><div class="qsub" style="margin-top:4px">${pinyinHTML(charPy(ch))} — ${esc(charRu(ch))}</div>`;
-  stage.appendChild(c);
-  const right=decompHTML(ch,{short:1,plain:1});
+  if(!e){ head(stage,'Разбор иероглифа'); stage.appendChild(c); stage.appendChild(el('div','',decompHTML(ch)));
+    const b=el('button','btn showbtn','Дальше'); b.dataset.key='space'; b.onclick=()=>playAnswer(true,{noFB:true}); stage.appendChild(b); return; }
+  const [t,parts]=e, forms=uniq(parts.map(p=>p[0]));
+  if(task.step==null) task.step=canAssemble(ch)?0:1;
   if(task.step===0){
+    if(!task.tiles) task.tiles=shuffle(forms.concat(shuffle(partPool().filter(f=>!forms.includes(f)&&!ch.includes(f))).slice(0,forms.length>2?3:4)));
+    head(stage,'Из каких частей состоит иероглиф?'); stage.appendChild(c);
     const pool=el('div','tl'), sel=new Set(); stage.appendChild(pool);
-    task.tiles.forEach(t=>{ const b=el('button','ptile han',esc(t.f)); b.onclick=()=>{ if(sel.has(t.n)){ sel.delete(t.n); b.classList.remove('sel'); } else { sel.add(t.n); b.classList.add('sel'); } chk.disabled=!sel.size; }; pool.appendChild(b); });
-    stage.appendChild(el('p','note','Выбери все ключи этого иероглифа, затем «Проверить».')).style.textAlign='center';
+    task.tiles.forEach(f=>{ const b=el('button','ptile han',esc(f)); b.onclick=()=>{ if(sel.has(f)){ sel.delete(f); b.classList.remove('sel'); } else { sel.add(f); b.classList.add('sel'); } chk.disabled=!sel.size; }; pool.appendChild(b); });
+    stage.appendChild(el('p','note','Выбери все части этого иероглифа (смысловой ключ, фонетик, части идеограммы), затем «Проверить».')).style.textAlign='center';
     const chk=el('button','btn showbtn','Проверить'); chk.disabled=true; chk.dataset.key='space'; stage.appendChild(chk);
     chk.onclick=()=>{
-      const ok=sel.size===need.length&&need.every(n=>sel.has(n));
-      [...pool.children].forEach((b,i)=>{ const t=task.tiles[i]; b.onclick=null; if(need.includes(t.n)) b.classList.add('right'); else if(sel.has(t.n)) b.classList.add('wrongs'); });
+      const ok=sel.size===forms.length&&forms.every(f=>sel.has(f));
+      [...pool.children].forEach((b,i)=>{ const f=task.tiles[i]; b.onclick=null; if(forms.includes(f)) b.classList.add('right'); else if(sel.has(f)) b.classList.add('wrongs'); });
       chk.remove();
-      if(!ok){ task.step=0; task.tiles=null; playAnswer(false,{right}); return; }
-      Sfx.ok(); task.step=1; task.qi=0; task.names=shuffle(need);
-      const nb=el('button','btn showbtn','Дальше: названия ключей'); nb.dataset.key='space'; nb.onclick=()=>{ PLAY.cur=task; render(); }; stage.appendChild(nb);
+      if(!ok){ reset(); playAnswer(false,{right}); return; }
+      Sfx.ok(); task.step=1;
+      const nb=el('button','btn showbtn','Дальше: тип иероглифа'); nb.dataset.key='space'; nb.onclick=()=>{ PLAY.cur=task; render(); }; stage.appendChild(nb);
     };
     return;
   }
-  const n=task.names[task.qi], r=RADS[n-1], f=(ks.find(k=>k[1]===n)||[])[0]||r[4][0];
-  stage.appendChild(el('div','note',`Ключ ${task.qi+1} из ${task.names.length}: <span class="han" style="font-size:30px;color:var(--title)">${esc(f)}</span>`)).style.textAlign='center';
-  const opts=shuffle(others(KEY_ORDER.slice(0,150).map(x=>RADS[x-1][3]),r[3],3).concat([r[3]]));
-  optionBox(stage,opts.map(o=>[o,esc(o)]),r[3],ok=>{
-    if(!ok){ task.step=0; task.tiles=null; playAnswer(false,{right:keyLabel(f,n)+'<br>'+right}); return; }
-    task.qi++;
-    if(task.qi<task.names.length){ Sfx.ok(); setTimeout(()=>{ if(PLAY&&PLAY.cur===task) render(); },350); return; }
-    task.step=0; task.tiles=null; playAnswer(true,{okHtml:right});
-  });
+  if(task.step===1){
+    head(stage,'Какой это тип иероглифа?'); stage.appendChild(c);
+    if(canAssemble(ch)) stage.appendChild(el('p','note',`Части: <span class="han" style="font-size:20px;color:var(--title)">${forms.map(esc).join(' + ')}</span>`)).style.textAlign='center';
+    optionBox(stage,TYPE_OPTS.map(([v,l])=>[v,l]),t,ok=>{
+      if(!ok){ reset(); playAnswer(false,{right}); return; }
+      next(t==='p'&&parts.some(p=>p[1]==='f')&&parts.length>=2?2:3);
+    });
+    return;
+  }
+  if(task.step===2){
+    head(stage,'Какая часть даёт звучание (фонетик)?'); stage.appendChild(c);
+    const f=parts.find(p=>p[1]==='f');
+    optionBox(stage,forms.map(x=>[x,'<span class="han" style="font-size:30px">'+esc(x)+'</span>']),f[0],ok=>{
+      if(!ok){ reset(); playAnswer(false,{right}); return; }
+      next(3);
+    },forms.length<=2?'two':'');
+    return;
+  }
+  // шаг 3: ключ (по пособию); варианты — другие ключи, которые видны в знаке (谢: 身, 寸), иначе случайные
+  const n=keyAsk(ch), kl=k=>`<span class="han" style="font-size:26px">${esc(keyForm(ch,k)||RADS[k-1][4][0])}</span> №${k} «${esc(RADS[k-1][3])}»`;
+  head(stage,'Какой у иероглифа ключ?'); stage.appendChild(c);
+  const near=uniq(keysOf(ch).map(x=>x[1]).concat(((KC.c||{})[ch]||[]).map(x=>x[1]),idsParts(ch).map(f=>RIDX[f]!=null?RADS[RIDX[f]][0]:0))).filter(k=>k&&k!==n);
+  const opts=shuffle([n].concat(near.slice(0,3),shuffle(KEY_ORDER.filter(k=>k!==n&&!near.includes(k))).slice(0,Math.max(0,3-near.length))));
+  optionBox(stage,opts.map(k=>[k,kl(k)]),n,ok=>{ reset(); playAnswer(ok,ok?{okHtml:right}:{right}); });
+  function next(st){
+    if(st===3&&!keyAsk(ch)){ reset(); playAnswer(true,{okHtml:right}); return; }
+    task.step=st; Sfx.ok(); setTimeout(()=>{ if(PLAY&&PLAY.cur===task) render(); },350);
+  }
 }
 // — ключи
 function tRadIntro(stage,x){

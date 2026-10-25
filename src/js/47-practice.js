@@ -44,8 +44,8 @@ function viewPractice(s){
   const due=dueKeys().length, tough=Object.keys(State.cards).filter(k=>validKey(k)&&(cardOf(k).lapses||0)>=3);
   const rows=[
     ['🔁','Повторить всё к сроку',due?due+' к сроку — слова, ключи, разборы':'к сроку ничего нет',()=>startPart('rev')],
-    ['🧩','Разбор на ключи','как на контрольной: ключи, пиньинь, перевод',()=>go('decomp')],
-    ['🔤','Собери из ключей','плитки ключей и их названия',()=>{ const q=decompQueue(8); if(!q.length){ toast('Сначала выучи несколько слов'); return; } playStart(q,{title:'Собери из ключей',kind:'chars'}); }],
+    ['🧩','Разбор на ключи','как на контрольной: тип, ключ, фонетик, пиньинь, перевод',()=>go('decomp')],
+    ['🔤','Разбери иероглиф (игра)','части, тип, фонетик, ключ',()=>{ const q=decompQueue(8); if(!q.length){ toast('Сначала выучи несколько слов'); return; } playStart(q,{title:'Разбери иероглиф',kind:'chars'}); }],
     ['💬','Перевод предложений','RU→中 и 中→RU, целиком или отрывками',()=>go('sent')],
     ['➕','Свои предложения',State.sets.length?State.sets.length+' '+plural(State.sets.length,'набор','набора','наборов'):'добавить от преподавателя',()=>go('addsent')],
     ['📝','Пробная контрольная','5 слов + 10 предложений, таймер',()=>go('mock')],
@@ -93,17 +93,14 @@ function viewDecomp(s){
   if(!DEC||DEC.done){
     const back=el('button','back','‹ Повторение'); back.onclick=()=>go('practice'); v.appendChild(back);
     v.appendChild(el('h2','title','Разбор на ключи'));
-    v.appendChild(el('div','',mascotRow('calm','Пиши на бумаге: ключи каждого иероглифа, их пиньинь и перевод, потом пиньинь и перевод иероглифа.')));
+    v.appendChild(el('div','',mascotRow('calm','Пиши на бумаге: тип иероглифа, ключ и фонетик (или части идеограммы), их пиньинь и перевод, потом пиньинь и перевод иероглифа.')));
     const q=decompQueue(10), d=D();
     v.appendChild(el('p','note',`Сегодня разобрано: ${d.dec} из 5 · к сроку: ${dueKeys(isKC).length} · в очереди: ${q.length} (сначала ошибки, затем новые иероглифы выученных слов).`));
-    const seg=el('div','setrow'); seg.style.cssText='padding:10px 0;border:0';
-    seg.innerHTML='<div class="lab"><b>Формат разбора</b><small>как у преподавателя — пока не подтверждён</small></div>';
-    const sg=el('div','seg2'); [['keys','до ключей'],['ids','первый уровень']].forEach(([id,t])=>{ const b=el('button',State.settings.decomp===id?'on':'',t); b.onclick=()=>{ State.settings.decomp=id; save('settings'); render(); }; sg.appendChild(b); });
-    seg.appendChild(sg); v.appendChild(seg);
+    v.appendChild(el('div','info','Как в «Пособии по иероглифике» Кондрашевского: тип — изобразительный (рисунок) · условный знак · идеограмма (смысл частей) · фоноидеограмма (ключ даёт смысл, фонетик — только звук); ключ — номер из 214, под которым знак ищут в словаре. Фонетик на ключи не дробим.'));
     if(DEC&&DEC.done) v.appendChild(el('div','info',`Готово: ${DEC.n} ${plural(DEC.n,'иероглиф','иероглифа','иероглифов')}, с первого раза верно ${DEC.ok}.`));
     const row=el('div','actionrow');
     const b1=el('button','btn','На бумаге'); b1.disabled=!q.length; b1.dataset.key='space'; b1.onclick=()=>{ DEC={q:q.slice(),n:0,ok:0,first:{}}; render(); };
-    const b2=el('button','btn ghost','Собери из ключей'); b2.disabled=!q.length; b2.onclick=()=>playStart(q.slice(0,8),{title:'Собери из ключей',kind:'chars'});
+    const b2=el('button','btn ghost','Игра: тип и ключ'); b2.disabled=!q.length; b2.onclick=()=>playStart(q.slice(0,8),{title:'Разбери иероглиф',kind:'chars'});
     row.appendChild(b1); row.appendChild(b2); v.appendChild(row);
     if(!q.length) v.appendChild(el('p','note','Разбирать пока нечего: сначала выучи несколько слов на Пути.'));
     s.appendChild(v); return;
@@ -113,9 +110,9 @@ function viewDecomp(s){
   const top=el('div','playtop'); const xb=el('button','x','✕'); xb.onclick=()=>{ DEC=null; render(); }; top.appendChild(xb);
   top.appendChild(el('div','bar',`<i style="width:${DEC.n/(DEC.n+DEC.q.length)*100}%"></i>`)); top.appendChild(el('div','combo',DEC.q.length+''));
   v.appendChild(top);
-  head(v,'Разбери на ключи');
+  head(v,'Разбери иероглиф');
   const c=el('div','qcard'); c.style.minHeight='22vh';
-  c.innerHTML=`${w&&w.s!==ch?`<div class="han" style="font-size:22px;color:var(--text2)">${esc(w.s).replace(ch,'<b style="color:var(--primary-text)">'+ch+'</b>')}</div>`:''}<div class="qhz han">${esc(ch)}</div><div class="qsub">ключи · их пиньинь и перевод · пиньинь и перевод знака</div>`;
+  c.innerHTML=`${w&&w.s!==ch?`<div class="han" style="font-size:22px;color:var(--text2)">${esc(w.s).replace(ch,'<b style="color:var(--primary-text)">'+ch+'</b>')}</div>`:''}<div class="qhz han">${esc(ch)}</div><div class="qsub">тип · части (ключ, фонетик) с пиньинем и переводом · пиньинь и перевод знака</div>`;
   v.appendChild(c);
   const sb=el('button','btn showbtn','Показать ответ'); sb.dataset.key='space'; v.appendChild(sb);
   sb.onclick=()=>{
@@ -141,7 +138,7 @@ function viewReports(s){
   const back=el('button','back','‹ Повторение'); back.onclick=()=>go('practice'); v.appendChild(back);
   v.appendChild(el('h2','title','Ошибки разбора'));
   v.appendChild(el('p','note','Скопируй список и пришли Claude — разбор поправят в данных.'));
-  const txt=State.meta.reports.map(r=>`${r.ch} (${r.date}, ${r.mode==='ids'?'первый уровень':'до ключей'}): ${r.note||'—'} | сейчас: ${keysOf(r.ch).map(([f,n])=>f+n).join(' + ')}`).join('\n');
+  const txt=State.meta.reports.map(r=>{ const e=ET[r.ch]; return `${r.ch} (${r.date}): ${r.note||'—'} | сейчас: ${e?(ETYPE[e[0]]+': '+e[1].map(p=>p[0]+':'+p[1]+(p[2]?p[2]:'')).join(' + ')):'нет разбора'}`; }).join('\n');
   const ta=el('textarea','tinput'); ta.value=txt; ta.readOnly=true; v.appendChild(ta);
   let armed=false; const cl=el('button','btn ghost','Очистить список'); cl.style.marginTop='12px';
   cl.onclick=()=>{ if(!armed){ armed=true; cl.textContent='Точно очистить?'; return; } State.meta.reports=[]; save('meta'); go('practice'); };
@@ -254,7 +251,7 @@ function viewAddSent(s){
 let MOCK=null, mockTimer=null;
 function mockGen(lessons){
   const set=new Set(lessons);
-  const ws=COURSE.filter(k=>set.has(WORD_L[k])).map(k=>BYK[k]).filter(w=>hanOf(w.s).length&&hanOf(w.s).every(c=>keysOf(c).length));
+  const ws=COURSE.filter(k=>set.has(WORD_L[k])).map(k=>BYK[k]).filter(w=>hanOf(w.s).length&&hanOf(w.s).every(c=>ET[c]));
   const pick=shuffle(ws.filter(w=>hanOf(w.s).length<=2)).concat(shuffle(ws.filter(w=>hanOf(w.s).length>2)));
   const err=State.meta.sentErr;
   const ss=shuffle(sentBank().filter(x=>sentLessons(x).some(l=>set.has(l)))).sort((a,b)=>(err[b.id]||0)-(err[a.id]||0));
@@ -271,7 +268,7 @@ function viewMock(s){
     if(!MOCK){ const ne=nextExam(); MOCK={phase:'setup',lessons:lessonFilter(ne&&(ne.lessons||[]).length?'exam':'group'),title:ne?(ne.title||'Контрольная'):'Пробная контрольная'}; }
     const back=el('button','back','‹ Назад'); back.onclick=()=>{ MOCK=null; go('practice'); }; v.appendChild(back);
     v.appendChild(el('h2','title',esc(MOCK.title||'Пробная контрольная')));
-    v.appendChild(el('p','note','Как настоящая: 1) 5 слов — разобрать на ключи, пиньинь и перевод ключей и иероглифов; 2) 5 предложений RU→中; 3) 5 предложений 中→RU. Пишешь на бумаге, потом сверяешь и честно отмечаешь «верно / частично / неверно».'));
+    v.appendChild(el('p','note','Как настоящая: 1) 5 слов — разбор каждого иероглифа: тип, ключ, фонетик (как в «Пособии по иероглифике»), пиньинь и перевод; 2) 5 предложений RU→中; 3) 5 предложений 中→RU. Пишешь на бумаге, потом сверяешь и честно отмечаешь «верно / частично / неверно».'));
     v.appendChild(el('p','eyebrow','Уроки'));
     lessonChips(v,MOCK.lessons,render);
     const tr=el('div','setrow'); tr.style.cssText='padding:12px 0;border:0'; tr.innerHTML='<div class="lab"><b>Таймер, минут</b><small>настраивается</small></div>';
@@ -294,7 +291,7 @@ function viewMock(s){
     const fmt=()=>{ const l=left(); tm.textContent=Math.floor(l/60)+':'+String(l%60).padStart(2,'0'); tm.classList.toggle('low',l<300); };
     fmt(); mockTimer=setInterval(()=>{ if(!document.body.contains(tm)){ clearInterval(mockTimer); return; } fmt(); if(!left()){ clearInterval(mockTimer); toast('Время вышло'); } },1000);
     let i=0; const part=(t,html)=>`<p class="eyebrow">${t}</p><div class="paper"><ol start="${i+1}">${html}</ol></div>`;
-    let h=part('1. Разбери на ключи; пиньинь и перевод ключей и иероглифов',MOCK.words.map(k=>{ i++; const w=BYK[k]; return `<li><span class="han" style="font-size:30px;color:var(--title)">${esc(w.d||w.s)}</span></li>`; }).join(''));
+    let h=part('1. Разбери на ключи: тип иероглифа, ключ, фонетик; пиньинь и перевод ключей и иероглифа',MOCK.words.map(k=>{ i++; const w=BYK[k]; return `<li><span class="han" style="font-size:30px;color:var(--title)">${esc(w.d||w.s)}</span></li>`; }).join(''));
     h+=part('2. Переведи на китайский',MOCK.ruzh.map(x=>{ i++; return `<li>${esc(x.ru)}</li>`; }).join(''));
     h+=part('3. Переведи на русский',MOCK.zhru.map(x=>{ i++; return `<li><span class="han" style="font-size:20px">${esc(x.zh)}</span></li>`; }).join(''));
     v.insertAdjacentHTML('beforeend',h);

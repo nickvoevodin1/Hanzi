@@ -59,9 +59,28 @@ function lessonWords(L){ return ((LESSONS[L]||{}).o||[]).map(k=>BYK[k]).filter(B
 function lessonExtras(L){ return ((LESSONS[L]||{}).x||[]).map(x=>({...x,words:x.o.map(k=>BYK[k]).filter(Boolean)})); }   // список группы, презентации
 function lessonTitle(L){ return (LESSONS[L]&&LESSONS[L].t) || ('Урок '+L); }
 
-// Разбор на ключи (kondr_chars.json): KC.c[знак]=[[форма,№],…], KC.order — порядок изучения 214 ключей
+// kondr_chars.json: KC.order — порядок изучения 214 ключей, KC.py/KC.ru — словарный пиньинь и перевод 587 знаков уроков
 const KC = /*__KCHARS__*/;
-function keysOf(ch){ return (KC.c[ch]&&KC.c[ch].length) ? KC.c[ch] : (HZ.c[ch]?[[HZ.c[ch][1],HZ.c[ch][0]]]:[]); }
+// Тип и состав иероглифа (etym.json, tools/make_etym.py): ET[знак]=[тип, [[форма, роль, №ключа|0, пиньинь, рус., чтения фонетика?]…],
+// примечание, спорно, авто, [ключи по пособию, урок пособия, тип по пособию 0/1]|0, части видны в написании 0/1].
+// Тип: g изобразительный, z условный знак, i идеограмма, p фоноидеограмма; роль: s ключ (смысл), f фонетик (звук),
+// m смысловая часть, x условный знак упрощения, w весь знак. Пособие — «Пособие по иероглифике» Кондрашевского.
+const ET = /*__ETYM__*/;
+const etOf = ch => ET[ch]||null;
+// Форма ключа №n в знаке: как часть разбора, иначе вариант ключа из состава знака, иначе основная форма
+function keyForm(ch,n){
+  const e=ET[ch], p=e&&e[1].find(p=>p[2]===n); if(p) return p[0];
+  const r=RADS[n-1]; if(!r) return '';
+  const fs=[...(r[4]||'')], h=HZ.c[ch], ids=(h&&h[2])||'';
+  return fs.find(f=>f===ch||ids.includes(f)) || fs[0] || '';
+}
+// Ключи знака: по пособию (все словарные ключи), затем ключи частей разбора; без разбора — ключ Канси
+function keysOf(ch){
+  const e=ET[ch], out=[], add=(f,n)=>{ if(n&&!out.some(x=>x[1]===n)) out.push([f,n]); };
+  if(e&&e[5]) e[5][0].forEach(n=>add(keyForm(ch,n),n));
+  if(e) e[1].forEach(p=>add(p[0],p[2]));
+  return out.length ? out : (HZ.c[ch]?[[HZ.c[ch][1],HZ.c[ch][0]]]:[]);
+}
 // Пиньинь иероглифа — словарный (587 знаков уроков — из kondr_1-30.json), перевод — из разбора приложения
 function charPy(ch){ return (KC.py&&KC.py[ch]) || (HZ.c[ch]&&HZ.c[ch][7]) || ''; }
 function charRu(ch){ return (HZ.c[ch]&&HZ.c[ch][6]) || (KC.ru&&KC.ru[ch]) || ''; }

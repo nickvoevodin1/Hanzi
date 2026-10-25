@@ -66,13 +66,12 @@ function viewSettings(s){
   setRow(b4,'Вибрация при ошибке','',switchEl(()=>S.vibrate,x=>{ S.vibrate=x; ss(); }));
   v.appendChild(b4);
   // — контрольные: таймер, шкала, разбор
-  v.appendChild(el('p','eyebrow','Пробная контрольная и разбор'));
+  v.appendChild(el('p','eyebrow','Пробная контрольная'));
   const b5=el('div','meta');
   setRow(b5,'Таймер, минут','',stepper(()=>S.mockMin,x=>{ S.mockMin=x; ss(); },5,120,5));
   setRow(b5,'«5» — от, %','шкала условная: поменяй, когда узнаешь настоящую',stepper(()=>S.scale[0],x=>{ S.scale[0]=Math.max(x,S.scale[1]+1); ss(); },50,100,1));
   setRow(b5,'«4» — от, %','',stepper(()=>S.scale[1],x=>{ S.scale[1]=Math.min(Math.max(x,S.scale[2]+1),S.scale[0]-1); ss(); },30,99,1));
   setRow(b5,'«3» — от, %','',stepper(()=>S.scale[2],x=>{ S.scale[2]=Math.min(x,S.scale[1]-1); ss(); },10,98,1));
-  setRow(b5,'Разбор на ключи','«до ключей» или «первый уровень» состава',segEl([['keys','до ключей'],['ids','первый уровень']],()=>S.decomp,x=>{ S.decomp=x; ss(); }));
   v.appendChild(b5);
   // — голос
   v.appendChild(el('p','eyebrow','Озвучка'));
@@ -95,6 +94,6 @@ function viewSettings(s){
   const learned=Object.keys(State.cards).filter(k=>validKey(k)&&!isNew(k));
   v.appendChild(el('p','note',`В работе: ${learned.filter(k=>BYK[k]).length} слов, ${learned.filter(isRad).length} ключей, ${learned.filter(isKC).length} разборов · всего повторений: ${Object.values(State.meta.rev||{}).reduce((a,b)=>a+b,0)}.<br>
     Хранилище: ${Store.persistent()?'на устройстве (IndexedDB) — прогресс у каждого браузера свой':'в памяти (превью)'}.<br>
-    Данные: Кондрашевский, том 1 (30 уроков, ${COURSE.length} слов, из них ${COURSE.filter(k=>EXTRA_OF[k]).length} — из списка группы и презентации) + HSK 1–6. Разбор на ключи — makemeahanzi (рекурсивно до 214 ключей), номер ключа — Канси (Unihan), названия ключей — таблица ДВФУ. Интервалы — FSRS-5.`));
+    Данные: Кондрашевский, том 1 (30 уроков, ${COURSE.length} слов, из них ${COURSE.filter(k=>EXTRA_OF[k]).length} — из списка группы и презентации) + HSK 1–6. Тип иероглифа и ключ — по «Пособию по иероглифике» А.Ф. Кондрашевского (ч. 1; 456 из 587 знаков уроков), строение и остальные знаки — 汉典 («Шовэнь») и Make Me a Hanzi; ключ Канси — Unihan, названия ключей — таблица ДВФУ. Интервалы — FSRS-5.`));
   s.appendChild(v);
 }

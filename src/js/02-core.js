@@ -69,7 +69,7 @@ const DEF_SEM={on:true,endDate:'2027-01-31',targetLesson:30,groupLesson:18,
   keysPerDay:10,exams:[],minutesNormal:40};
 const clone=o=>JSON.parse(JSON.stringify(o));
 const DEF_SETTINGS={semester:clone(DEF_SEM),newPerDay:12,voiceName:null,xpGoal:50,sound:true,vibrate:false,
-  decomp:'keys',mockMin:40,scale:[90,75,60]};
+  mockMin:40,scale:[90,75,60]};
 const State = {
   cards:{},                                  // ключ → карточка FSRS: слово (w.key), ключ 'r:N', разбор знака 'key:<иероглиф>'
   settings:clone(DEF_SETTINGS),
@@ -102,7 +102,7 @@ async function loadState(){
   }
   const s=await Store.get('settings');
   if(s){
-    ['newPerDay','voiceName','xpGoal','sound','vibrate','decomp','mockMin','scale'].forEach(k=>{ if(s[k]!==undefined) State.settings[k]=s[k]; });
+    ['newPerDay','voiceName','xpGoal','sound','vibrate','mockMin','scale'].forEach(k=>{ if(s[k]!==undefined) State.settings[k]=s[k]; });
     // миграция: старые «урок группы» (lesson) и цель (goal) → семестр; прогресс не трогаем
     const sem=s.semester||{}; if(!s.semester&&s.lesson) sem.groupLesson=s.lesson;
     State.settings.semester=mergeSemester(sem);
@@ -140,7 +140,7 @@ const isRad = k => typeof k==='string' && k.startsWith('r:');
 const radNum = k => +k.slice(2);
 const isKC = k => typeof k==='string' && k.startsWith('key:');      // разбор иероглифа на ключи
 const kcChar = k => k.slice(4);
-const validKey = k => isRad(k) ? (radNum(k)>=1&&radNum(k)<=214) : isKC(k) ? keysOf(kcChar(k)).length>0 : (k in BYK);
+const validKey = k => isRad(k) ? (radNum(k)>=1&&radNum(k)<=214) : isKC(k) ? !!(ET[kcChar(k)]||HZ.c[kcChar(k)]) : (k in BYK);
 const cardOf = k => State.cards[k];
 const isNew = k => { const c=cardOf(k); return !c||!c.state; };
 const isDue = k => { const c=cardOf(k); return !!(c&&c.state&&c.due<=Date.now()); };

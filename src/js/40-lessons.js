@@ -107,7 +107,7 @@ function viewCard(s){
   if(w.ra) meta.appendChild(mr('Перевод','<span style="color:var(--muted)">из открытого словаря — можно перепроверить</span>'));
   if(meta.children.length) v.appendChild(meta);
   v.appendChild(el('p','eyebrow','Разбор на ключи'));
-  v.appendChild(el('div','',hanOf(w.s).filter(c=>keysOf(c).length).map(c=>decompHTML(c,{w})).join('')));
+  v.appendChild(el('div','',hanOf(w.s).filter(c=>ET[c]||HZ.c[c]).map(c=>decompHTML(c,{w})).join('')));
   v.appendChild(el('p','eyebrow','Разбор по иероглифам'));
   v.appendChild(el('div','',breakdown(w.s)));
   s.appendChild(v);

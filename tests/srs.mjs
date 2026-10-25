@@ -53,11 +53,20 @@ await T('pairs',()=>{ reset(); const ks=ev("lessonKeys(10).slice(0,5)"); ev(`PLA
   L.forEach(a=>{ a.click(); R.find(b=>b.dataset.i===a.dataset.i).click(); });
   return new Promise(r=>setTimeout(()=>{ ok(doc.getElementById('fb').classList.contains('ok'),'пары не приняты'); r(); },500)); });
 await T('assemble-谢',()=>{ reset(); ev("PLAY=null; playStart(['key:谢'],{title:'t',kind:'chars'}); PLAY.queue=[]; PLAY.cur={t:'assemble',k:'key:谢',ch:'谢'}; render()");
-  [...doc.querySelectorAll('.ptile')].filter(b=>['讠','身','寸'].includes(b.textContent)).forEach(b=>b.click()); click(/^Проверить$/);
-  ok(/названия ключей/i.test(txt()),'плитки ключей не приняты'); click(/названия ключей/);
-  for(let i=0;i<3;i++){ const n=ev("PLAY.cur.names[PLAY.cur.qi]"), name=ev(`RADS[${n}-1][3]`); [...doc.querySelectorAll('#screen .choice')].find(e=>e.textContent.slice(1)===name).click();
-    if(i<2) ev("render()"); }
-  ok(doc.getElementById('fb').classList.contains('ok'),'«собери из ключей» не принят'); ok(ev("State.cards['key:谢'].state")===1&&ev("D().dec")===1,'разбор не засчитан'); });
+  ok(/Из каких частей/.test(txt()),'нет шага «части»');
+  [...doc.querySelectorAll('.ptile')].filter(b=>['讠','射'].includes(b.textContent)).forEach(b=>b.click()); click(/^Проверить$/);
+  ok(/тип иероглифа/i.test(txt()),'части не приняты'); click(/тип иероглифа/);
+  ok(/Какой это тип/.test(txt())&&doc.querySelectorAll('#screen .choice').length===4,'нет 4 вариантов типа');
+  [...doc.querySelectorAll('#screen .choice')].find(e=>/Фоноидеограмма/.test(e.textContent)).click();
+  ev("render()"); ok(/фонетик/.test(txt()),'нет вопроса про фонетик');
+  [...doc.querySelectorAll('#screen .choice')].find(e=>e.textContent.includes('射')).click();
+  ev("render()"); ok(/Какой у иероглифа ключ/.test(txt()),'нет вопроса про ключ'); ok(/№158/.test(txt())&&/№41/.test(txt()),'в вариантах нет видимых «ключей» 身, 寸');
+  [...doc.querySelectorAll('#screen .choice')].find(e=>/№149/.test(e.textContent)).click();
+  ok(doc.getElementById('fb').classList.contains('ok'),'«разбери иероглиф» не принят'); ok(ev("State.cards['key:谢'].state")===1&&ev("D().dec")===1,'разбор не засчитан'); });
+await T('assemble-wrong-type',()=>{ reset(); ev("PLAY=null; playStart(['key:一'],{title:'t',kind:'chars'}); PLAY.queue=[]; PLAY.cur={t:'assemble',k:'key:一',ch:'一'}; render()");
+  ok(/Какой это тип/.test(txt()),'у целого знака сразу вопрос о типе');
+  [...doc.querySelectorAll('#screen .choice')].find(e=>/Изобразительный/.test(e.textContent)).click();
+  ok(doc.getElementById('fb').classList.contains('bad')&&/условный знак/.test(doc.getElementById('fb').textContent),'ошибка типа не показана'); });
 await T('write-no-loop',()=>{ reset(); ev("State.cards['睡觉']={state:1,S:15,D:5,due:Date.now()-1,last:Date.now()-15*864e5,reps:3,lapses:0}; PLAY=null; playStart(['睡觉'],{title:'t',kind:'review'}); PLAY.cur.t='write'; PLAY.answered=false; render()");
   click(/Не помню — показать/); ok(ev("PLAY.queue.length")===1&&ev("PLAY.queue[0].t")==='produce','повтор прописи — другим заданием: '+ev("PLAY.queue.map(t=>t.t)")); });
 // карточки-классика: 4 кнопки

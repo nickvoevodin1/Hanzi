@@ -51,4 +51,14 @@ await T('local-date',()=>ok(ev("dstr(new Date(2026,0,5))")==='2026-01-05','dstr'
 await T('pinyin-fixes',()=>{ ok(ev("BYS['便宜'].p")==='pián yi','便宜'); ok(ev("BYS['重点'].p")==='zhòng diǎn','重点'); ok(ev("WORDS.some(w=>w.d==='接(电话)')"),'помета 接(电话)'); });
 await T('petrosyan',()=>{ ok(Object.keys(ev("RAD2")).length===214,'пособие: не все ключи'); ok(ev("RAD2[1].e")==='三'&&ev("RAD2[9].e")==='佛','примеры');
   ok(ev("Object.keys(RAD2).every(n=>RAD2[n].m&&RAD2[n].e)"),'пустые значения/примеры'); });
+// «Пособие по иероглифике» Кондрашевского: тип и ключи 456 знаков уроков; у фоноидеограммы — ключ и не больше одного фонетика
+await T('posobie',()=>{
+  const r=ev(`(()=>{ const K=Object.keys(KC.py||{}); let book=0, typed=0, bad=[];
+    K.forEach(c=>{ const e=ET[c]; if(!e){ bad.push(c+':нет'); return; } if(!'gzip'.includes(e[0])) bad.push(c+':тип');
+      if(e[5]){ book++; if(e[5][2]) typed++; if(!e[5][0].every(n=>n>=1&&n<=214)) bad.push(c+':ключ'); }
+      const f=e[1].filter(p=>p[1]==='f').length; if(f>1) bad.push(c+':фонетиков '+f); });
+    return {n:K.length,book,typed,bad}; })()`);
+  ok(r.n===587&&!r.bad.length,'разбор: '+r.bad.slice(0,10).join(' ')); ok(r.book>=450&&r.typed>=430,'в пособии: '+r.book+'/'+r.typed);
+  ok(ev("[ET['谢'][0],ET['我'][0],ET['好'][0],ET['上'][0]].join('')")==='pgiz','типы 谢 我 好 上');
+  ok(ev("ET['谢'][1].find(p=>p[1]==='f')[5]")==='she, xie','чтения фонетика 射'); });
 A.finish('data: уроки, разбор иероглифов, ключи Канси, блоки тренировки, проверочная 18');

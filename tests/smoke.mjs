@@ -14,9 +14,9 @@ await T('no-export-no-theme',()=>{ ev("go('settings')"); ok(!/Экспорт|И�
 await T('sheet',()=>{ ev("go('card',{id:BYS['睡觉'].id})"); const h=doc.querySelector('#screen [data-c="觉"]'); ok(h,'нет кликабельного 觉');
   ok(doc.getElementById('sheet').hidden,'шторка открыта заранее');
   h.dispatchEvent(new A.w.MouseEvent('click',{bubbles:true})); ok(!doc.getElementById('sheet').hidden,'шторка не открылась');
-  const t=doc.getElementById('sheetc').textContent; ok(/Ключ/.test(t)&&/147/.test(t)&&/Состав/.test(t),'нет разбора: '+t.slice(0,80));
+  const t=doc.getElementById('sheetc').textContent; ok(/Ключ/.test(t)&&/147/.test(t)&&/фоноидеограмма/.test(t)&&/фонетик/.test(t)&&/Пособию по иероглифике/.test(t),'нет разбора: '+t.slice(0,80));
   A.key('Escape'); ok(doc.getElementById('sheet').hidden,'Escape не закрыл'); });
-await T('card-decomp',()=>{ ev("go('card',{id:BYS['谢谢'].id})"); ok(/Разбор на ключи/.test(txt())&&/讠 \(149, yán, «речь»\)/.test(txt()),'разбор на ключи на карточке'); });
+await T('card-decomp',()=>{ ev("go('card',{id:BYS['谢谢'].id})"); ok(/Разбор на ключи/.test(txt())&&/Ключ: 讠 №149 yán «речь»/.test(txt())&&/射/.test(txt()),'разбор на ключи на карточке'); });
 await T('sheet-word',()=>{ ev("openChar('好')"); const b=doc.querySelector('#sheet [data-word]'); ok(b,'нет слов'); b.click(); ok(ev("State.route.name")==='card','не перешли к слову'); });
 await T('settings-group-lesson',()=>{ ev("go('settings')"); const inc=doc.querySelectorAll('.stepper button[aria-label="больше"]')[0]; inc.click();
   ok(ev("State.settings.semester.groupLesson")===19,'урок группы'); ev("State.settings.semester.groupLesson=18"); });
