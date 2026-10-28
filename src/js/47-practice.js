@@ -43,9 +43,11 @@ function viewPractice(s){
   v.appendChild(el('h2','title','Повторение'));
   const due=dueKeys().length, tough=Object.keys(State.cards).filter(k=>validKey(k)&&(cardOf(k).lapses||0)>=3);
   const rows=[
-    ['cycleC','Повторить всё к сроку',due?due+' к сроку — слова, ключи, разборы':'к сроку ничего нет',()=>startPart('rev')],
+    ['cycleC','Повторить всё к сроку',due?due+' к сроку — слова, ключи, разборы, прописи':'к сроку ничего нет',()=>startPart('rev')],
     ['split','Разбор на ключи','как на контрольной: тип, ключ, фонетик, пиньинь, перевод',()=>go('decomp')],
     ['target','Разбери иероглиф (игра)','части, тип, фонетик, ключ',()=>{ const q=decompQueue(8); if(!q.length){ toast('Сначала выучи несколько слов'); return; } playStart(q,{title:'Разбери иероглиф',kind:'chars'}); }],
+    ['brush','Прописи иероглифов',(()=>{ const ws=writeStats(); return (ws.due?'к сроку '+ws.due+' · ':'')+'порядок черт, обвести, по памяти · написано '+ws.chars; })(),()=>startWrite('chars')],
+    ['brush','Прописи ключей','214 ключей в формах упрощённого письма (人 и 亻, 言 и 讠) · написано '+writeStats().keys,()=>startWrite('keys')],
     ['headphones','Тоны на слух','записи носителей: какой тон? слабые слоги — чаще',()=>startToneDrill()],
     ['chat','Перевод предложений','RU→中 и 中→RU, целиком или отрывками',()=>go('sent')],
     ['plus','Свои предложения',State.sets.length?State.sets.length+' '+plural(State.sets.length,'набор','набора','наборов'):'добавить от преподавателя',()=>go('addsent')],
@@ -53,7 +55,7 @@ function viewPractice(s){
     ['考','Проверочные','полный цикл подготовки по урокам',()=>go('tests')],
     ['cards','Карточки (классика)','самопроверка, 4 кнопки оценки',()=>go('cards')],
     ['部','Ключи-справочник','214 ключей: формы, названия, примеры',()=>go('keys')],
-    ['笔','Прописи','новые иероглифы урока группы',()=>go('draw',{chars:LESSON_CHARS[groupL()].slice(),title:'Урок '+groupL(),back:{name:'practice'}})],
+    ['笔','Свободные прописи','иероглифы урока группы — без оценки',()=>go('draw',{chars:LESSON_CHARS[groupL()].slice(),title:'Урок '+groupL(),back:{name:'practice'}})],
   ];
   if(tough.length) rows.push(['warn','Трудные слова',tough.length+' — 3 и больше ошибок',()=>playStart(shuffle(tough).slice(0,12),{title:'Трудные',kind:'review'})]);
   if(State.meta.reports.length) rows.push(['flag','Ошибки разбора',State.meta.reports.length+' — отправь список Claude',()=>go('reports')]);
@@ -74,7 +76,7 @@ function viewCards(s){
   MODES.forEach(([id,t])=>{ const c=el('button','chip'+(mode===id?' on':''),t); c.onclick=()=>go('cards',{mode:id}); mc.appendChild(c); });
   v.appendChild(mc);
   const N=groupL(), list=el('div','rowlist'); list.style.marginTop='10px';
-  const srcs=[['К сроку',()=>dueKeys().filter(k=>!isKC(k)),'повторения'],['Урок дня',()=>dailyQueue().filter(k=>!isKC(k)),'повторения + новые'],
+  const srcs=[['К сроку',()=>dueKeys().filter(k=>!isKC(k)&&!isWR(k)),'повторения'],['Урок дня',()=>dailyQueue().filter(k=>!isKC(k)&&!isWR(k)),'повторения + новые'],
     ['Урок группы '+N,()=>poolQueue(lessonKeys(N)),'слова урока'],['Уроки 1–'+N,()=>poolQueue(courseKeys(N)),'по порядку курса'],['Все 214 ключей',()=>poolQueue(KEY_ORDER.map(n=>'r:'+n)),'в порядке изучения']];
   srcs.forEach(([t,f,sub])=>{ const n=f().length; const r=el('button','row',`<div class="tt"><b>${esc(t)}</b><small>${esc(sub)}</small></div><span class="cnt">${Math.min(n,SESSION_CAP)}${n>SESSION_CAP?'+':''}</span>`);
     r.onclick=()=>startSession(f().slice(0,SESSION_CAP),mode,t,()=>f().slice(0,SESSION_CAP)); list.appendChild(r); });

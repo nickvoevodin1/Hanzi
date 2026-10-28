@@ -91,7 +91,7 @@ function semStats(){
   return {total:ws.length,learned,solid,know:ws.filter(k=>stab(k)>=7).length};
 }
 // Сколько минут займёт пункт плана (для подсказки)
-function planMinutes(id,n){ return Math.max(1,Math.round(({rev:.33,new:1.4,keys:1,dec:1,sent:1.4,mock:State.settings.mockMin||40}[id]||1)*(id==='mock'?1:n))); }
+function planMinutes(id,n){ return Math.max(1,Math.round(({rev:.33,new:1.4,keys:1,dec:1,wr:1.5,sent:1.4,mock:State.settings.mockMin||40}[id]||1)*(id==='mock'?1:n))); }
 // План дня (чеклист раздела 4)
 function dayPlan(){
   const d=D(), type=dayType(), due=dueKeys().length;
@@ -104,12 +104,14 @@ function dayPlan(){
     items.push({id:'mock',icon:'pencil',title:'Пробная контрольная',sub:'фокус-неделя: '+(focusExam(todayStr(),SEM()).e.title||'контрольная'),cur:d.mock,need:1,done:d.mock>=1,min:planMinutes('mock')});
   }else if(type!=='away'){
     items.push({id:'dec',icon:'split',title:'Разбор на ключи — 5',sub:'иероглифы выученных слов',cur:d.dec,need:5,done:d.dec>=5,min:planMinutes('dec',Math.max(0,5-d.dec))});
+    const wt=writeToday();
+    if(wt.quota&&wt.need) items.push({id:'wr',icon:'brush',title:'Прописи — '+wt.need,sub:wt.done>=wt.need?'на сегодня написано':'иероглифы выученных слов и ключи · осталось '+(wt.need-wt.done),cur:wt.done,need:wt.need,done:wt.done>=wt.need,min:planMinutes('wr',wt.need-wt.done)});
     items.push({id:'sent',icon:'chat',title:'Перевод предложений — 5',sub:'RU→中 и 中→RU',cur:d.sent,need:5,done:d.sent>=5,min:planMinutes('sent',Math.max(0,5-d.sent))});
     if(type==='holiday'||type==='consol') items.push({id:'mock',icon:'pencil',title:'Пробная контрольная',sub:'раз в 2–3 дня',cur:d.mock,need:1,done:d.mock>=1,opt:1,min:planMinutes('mock')});
   }
   // 3 ежедневных задания: повторения, новые слова (или предложения), ключи (или разбор / пробная в фокус-неделю)
   const pick=ids=>ids.map(id=>items.find(x=>x.id===id)).find(Boolean);
-  const quests=[pick(['rev']),pick(wq.quota>0?['new','sent','dec']:['sent','dec','new']),pick(type==='focus'?['mock','keys','dec']:['keys','dec','sent'])]
+  const quests=[pick(['rev']),pick(wq.quota>0?['new','sent','dec']:['sent','dec','new']),pick(type==='focus'?['mock','keys','dec']:['keys','wr','dec','sent'])]
     .filter((x,i,a)=>x&&a.indexOf(x)===i);
   quests.forEach(q=>q.quest=1);
   return {type,items,quests,minutes:items.filter(x=>!x.done&&!x.opt).reduce((a,x)=>a+x.min,0)};

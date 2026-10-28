@@ -90,7 +90,7 @@ function qIntro(stage,w){
   const c=el('div','qcard');
   c.innerHTML=`<div class="qprompt" style="color:var(--cinnabar-2)">${IC('sparkle',14)} Новое слово${EXTRA_OF[w.key]?' · '+esc(EXTRA_OF[w.key]):WORD_L[w.key]?' · урок '+WORD_L[w.key]:''}</div>
     <div class="qhz han" style="font-size:84px">${esc(w.d||w.s)}</div>
-    <div class="reveal" style="margin-top:10px"><div class="py">${pinyinHTML(w.p)}</div>${palladius(w.p)?`<div class="palla">${esc(palladius(w.p))}</div>`:''}<div class="tr">${esc(meaning(w))}</div>
+    <div class="reveal" style="margin-top:10px"><div class="py">${pinyinHTML(w.p)}</div>${palladius(w.p)?`<div class="palla">${esc(palladius(w.p))}</div>`:''}<div class="tr">${esc(meaning(w))}</div>${wordFormulas(w)}
     ${w.ex?`<div class="en han" style="font-size:16px;margin-top:8px">${wrapHz(w.ex[0])}</div><div class="en">${pinyinHTML(w.ex[1])}</div><div class="en">${esc(w.ex[2])}</div><button class="say" data-say="${esc(w.ex[0])}" style="margin-top:6px">${SPK()} Пример</button>`:''}</div>
 `;
   stage.appendChild(c);

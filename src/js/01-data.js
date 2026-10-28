@@ -26,7 +26,11 @@ const STROKE_NO = {j:1,f:2,l:3,s:4,i:6,k:7,d:8,E:9,g:10,h:11,u:12,y:13,c:14,e:15
 const STROKE_EXTRA = {Y:'лежачая с крюком (卧钩, как в 心)',t:'изогнутая с крюком (弯钩, как в 子)',v:'горизонтальная дважды ломаная (横折折 / 横折弯)',
   x:'вертикальная дважды ломаная (竖折撇 / 竖折折)',q:'горизонтальная трижды ломаная (横折折折)'};   // нет в таблице курса
 const STROKE_NAME = {}; STROKE_TABLE.forEach(([,rows])=>rows.forEach(([n,name])=>{ STROKE_NAME[n]=name; }));
-function strokesOf(ch){ const h=HZ.c[ch]; return h&&h[10] ? [...h[10]].map(c=>STROKE_NO[c]?{n:STROKE_NO[c],name:STROKE_NAME[STROKE_NO[c]]}:{n:0,name:STROKE_EXTRA[c]||'черта'}) : []; }
+// Прописи ключей (rad_write.json, tools/make_rad_strokes.py): RADW[№]=[[форма, коды черт]…] — формы, которые пишутся
+// в упрощённых знаках (основная первой, не больше двух); у форм-частей (亻 讠 氵…) порядок черт — отсюда
+const RADW = /*__RADW__*/;
+const FORM_CODES={}; Object.values(RADW).forEach(a=>a.forEach(([f,c])=>{ if(!FORM_CODES[f]) FORM_CODES[f]=c; }));
+function strokesOf(ch){ const h=HZ.c[ch], cs=(h&&h[10])||FORM_CODES[ch]; return cs ? [...cs].map(c=>STROKE_NO[c]?{n:STROKE_NO[c],name:STROKE_NAME[STROKE_NO[c]]}:{n:0,name:STROKE_EXTRA[c]||'черта'}) : []; }
 function strokeImg(n,h){ return n?`<img class="sti" src="strokes/${String(n).padStart(2,'0')}.png" alt="" style="height:${h||20}px">`:''; }
 // Палладий по таблице курса; слоги через пробел, эрхуа (nǎr) — с «р» на конце
 function palladius(p){

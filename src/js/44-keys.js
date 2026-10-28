@@ -49,7 +49,8 @@ function viewRadical(s){
     ${r[4].length>1?`<div class="han" style="font-size:22px;color:var(--paper-dim);margin-bottom:6px">${esc([...r[4]].slice(1).join('  '))}</div>`:''}
     <div class="bigpy">${pinyinHTML(r[2])}</div><div class="bigtr">${esc(r[3])}</div>
     <div class="tagrow"><span class="pill">Ключ №${n}</span><span class="pill">${r[1]} ${plural(r[1],'черта','черты','черт')}</span>${KEY_L[n]?`<span class="pill k">урок ${KEY_L[n]}</span>`:''}<span class="pill">№${KEY_ORDER.indexOf(n)+1} в порядке изучения</span>${st!=='new'?'<span class="pill ok">в работе</span>':''}</div>
-    <div class="cardbtns"><button class="iconbtn primary" data-say="${esc(r[4][0])}" aria-label="Слушать">${SPK(26)}</button><button class="iconbtn" data-draw="${esc(r[4][0])}" aria-label="Прописи">${IC('brush',26)}</button></div>`;
+    <div class="cardbtns"><button class="iconbtn primary" data-say="${esc(r[4][0])}" aria-label="Слушать">${SPK(26)}</button><button class="iconbtn" data-draw="${esc((RADW[n]||[[r[4][0]]]).map(x=>x[0]).join(''))}" aria-label="Прописи">${IC('brush',26)}</button></div>
+    <div class="note" style="margin:8px 0 0">Пишется: <span class="han" style="font-size:22px;color:var(--title)">${(RADW[n]||[[r[4][0]]]).map(x=>esc(x[0])).join(' · ')}</span>${!isNew('wr:r:'+n)?' · <b style="color:var(--ok-text)">в прописях</b>':''}</div>`;
   v.appendChild(card);
   const p2=RAD2[n];
   if(p2){ const ex=p2.e&&HZ.c[p2.e]?`<span class="hz han" data-c="${p2.e}" style="font-size:20px">${esc(p2.e)}</span>`:`<span class="han" style="font-size:20px">${esc(p2.e||'')}</span>`;

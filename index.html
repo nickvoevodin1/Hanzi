@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="./icon-32.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/hanzi-writer/3.7.3/hanzi-writer.min.js"></script>
+<script src="./lib/hanzi-writer.min.js"></script>
 <style>
 /* ===== Оформление: палитра Duolingo (белый, серые Swan/Wolf/Eel), их зелёный акцент заменён оранжевым =====
    Оранжевый (#ff9600, «Fox» из палитры Duolingo) — кнопки и активные элементы; зелёный — только «верно»; красный — «ошибка».
@@ -275,6 +275,45 @@ textarea.tinput{text-align:left;font-size:15px;min-height:140px}
   background-image:linear-gradient(90deg,transparent calc(50% - 1px),var(--line) calc(50% - 1px),var(--line) calc(50% + 1px),transparent calc(50% + 1px)),
     linear-gradient(transparent calc(50% - 1px),var(--line) calc(50% - 1px),var(--line) calc(50% + 1px),transparent calc(50% + 1px))}
 .drawhint{font-size:13px;color:var(--text2);text-align:center;margin-top:8px;min-height:18px}
+/* прописи: подпись текущей черты, полоса черт, формы ключа */
+.writer.wpad,#writer{max-width:100%}
+.wcap{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px 8px;min-height:42px;margin-top:6px;font-size:14px;font-weight:800;color:var(--title);line-height:1.25;text-align:left}
+.wcap .wn{font-size:20px;font-weight:900;color:var(--primary-text)}.wcap .wn small{font-size:12px;color:var(--text3)}
+.wcap .sti{height:30px;width:40px;object-fit:contain}
+.wcap .wt{max-width:220px}.wcap .wt small{color:var(--text2);font-weight:700}
+.wcap .wbad{flex-basis:100%;text-align:center;color:var(--bad-text);font-size:13px}
+.stks{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;margin-top:4px}
+.stk .stks{justify-content:flex-start}
+.sk{display:inline-flex;flex-direction:column;align-items:center;border:2px solid var(--line);border-radius:10px;padding:1px 3px 2px;min-width:32px;background:var(--card);transition:background .2s,border-color .2s}
+.sk i{font-style:normal;font-size:10px;font-weight:900;color:var(--text3);line-height:1.1}
+.sk .sti,.wcap .sti,.stkn .sti{mix-blend-mode:multiply}
+.sk .sti{height:24px;width:30px;object-fit:contain;opacity:.9}
+.sk.on{border-color:var(--primary);background:var(--primary-soft)}.sk.on i{color:var(--primary-text)}
+.sk.done{border-color:#bdeb9a;background:#f1fde6}
+.stkn{margin:6px 0 0;padding-left:22px;font-size:13px;line-height:1.6;font-weight:600}
+.wforms{display:flex;justify-content:center;gap:8px;margin:2px 0 4px}
+.wf{display:inline-flex;flex-direction:column;align-items:center;border:2px solid var(--line);border-bottom-width:4px;border-radius:12px;padding:2px 12px;background:var(--card);color:var(--text2);font:inherit;cursor:pointer}
+.wf .han{font-size:26px;color:var(--title);line-height:1.2}.wf b{font-size:20px;line-height:1.3}.wf small{font-size:10.5px;font-weight:800}
+.wf.on{border-color:var(--primary);background:var(--primary-soft)}.wf.ok{border-color:#bdeb9a}
+.wmeta{font-size:17px;font-weight:700;color:var(--title);text-align:center}.wmeta .say{padding:2px 8px;vertical-align:middle}
+.wintro .kf{text-align:left;margin:8px 0 2px}
+/* состав знака одной строкой: знак = ключ + фонетик */
+.kfs-wrap{margin-top:10px;text-align:left}
+.kfs-wrap>.lbl{display:block;text-align:center;font-size:11px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+.kf{border:2px solid var(--line);border-radius:14px;padding:7px 10px 8px;margin-top:6px;background:var(--card);font-weight:700}
+.kfh{display:flex;align-items:center;flex-wrap:wrap;gap:5px}
+.kfh>.han{font-size:34px;color:var(--title);line-height:1.1}
+.kfop{font-style:normal;font-weight:900;color:var(--text3);font-size:18px}
+.kft{display:inline-flex;flex-direction:column;align-items:center;min-width:52px;max-width:118px;padding:2px 7px 4px;border-radius:12px;border:2px solid var(--line);line-height:1.15;text-align:center}
+.kft .han{font-size:25px;color:var(--title);font-weight:400;line-height:1.2}
+.kft small{font-size:10.5px;font-weight:900;color:var(--text2)}
+.kft .kfs{font-weight:700;color:var(--text);font-size:11.5px}
+.kft.s,.kft.m{border-color:var(--primary-line);background:var(--primary-soft)}.kft.s small:first-of-type{color:var(--primary-text)}
+.kft.f{border-color:#b9e6fb;background:var(--blue-soft)}.kft.f small:first-of-type{color:var(--blue-lip)}
+.kft.x{border-style:dashed}
+.kfw{font-size:13px;font-weight:700;color:var(--text2);flex:1;min-width:150px}
+.kfm{margin-top:4px;font-size:14px;line-height:1.4}.kfm .tpill{vertical-align:1px;margin-right:2px}
+.kfk{margin-top:2px;font-size:12.5px;color:var(--text2);line-height:1.4}.kfk .han{font-size:16px;color:var(--title)}
 .introcard{text-align:center}
 .newtag{display:inline-block;color:var(--purple-lip);background:#f9efff;border-radius:10px;padding:3px 10px;font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
 .palla{font-size:13px;color:var(--text3);margin-top:2px}
@@ -627,7 +666,11 @@ const STROKE_NO = {j:1,f:2,l:3,s:4,i:6,k:7,d:8,E:9,g:10,h:11,u:12,y:13,c:14,e:15
 const STROKE_EXTRA = {Y:'лежачая с крюком (卧钩, как в 心)',t:'изогнутая с крюком (弯钩, как в 子)',v:'горизонтальная дважды ломаная (横折折 / 横折弯)',
   x:'вертикальная дважды ломаная (竖折撇 / 竖折折)',q:'горизонтальная трижды ломаная (横折折折)'};   // нет в таблице курса
 const STROKE_NAME = {}; STROKE_TABLE.forEach(([,rows])=>rows.forEach(([n,name])=>{ STROKE_NAME[n]=name; }));
-function strokesOf(ch){ const h=HZ.c[ch]; return h&&h[10] ? [...h[10]].map(c=>STROKE_NO[c]?{n:STROKE_NO[c],name:STROKE_NAME[STROKE_NO[c]]}:{n:0,name:STROKE_EXTRA[c]||'черта'}) : []; }
+// Прописи ключей (rad_write.json, tools/make_rad_strokes.py): RADW[№]=[[форма, коды черт]…] — формы, которые пишутся
+// в упрощённых знаках (основная первой, не больше двух); у форм-частей (亻 讠 氵…) порядок черт — отсюда
+const RADW = {"1":[["一","j"]],"2":[["丨","f"]],"3":[["丶","k"]],"4":[["丿","s"]],"5":[["乙","o"],["乚","u"]],"6":[["亅","g"]],"7":[["二","jj"]],"8":[["亠","kj"]],"9":[["人","sl"],["亻","sf"]],"10":[["儿","su"]],"11":[["入","sl"]],"12":[["八","sl"]],"13":[["冂","fr"]],"14":[["冖","dE"]],"15":[["冫","ki"]],"16":[["几","so"]],"17":[["凵","bf"]],"18":[["刀","rs"],["刂","fg"]],"19":[["力","rs"]],"20":[["勹","sr"]],"21":[["匕","su"]],"22":[["匚","jb"]],"23":[["匸","jb"]],"24":[["十","jf"]],"25":[["卜","fk"]],"26":[["卩","rf"]],"27":[["厂","js"]],"28":[["厶","nk"]],"29":[["又","el"]],"30":[["口","fcj"]],"31":[["囗","fcj"]],"32":[["土","jfj"]],"33":[["士","jfj"]],"34":[["夂","sel"]],"35":[["夊","sel"]],"36":[["夕","sek"]],"37":[["大","jsl"]],"38":[["女","msj"]],"39":[["子","egj"]],"40":[["宀","kdE"]],"41":[["寸","jgk"]],"42":[["小","gsk"],["⺌","fks"]],"43":[["尢","jsu"]],"44":[["尸","cjs"]],"45":[["屮","bfu"]],"46":[["山","fbf"]],"47":[["川","sff"]],"48":[["工","jfj"]],"49":[["己","cju"],["已","cju"]],"50":[["巾","frf"]],"51":[["干","jjf"]],"52":[["幺","nnk"]],"53":[["广","kjs"]],"54":[["廴","al"]],"55":[["廾","jsf"]],"56":[["弋","jyk"]],"57":[["弓","cjz"]],"58":[["彐","cjj"]],"59":[["彡","sss"]],"60":[["彳","ssf"]],"61":[["心","dYkk"],["忄","dkf"]],"62":[["戈","jysk"]],"63":[["户","kcjs"]],"64":[["手","sjjg"],["扌","jgi"]],"65":[["支","jfel"]],"66":[["攴","fjel"],["攵","sjsl"]],"67":[["文","kjsl"]],"68":[["斗","kkjf"]],"69":[["斤","ssjf"]],"70":[["方","kjrs"]],"71":[["无","jjsu"]],"72":[["日","fcjj"]],"73":[["曰","fcjj"]],"74":[["月","srjj"]],"75":[["木","jfsl"]],"76":[["欠","sEsl"]],"77":[["止","fjfj"]],"78":[["歹","jsek"]],"79":[["殳","svel"]],"80":[["毋","brsj"]],"81":[["比","jhsu"]],"82":[["毛","sjju"]],"83":[["氏","shjy"]],"84":[["气","sjjo"]],"85":[["水","gesl"],["氵","kki"]],"86":[["火","dssl"],["灬","dkkk"]],"87":[["爪","ssfl"],["爫","skks"]],"88":[["父","sksl"]],"89":[["爻","sksl"]],"90":[["丬","kif"]],"91":[["片","sfjc"]],"92":[["牙","jngs"]],"93":[["牛","sjjf"]],"94":[["犬","jslk"],["犭","sts"]],"95":[["玄","kjnnk"]],"96":[["玉","jjfjk"],["王","jjfj"]],"97":[["瓜","sshkl"]],"98":[["瓦","jhok"]],"99":[["甘","jffjj"]],"100":[["生","sjjfj"]],"101":[["用","srjjf"]],"102":[["田","fcjfj"]],"103":[["疋","Efjsl"]],"104":[["疒","kjski"]],"105":[["癶","ekssl"]],"106":[["白","sfcjj"]],"107":[["皮","Esfel"]],"108":[["皿","fcffj"]],"109":[["目","fcjjj"]],"110":[["矛","ekEgs"]],"111":[["矢","sjjsl"]],"112":[["石","jsfcj"]],"113":[["示","jjgsk"],["礻","kefk"]],"114":[["禸","frfik"]],"115":[["禾","sjfsl"]],"116":[["穴","kdEsl"]],"117":[["立","kjksj"]],"118":[["竹","sjfsjg"],["⺮","sjksjk"]],"119":[["米","ksjfsl"]],"120":[["糸","nnkgsk"],["纟","nni"]],"121":[["缶","sjjfbf"]],"122":[["网","frsksk"],["罒","fcffj"]],"123":[["羊","ksjjjf"]],"124":[["羽","rkirki"]],"125":[["老","jfjssu"],["耂","jfjs"]],"126":[["而","jsfrff"]],"127":[["耒","jjjfsl"]],"128":[["耳","jffjjj"]],"129":[["聿","cjjjjf"],["肀","cjjf"]],"130":[["肉","frsksk"],["⺼","srjj"]],"131":[["臣","jfcjfb"]],"132":[["自","sfcjjj"]],"133":[["至","jnkjfj"]],"134":[["臼","sfjcjj"]],"135":[["舌","sjffcj"]],"136":[["舛","sekjnf"]],"137":[["舟","ssrkjk"]],"138":[["艮","cjjhsl"]],"139":[["色","secfju"]],"140":[["艹","jff"]],"141":[["虍","fjEsju"]],"142":[["虫","fcjfjk"]],"143":[["血","sfcffj"]],"144":[["行","ssfjjg"]],"145":[["衣","kjshsl"],["衤","kefsk"]],"146":[["西","jfcsbj"],["覀","jfcffj"]],"147":[["见","fcsu"]],"148":[["角","sesrjjf"]],"149":[["言","kjjjfcj"],["讠","kp"]],"150":[["谷","skslfcj"]],"151":[["豆","jfcjksj"]],"152":[["豕","jstsssl"]],"153":[["豸","skkstss"]],"154":[["贝","fcsk"]],"155":[["赤","jfjsgsk"]],"156":[["走","jfjfjsl"]],"157":[["足","fcjfjsl"]],"158":[["身","sfrjjjs"]],"159":[["车","jnjf"]],"160":[["辛","kjksjjf"]],"161":[["辰","jsjjhsl"]],"162":[["辶","kal"]],"163":[["邑","fcjcfju"]],"164":[["酉","jfcsbjj"]],"165":[["釆","sksjfsl"]],"166":[["里","fcjjfjj"]],"167":[["金","sljjfksj"],["钅","sjjjh"]],"168":[["长","sjhl"]],"169":[["门","kfr"]],"170":[["阝","wf"]],"171":[["隶","cjjgkisl"]],"172":[["隹","sfkjjjfj"]],"173":[["雨","jfrfkkkk"]],"174":[["青","jjfjfrjj"]],"175":[["非","fjjjfjjj"]],"176":[["面","jsfcffjjj"]],"177":[["革","jffjfcjjf"]],"178":[["韦","jjrf"]],"179":[["韭","fjjjfjjjj"]],"180":[["音","kjksjfcjj"]],"181":[["页","jsfcsk"]],"182":[["风","sosk"]],"183":[["飞","osk"]],"184":[["食","slkcjjhsk"],["饣","seh"]],"185":[["首","ksjsfcjjj"]],"186":[["香","sjfslfcjj"]],"187":[["马","czj"]],"188":[["骨","fccdEfrjj"]],"189":[["高","kjfcjfrfcj"]],"190":[["髟","jfjjjnksss"]],"191":[["斗","kkjf"]],"192":[["鬯","skkkkkbfsu"]],"193":[["鬲","jfcjfrksjf"]],"194":[["鬼","sfcjjsunk"]],"195":[["鱼","sefcjfjj"]],"196":[["鸟","srkzj"]],"197":[["卤","fjfcskj"]],"198":[["鹿","kjscffjjhsu"]],"199":[["麦","jjfjsel"]],"200":[["麻","kjsjfskjfsl"]],"201":[["黄","jffjfcjfjsk"]],"202":[["黍","sjfskslgkisk"]],"203":[["黑","fcksjfjjdkkk"]],"204":[["黹","ffksjksfrfsk"]],"205":[["黾","fcjfcjju"]],"206":[["鼎","fcjjjxjsfjfc"]],"207":[["鼓","jfjfcjksijfel"]],"208":[["鼠","sfjcjjhkkhkkY"]],"209":[["鼻","sfcjjjfcjfjjsf"]],"210":[["齐","kjslsf"]],"211":[["齿","fjfjskbf"]],"212":[["龙","jsusk"]],"213":[["龟","sefcjju"]],"214":[["龠","sljfcjfcjfcjfrjff"]]};
+const FORM_CODES={}; Object.values(RADW).forEach(a=>a.forEach(([f,c])=>{ if(!FORM_CODES[f]) FORM_CODES[f]=c; }));
+function strokesOf(ch){ const h=HZ.c[ch], cs=(h&&h[10])||FORM_CODES[ch]; return cs ? [...cs].map(c=>STROKE_NO[c]?{n:STROKE_NO[c],name:STROKE_NAME[STROKE_NO[c]]}:{n:0,name:STROKE_EXTRA[c]||'черта'}) : []; }
 function strokeImg(n,h){ return n?`<img class="sti" src="strokes/${String(n).padStart(2,'0')}.png" alt="" style="height:${h||20}px">`:''; }
 // Палладий по таблице курса; слоги через пробел, эрхуа (nǎr) — с «р» на конце
 function palladius(p){
@@ -849,7 +892,7 @@ async function save(what){
   if(!what||what==='sentences') await Store.set('sentences',State.sets);
 }
 function D(day){ day=day||todayStr(); const m=State.meta.daily;
-  return m[day]||(m[day]={xp:0,t:0,ok:0,new:0,keys:0,dec:0,sent:0,mock:0,rv:0,ls:0}); }
+  return m[day]||(m[day]={xp:0,t:0,ok:0,new:0,keys:0,dec:0,sent:0,mock:0,rv:0,ls:0,wr:0}); }
 const SEM=()=>State.settings.semester;
 const groupL=()=>SEM().groupLesson;
 
@@ -860,7 +903,9 @@ const isRad = k => typeof k==='string' && k.startsWith('r:');
 const radNum = k => +k.slice(2);
 const isKC = k => typeof k==='string' && k.startsWith('key:');      // разбор иероглифа на ключи
 const kcChar = k => k.slice(4);
-const validKey = k => isRad(k) ? (radNum(k)>=1&&radNum(k)<=214) : isKC(k) ? !!(ET[kcChar(k)]||HZ.c[kcChar(k)]) : (k in BYK);
+const isWR = k => typeof k==='string' && k.startsWith('wr:');       // прописи: 'wr:<знак>' или 'wr:r:<№ ключа>'
+const wrOf = k => k.slice(3);
+const validKey = k => isWR(k) ? (isRad(wrOf(k)) ? !!RADW[radNum(wrOf(k))] : !!CHARS[wrOf(k)]) : isRad(k) ? (radNum(k)>=1&&radNum(k)<=214) : isKC(k) ? !!(ET[kcChar(k)]||HZ.c[kcChar(k)]) : (k in BYK);
 const cardOf = k => State.cards[k];
 const isNew = k => { const c=cardOf(k); return !c||!c.state; };
 const isDue = k => { const c=cardOf(k); return !!(c&&c.state&&c.due<=Date.now()); };
@@ -1184,7 +1229,7 @@ function semStats(){
   return {total:ws.length,learned,solid,know:ws.filter(k=>stab(k)>=7).length};
 }
 // Сколько минут займёт пункт плана (для подсказки)
-function planMinutes(id,n){ return Math.max(1,Math.round(({rev:.33,new:1.4,keys:1,dec:1,sent:1.4,mock:State.settings.mockMin||40}[id]||1)*(id==='mock'?1:n))); }
+function planMinutes(id,n){ return Math.max(1,Math.round(({rev:.33,new:1.4,keys:1,dec:1,wr:1.5,sent:1.4,mock:State.settings.mockMin||40}[id]||1)*(id==='mock'?1:n))); }
 // План дня (чеклист раздела 4)
 function dayPlan(){
   const d=D(), type=dayType(), due=dueKeys().length;
@@ -1197,12 +1242,14 @@ function dayPlan(){
     items.push({id:'mock',icon:'pencil',title:'Пробная контрольная',sub:'фокус-неделя: '+(focusExam(todayStr(),SEM()).e.title||'контрольная'),cur:d.mock,need:1,done:d.mock>=1,min:planMinutes('mock')});
   }else if(type!=='away'){
     items.push({id:'dec',icon:'split',title:'Разбор на ключи — 5',sub:'иероглифы выученных слов',cur:d.dec,need:5,done:d.dec>=5,min:planMinutes('dec',Math.max(0,5-d.dec))});
+    const wt=writeToday();
+    if(wt.quota&&wt.need) items.push({id:'wr',icon:'brush',title:'Прописи — '+wt.need,sub:wt.done>=wt.need?'на сегодня написано':'иероглифы выученных слов и ключи · осталось '+(wt.need-wt.done),cur:wt.done,need:wt.need,done:wt.done>=wt.need,min:planMinutes('wr',wt.need-wt.done)});
     items.push({id:'sent',icon:'chat',title:'Перевод предложений — 5',sub:'RU→中 и 中→RU',cur:d.sent,need:5,done:d.sent>=5,min:planMinutes('sent',Math.max(0,5-d.sent))});
     if(type==='holiday'||type==='consol') items.push({id:'mock',icon:'pencil',title:'Пробная контрольная',sub:'раз в 2–3 дня',cur:d.mock,need:1,done:d.mock>=1,opt:1,min:planMinutes('mock')});
   }
   // 3 ежедневных задания: повторения, новые слова (или предложения), ключи (или разбор / пробная в фокус-неделю)
   const pick=ids=>ids.map(id=>items.find(x=>x.id===id)).find(Boolean);
-  const quests=[pick(['rev']),pick(wq.quota>0?['new','sent','dec']:['sent','dec','new']),pick(type==='focus'?['mock','keys','dec']:['keys','dec','sent'])]
+  const quests=[pick(['rev']),pick(wq.quota>0?['new','sent','dec']:['sent','dec','new']),pick(type==='focus'?['mock','keys','dec']:['keys','wr','dec','sent'])]
     .filter((x,i,a)=>x&&a.indexOf(x)===i);
   quests.forEach(q=>q.quest=1);
   return {type,items,quests,minutes:items.filter(x=>!x.done&&!x.opt).reduce((a,x)=>a+x.min,0)};
@@ -1264,6 +1311,7 @@ const ACH=[
   {id:'w300',ic:'leaf',t:'300 слов',d:'выучено 300 слов',f:()=>wordsLearned()>=300},
   {id:'wall',ic:'tree',t:'Все слова',d:'все слова уроков 1–30',f:()=>semRemaining()===0},
   {id:'k214',ic:'部',t:'214 ключей',d:'введены все ключи',f:()=>keysDeckLeft()===0},
+  {id:'wr50',ic:'brush',t:'50 иероглифов',d:'50 иероглифов в прописях по памяти',f:()=>writeStats().chars>=50},
   {id:'crown5',ic:'crown',t:'5 корон',d:'юнит на 5 корон',f:()=>pathUnits().some(u=>unitCrowns(u)>=5)},
   {id:'s7',ic:'flame',t:'Серия 7',d:'7 дней подряд',f:()=>streakLen()>=7},
   {id:'s30',ic:'flame',t:'Серия 30',d:'30 дней подряд',f:()=>streakLen()>=30},
@@ -1450,7 +1498,7 @@ function charBox(ch,opts){
     ${ET[ch]?etymParts(ch):`<div><span class="lbl">Ключ:</span> <b class="han">${esc(form)}</b> — №${kx} <span class="han">${r[4][0]}</span> ${esc(r[2])}, ${esc(radName(kx))}${alt?` <span class="lbl">(в других словарях — №${alt} ${RADS[alt-1]?esc(RADS[alt-1][4][0]):''})</span>`:''}</div>
     <div><span class="lbl">Состав:</span> ${sostav}</div>
     ${type?`<div class="lbl">Тип: ${TYPES[type]}${type==='p'&&(sem||phon)?` — смысловая часть <b class="han">${esc(sem||'—')}</b>, звуковая <b class="han">${esc(phon||'—')}</b>`:''}</div>`:''}`}
-    ${(()=>{ const st=strokesOf(ch); return st.length?`<details class="strk"><summary>Порядок черт (${st.length}) — по таблице черт курса</summary><ol>${st.map(x=>`<li>${strokeImg(x.n,18)}${esc(x.name)}${x.n?` <span class="lbl">№${x.n}</span>`:' <span class="lbl">(нет в таблице)</span>'}</li>`).join('')}</ol></details>`:''; })()}
+    ${strokeStrip(ch,{names:opts&&opts.actions})}
     ${EVO.includes(ch)?`<div class="evo"><div class="lbl">Эволюция написания (таблица курса):</div><img src="evolution/${ch.codePointAt(0).toString(16)}.jpg" loading="lazy" alt="эволюция ${ch}"><div class="evocap"><span>Инь, гадат. надписи</span><span>Чжоу, бронза</span><span>сяо-чжуань</span><span>лишу</span><span>кайшу</span><span>цаошу</span><span>синшу</span><span>сокращ.</span></div></div>`:''}
     ${opts&&opts.actions?`<div class="actionrow" style="margin-top:6px"><button class="say" data-say="${ch}">${SPK()} Слушать</button><button class="say" data-draw="${ch}">${IC('brushW',18)} Прописи</button></div>`:''}
   </div>`;
@@ -1474,7 +1522,7 @@ $('#sheet').addEventListener('click',e=>{
 document.addEventListener('click',e=>{
   const h=e.target.closest('[data-c]'); if(h){ e.preventDefault(); e.stopPropagation(); openChar(h.dataset.c); return; }
   const sb=e.target.closest('[data-say]'); if(sb){ Speech.say(sb.dataset.say, sb.dataset.rate?+sb.dataset.rate:undefined, sb.dataset.py); return; }
-  const db=e.target.closest('[data-draw]'); if(db){ closeSheet(); go('draw',{chars:[db.dataset.draw], title:db.dataset.draw, back:State.route}); }
+  const db=e.target.closest('[data-draw]'); if(db){ closeSheet(); go('draw',{chars:[...db.dataset.draw], title:db.dataset.draw, back:State.route}); }
 },true);
 
 
@@ -1538,6 +1586,39 @@ function etymParts(ch,o){
     <div class="ds dkey">${keyLine(ch)}</div>
     <div class="dparts">${rows}</div>
     <div class="ds">${note?esc(note)+' · ':''}${disp?'<span class="disp">мнения расходятся</span> · ':''}<span class="lbl">${srcLine(ch)}</span></div>`;
+}
+// Состав знака одной строкой — всегда на виду (знакомство со словом, прописи): 谢 = 讠 ключ 149 «речь» + 射 фонетик shè
+function kfTile(p){
+  const [f,role,n,py,ru]=p, r=n?RADS[n-1]:null;
+  const lab=role==='s'?'ключ'+(n?' '+n:''):role==='f'?'фонетик':role==='m'?(r?'ключ '+n:'по смыслу'):role==='x'?'знак упрощения':'';
+  const sub=role==='f'?pinyinHTML(py||''):esc(r?r[3]:(ru||''));
+  return `<span class="kft ${role}"><b class="han">${esc(f)}</b><small>${esc(lab)}</small>${sub?`<small class="kfs">${sub}</small>`:''}</span>`;
+}
+function keyFormula(ch,o){
+  o=o||{}; const e=ET[ch], py=charPyIn(ch,o.w), ru=charRu(ch);
+  let body, t='';
+  if(e){ t=e[0]; const ps=e[1];
+    body=ps.length===1&&ps[0][1]==='w' ? `<span class="kfw">${roleText(ps[0],t)}</span>` : ps.map(kfTile).join('<i class="kfop">+</i>'); }
+  else{ const ip=idsParts(ch);
+    body=ip.length ? ip.map(f=>{ const i=RIDX[f]; return kfTile([f,i!=null?'s':'m',i!=null?RADS[i][0]:0,'',(HZ.p[f]||[])[1]||charRu(f)]); }).join('<i class="kfop">+</i>') : '<span class="kfw">на части не делится</span>'; }
+  return `<div class="kf"><div class="kfh"><span class="han hz" data-c="${ch}">${ch}</span><i class="kfop">=</i>${body}</div>
+    <div class="kfm">${t?`<span class="tpill ${t}">${ETYPE[t]}</span> `:''}<b>${pinyinHTML(py)}</b>${ru?' — '+esc(shortRu(ru)):''}</div>
+    ${o.nokey?'':`<div class="kfk">${keyLine(ch)}</div>`}</div>`;
+}
+// Короткое значение знака для подсказок (до ~32 знаков, по границе запятой/точки с запятой вне скобок)
+function shortRu(s){
+  s=s||''; const parts=[]; let d=0, cur='';
+  for(const c of s){ if(c==='(') d++; if(c===')') d=Math.max(0,d-1); if(!d&&(c===','||c===';')){ parts.push(cur.trim()); cur=''; } else cur+=c; }
+  if(cur.trim()) parts.push(cur.trim());
+  let out=''; for(const p of parts.filter(Boolean)){ if(out&&(out+', '+p).length>32) break; out=out?out+', '+p:p; }
+  return out||s;
+}
+// Порядок черт по таблице черт курса — полосой: номер и картинка черты; названия — списком (o.names)
+function strokeStrip(ch,o){
+  const st=strokesOf(ch); if(!st.length) return '';
+  o=o||{};
+  return `<div class="stk">${o.nolabel?'':`<div class="lbl">Порядок черт (${st.length}) — по таблице черт курса</div>`}<div class="stks">${st.map((x,i)=>`<span class="sk" title="${esc(x.name)}"><i>${i+1}</i>${x.n?strokeImg(x.n,26):'<b>·</b>'}</span>`).join('')}</div>
+    ${o.names?`<ol class="stkn">${st.map(x=>`<li>${esc(x.name)}${x.n?` <span class="lbl">№${x.n}</span>`:' <span class="lbl">(нет в таблице)</span>'}</li>`).join('')}</ol>`:''}</div>`;
 }
 // «Сообщить об ошибке разбора» — список хранится в meta.reports, виден в Повторении
 function reportDecomp(ch){
@@ -1644,7 +1725,10 @@ function buildUnits(){
   const U=[];
   KEY_UNITS.forEach((ns,i)=>{
     const id='K'+(i+1), items=ns.map(n=>'r:'+n), a=Math.round(i*214/11);
-    const nodes=chunk(items,7).map((c,j)=>({id:id+'n'+(j+1),type:'learn',icon:'部',title:'Ключи '+(a+j*7+1)+'–'+(a+j*7+c.length),items:c}));
+    const nodes=[];                   // 7 новых ключей → их пропись
+    chunk(items,7).forEach((c,j)=>{ const t=(a+j*7+1)+'–'+(a+j*7+c.length);
+      nodes.push({id:id+'n'+(j+1),type:'learn',icon:'部',title:'Ключи '+t,items:c});
+      nodes.push({id:id+'w'+(j+1),type:'write',alt:1,icon:'brushW',title:'Пропись ключей '+t,items:c.map(k=>'wr:'+k),after:id+'n'+(j+1)}); });
     nodes.push({id:id+'rev',type:'review',alt:1,icon:'cycle',title:'Повторение ключей',items});
     U.push({id,sec:'keys',title:'Ключи · юнит '+(i+1),sub:ns.slice(0,8).map(n=>RADS[n-1][4][0]).join(' '),items,nodes,color:UCOL[(i+1)%UCOL.length]});
   });
@@ -1652,7 +1736,12 @@ function buildUnits(){
     const id='L'+L, words=lessonKeys(L), main=words.filter(k=>!EXTRA_OF[k]), ext=words.filter(k=>EXTRA_OF[k]), nodes=[];
     chunk(main,7).forEach((c,j,a)=>nodes.push({id:id+'w'+(j+1),type:'learn',icon:'star',title:'Новые слова'+(a.length>1?' '+(j+1):''),items:c}));
     chunk(ext,7).forEach((c,j,a)=>nodes.push({id:id+'x'+(j+1),type:'learn',icon:'star',title:EXTRA_OF[c[0]].split(' · ')[0]+(a.length>1?' '+(j+1):''),items:c}));
-    chunk(LESSON_CHARS[L].map(c=>'key:'+c).filter(validKey),8).forEach((c,j,a)=>nodes.push({id:id+'c'+(j+1),type:'chars',alt:1,icon:'splitW',title:'Иероглифы: разбор'+(a.length>1?' '+(j+1):''),items:c}));
+    // иероглифы урока порциями по 8: разбор на ключи → пропись тех же знаков
+    const kc=chunk(LESSON_CHARS[L].map(c=>'key:'+c).filter(validKey),8), wc=chunk(LESSON_CHARS[L].map(c=>'wr:'+c).filter(validKey),8);
+    for(let j=0;j<Math.max(kc.length,wc.length);j++){
+      if(kc[j]) nodes.push({id:id+'c'+(j+1),type:'chars',alt:1,icon:'splitW',title:'Иероглифы: разбор'+(kc.length>1?' '+(j+1):''),items:kc[j]});
+      if(wc[j]) nodes.push({id:id+'p'+(j+1),type:'write',alt:1,icon:'brushW',title:'Иероглифы: пропись'+(wc.length>1?' '+(j+1):''),items:wc[j]});
+    }
     nodes.push({id:id+'h',type:'hear',alt:1,icon:'headphones',title:'Тоны на слух',L});
     if(lessonSents(L).length) nodes.push({id:id+'s',type:'sent',alt:1,icon:'chatW',title:'Предложения',L});
     nodes.push({id:id+'rev',type:'review',alt:1,icon:'cycle',title:'Повторение урока',items:words});
@@ -1670,11 +1759,11 @@ function crownsOf(keys){
 function unitCrowns(u){ return crownsOf(u.items); }
 const learnNodes=u=>u.nodes.filter(n=>n.type==='learn');
 function nodeDone(n){
-  if(n.type==='learn'||n.type==='chars') return n.items.length>0&&n.items.every(k=>!isNew(k));
+  if(n.type==='learn'||n.type==='chars'||n.type==='write') return n.items.length>0&&n.items.every(k=>!isNew(k));
   if(n.type==='test'){ const tp=State.tp[n.tid]; return !!(tp&&tp.final); }
   return !!State.meta.nodes[n.id];
 }
-function nodeCracked(n){ return (n.type==='learn'||n.type==='chars'||n.type==='review')&&nodeDone(n)&&n.items.some(isDue); }
+function nodeCracked(n){ return (n.type==='learn'||n.type==='chars'||n.type==='write'||n.type==='review')&&nodeDone(n)&&n.items.some(isDue); }
 function unitComplete(u){ return learnNodes(u).every(nodeDone); }
 function unitOpen(u,i,list){ return i===0||!!State.meta.jumps[u.id]||u.items.some(k=>!isNew(k))||unitComplete(list[i-1]); }
 function nodeState(u,n,open){
@@ -1685,6 +1774,7 @@ function nodeState(u,n,open){
   if(n.type==='learn'){ const j=ln.indexOf(n); return j===0||nodeDone(ln[j-1])||n.items.some(k=>!isNew(k))?'avail':'locked'; }
   if(n.type==='mini') return ln.every(nodeDone)?'avail':'locked';
   if(n.type==='test') return 'avail';
+  if(n.after){ const a=u.nodes.find(x=>x.id===n.after); return !a||nodeDone(a)||n.items.some(k=>!isNew(k))?'avail':'locked'; }   // пропись ключей — после их узла
   return !ln.length||nodeDone(ln[0])?'avail':'locked';
 }
 function examBosses(L){
@@ -1694,7 +1784,7 @@ function examBosses(L){
 
 // — запуск узла
 function openNode(u,n,st){
-  if(st==='locked'){ toast(n.type==='learn'?'Сначала пройди предыдущий узел — или «Перепрыгни»':'Откроется после первых слов юнита'); return; }
+  if(st==='locked'){ toast(n.type==='learn'?'Сначала пройди предыдущий узел — или «Перепрыгни»':n.after?'Откроется, когда выучишь эти ключи':'Откроется после первых слов юнита'); return; }
   const base={title:(u?u.title+' · ':'')+n.title,node:n.id};
   if(n.type==='learn'){
     const nw=n.items.filter(isNew), due=n.items.filter(isDue);
@@ -1703,6 +1793,10 @@ function openNode(u,n,st){
   }else if(n.type==='chars'){
     const nw=n.items.filter(isNew), due=n.items.filter(isDue);
     playStart((nw.length||due.length?due.concat(nw):shuffle(n.items)).slice(0,6),{...base,kind:'chars'});
+  }else if(n.type==='write'){
+    if(!canHW()){ toast('Прописи не загрузились — открой приложение с интернетом'); return; }
+    const nw=n.items.filter(isNew), due=n.items.filter(isDue);   // по 4 новых за раз: знакомство + обвести + по памяти
+    playStart(nw.length||due.length?due.slice(0,4).concat(nw.slice(0,4)):shuffle(n.items).slice(0,6),{...base,kind:'write'});
   }else if(n.type==='review'){
     const got=n.items.filter(k=>!isNew(k)); if(!got.length){ toast('Сначала выучи слова юнита'); return; }
     playStart(got.filter(isDue).concat(got.filter(k=>!isDue(k)).sort((a,b)=>stab(a)-stab(b))).slice(0,12),{...base,kind:'review'});
@@ -1729,6 +1823,7 @@ function startPart(id){
   else if(id==='new'){ const f=()=>newWordsToday().slice(0,5); if(!f().length){ toast('Квота новых слов выполнена'); return; } playStart(f(),{title:'Новые слова',kind:'learn',more:f}); }
   else if(id==='keys'){ const f=()=>newKeysToday().slice(0,5); if(!f().length){ toast('Ключи на сегодня введены'); return; } playStart(f(),{title:'Новые ключи',kind:'learn',more:f}); }
   else if(id==='dec') go('decomp');
+  else if(id==='wr') startWrite();
   else if(id==='sent') go('sent');
   else if(id==='mock') go('mock');
 }
@@ -1838,9 +1933,10 @@ function nodeGlyph(n,st){
 }
 function nodeDesc(n,st){
   const it=n.items||[], nw=it.filter(isNew).length, due=it.filter(isDue).length;
-  if(st==='locked') return n.type==='learn'?'Сначала пройди предыдущие узлы — или «Перепрыгни» тестом':'Откроется после первых слов юнита';
+  if(st==='locked') return n.type==='learn'?'Сначала пройди предыдущие узлы — или «Перепрыгни» тестом':n.after?'Откроется, когда выучишь эти ключи':'Откроется после первых слов юнита';
   if(n.type==='learn') return nw?`${nw} ${n.items[0]&&isRad(n.items[0])?plural(nw,'новый ключ','новых ключа','новых ключей'):plural(nw,'новое слово','новых слова','новых слов')}${due?' · повторить '+due:''}`:due?'Пора повторить: '+due:'Пройдено — можно потренироваться';
   if(n.type==='chars') return `Разбор ${it.length} ${plural(it.length,'иероглифа','иероглифов','иероглифов')}: тип, ключ, фонетик`;
+  if(n.type==='write'){ const kk=it[0]&&isRad(wrOf(it[0])); return (nw?`Пропись: ${nw} ${kk?plural(nw,'новый ключ','новых ключа','новых ключей'):plural(nw,'новый иероглиф','новых иероглифа','новых иероглифов')}`:due?'Пропись по памяти — к сроку: '+due:'Повторить пропись')+' · порядок черт, обвести, по памяти'; }
   if(n.type==='sent') return 'Перевод предложений урока RU→中 и 中→RU';
   if(n.type==='hear') return 'Слоги и слова урока в записи носителей: угадай тон';
   if(n.type==='review') return due?'К сроку: '+due:'Повторение всего юнита';
@@ -1854,7 +1950,7 @@ function nodePop(u,n,st,x){
   if(st!=='locked'&&u){ p.style.background=u.color[0]; p.style.setProperty('--lip',u.color[1]); p.style.setProperty('--npbg',u.color[0]); }
   p.style.setProperty('--ax',x+'px');
   p.innerHTML=`<b>${esc(n.title)}</b><small>${esc(nodeDesc(n,st))}</small>`;
-  if(st!=='locked'){ const b=el('button','popbtn',st==='done'?'Повторить':'Начать'+(n.type==='learn'||n.type==='chars'||n.type==='sent'||n.type==='review'?' · +'+XP.task+' XP':''));
+  if(st!=='locked'){ const b=el('button','popbtn',st==='done'?'Повторить':'Начать'+(n.type==='learn'||n.type==='chars'||n.type==='write'||n.type==='sent'||n.type==='review'?' · +'+XP.task+' XP':''));
     b.style.color=u?u.color[0]:'var(--primary-text)'; b.dataset.key='space'; b.onclick=()=>{ PATH_POP=null; openNode(u,n,st); }; p.appendChild(b); }
   return p;
 }
@@ -1932,7 +2028,7 @@ function pathEl(){
   «Уже знаю» — Easy. Досрочная практика без ошибок расписание не трогает.
 ==================================================================*/
 let PLAY=null;
-const FAST={choice:4000,produce:4500,listen:5000,keyname:4000,keyform:4000,keyvar:4000,tones:7000,pinyin:9000,assemble:12000,build:15000,pairs:20000};
+const FAST={wtrace:60000,wmem:30000,choice:4000,produce:4500,listen:5000,keyname:4000,keyform:4000,keyvar:4000,tones:7000,pinyin:9000,assemble:12000,build:15000,pairs:20000};
 const PUNCT=/[\s，。！？、；：,.!?;:“”"'‘’（）()…—·《》<>\-–]/;
 let WORDSET=null;
 function segment(zh){                                   // предложение → слова словаря (жадно, до 4 знаков)
@@ -1979,6 +2075,7 @@ function itemTasks(k,used,opts){
     return pickTypes(pool,1,used).map(t=>({t,k,n}));
   }
   if(isKC(k)) return [{t:'assemble',k,ch:kcChar(k)}];
+  if(isWR(k)) return wrTasks(k,used,opts);
   const w=BYK[k]; if(!w) return [];
   const ok=t=>wordOK(w,t);
   if(opts.test) return pickTypes(['choice','produce','tones'].filter(ok),1,used).map(t=>({t,k}));
@@ -2044,7 +2141,8 @@ function viewPlay(s){
   const stage=el('div',''); v.appendChild(stage); s.appendChild(v);
   const w=x.k&&BYK[x.k];
   ({intro:tIntro,choice:tChoice,produce:tProduce,listen:tListen,pinyin:tPinyin,tones:tTones,recall:tRecall,write:tWrite,build:tBuild,
-    pairs:tPairs,assemble:tAssemble,rintro:tRadIntro,keyname:tKeyName,keyform:tKeyForm,keyvar:tKeyVar,hear:tHear}[x.t]||tChoice)(stage,w||x,x);
+    pairs:tPairs,assemble:tAssemble,rintro:tRadIntro,keyname:tKeyName,keyform:tKeyForm,keyvar:tKeyVar,hear:tHear,
+    wintro:tWIntro,wtrace:tWTrace,wmem:tWMem}[x.t]||tChoice)(stage,w||x,x);
   footify(stage);
 }
 // Главная кнопка задания («Проверить», «Дальше», «Уже знаю/Дальше») — в нижнюю панель, как у Duolingo
@@ -2065,8 +2163,8 @@ function playAnswer(ok,info){
     if([3,5,10,15,20,30,40,50].includes(P.combo)) comboPop(P.combo); else Sfx.ok();
     if(x.sid&&!P.sents.has(x.sid)){ P.sents.add(x.sid); d.sent++; }
   }else{
-    P.combo=0; P.errors++; Sfx.bad(); buzz();      // ошибку — в конец урока; прописи не зацикливаем: повтор — выбор иероглифов
-    if(x.t!=='pairs'&&!P.opts.test){ P.queue.push(Object.assign({},x,{retry:1,t0:0,played:0},x.t==='write'?{t:'produce'}:{})); P.total++; P.undo.pushed=true; if(x.k) P.fails.add(x.k); if(x.sid) P.fails.add('sent:'+x.sid); }
+    P.combo=0; P.errors++; Sfx.bad(); buzz();      // ошибку — в конец урока; прописи не зацикливаем: повтор слова — выбор иероглифов, знака — обвести по контуру
+    if(x.t!=='pairs'&&!P.opts.test){ P.queue.push(Object.assign({},x,{retry:1,t0:0,played:0},x.t==='write'?{t:'produce'}:x.t==='wmem'?{t:'wtrace'}:{})); P.total++; P.undo.pushed=true; if(x.k) P.fails.add(x.k); if(x.sid) P.fails.add('sent:'+x.sid); }
   }
   const it=x.k&&!x.ungraded&&P.items[x.k];
   if(it){
@@ -2099,7 +2197,7 @@ function finishItem(k){
   const g = it.known?4 : it.fail?1 : it.hard?2 : (!wasNew&&!it.slow?4:3);
   State.cards[k]=FSRS.review(cardOf(k)||{},g,REQ);
   const d=D();
-  if(wasNew){ if(isRad(k)) d.keys++; else if(isKC(k)) d.dec++; else if(inSem(k)) d.new++; }
+  if(wasNew){ if(isRad(k)) d.keys++; else if(isKC(k)) d.dec++; else if(isWR(k)) d.wr=(d.wr||0)+1; else if(inSem(k)) d.new++; }
   else{ d.rv++; State.meta.rev[todayStr()]=(State.meta.rev[todayStr()]||0)+1; if(isKC(k)) d.dec++; }
   save('cards');
 }
@@ -2146,16 +2244,18 @@ function tIntro(stage,w){
   const c=el('div','qcard introcard');
   c.innerHTML=`<div class="newtag">${IC('sparkle',14)} Новое слово${EXTRA_OF[w.key]?' · '+esc(EXTRA_OF[w.key]):L?' · урок '+L:''}</div>${wordHead(w,80)}
     <div class="reveal" style="border:0;margin-top:4px;padding-top:4px"><div class="py">${pinyinHTML(w.p)}</div>${palladius(w.p)?`<div class="palla">${esc(palladius(w.p))}</div>`:''}<div class="tr">${esc(meaning(w))}</div>
+    ${wordFormulas(w)}
     ${w.ex?`<div class="han" style="font-size:17px;margin-top:10px;color:var(--title)">${wrapHz(w.ex[0])}</div><div class="en">${pinyinHTML(w.ex[1])}</div><div class="en">${esc(w.ex[2])}</div>`:''}
     <div class="actionrow" style="justify-content:center"><button class="say" ${sayA(w)}>${SPK()} Слово</button>${w.ex?`<button class="say" data-say="${esc(w.ex[0])}">${SPK()} Пример</button>`:''}</div></div>`;
   stage.appendChild(c);
-  const bk=el('details','strk'); bk.style.marginTop='10px'; bk.innerHTML=`<summary>Разбор по иероглифам и ключам</summary>${hanOf(w.s).filter(c=>HZ.c[c]).map(c=>decompHTML(c,{short:1,w})).join('')}`; stage.appendChild(bk);
   const row=el('div','actionrow');
   const kn=el('button','btn ghost','Уже знаю'); kn.onclick=()=>introKnown(w.key);
   const nx=el('button','btn','Дальше'); nx.dataset.key='space'; nx.onclick=playNext;
   row.appendChild(kn); row.appendChild(nx); stage.appendChild(row);
   Speech.has()&&sayW(w);
 }
+// состав каждого знака слова — сразу на виду (без «развернуть»): знак = ключ + фонетик / части, тип, ключ по пособию
+function wordFormulas(w){ const cs=uniq(hanOf(w.s)).filter(c=>ET[c]||HZ.c[c]); return cs.length?`<div class="kfs-wrap"><div class="lbl">Состав по ключам</div>${cs.map(c=>keyFormula(c,{w})).join('')}</div>`:''; }
 function introKnown(k){
   const P=PLAY, it=P.items[k];
   P.queue=P.queue.filter(t=>t.k!==k); P.total=Math.max(P.done,P.total-(it?it.left:0));
@@ -2461,6 +2561,198 @@ function tHear(stage,x,task){
 }
 
 /*==================================================================
+  ПРОПИСИ ИЕРОГЛИФОВ И КЛЮЧЕЙ — карточки FSRS 'wr:<знак>' и 'wr:r:<№ ключа>'.
+  Новое: знакомство (черта за чертой с названием по таблице черт курса + состав по ключам)
+  → обвести по контуру → позже в уроке — написать по памяти. Повторение — по памяти;
+  ошибка → в конце урока обвести ещё раз (оценка FSRS — «не помню»).
+  Ключ пишется в формах упрощённого письма (RADW: 人 и 亻, 言 и 讠…).
+==================================================================*/
+const canHW=()=>typeof HanziWriter!=='undefined';
+function wrForms(k){ const t=wrOf(k); return isRad(t)?RADW[radNum(t)].map(x=>x[0]):[t]; }
+// слово курса с этим знаком — для чтения знака и подсказки: выученное, не имя собственное, не из одного этого знака (谢谢),
+// короткое, раннего урока
+function wrWord(ch){
+  let best=null, bk=null;
+  const less=(a,b)=>{ for(let i=0;i<a.length;i++) if(a[i]!==b[i]) return a[i]<b[i]; return false; };
+  WORDS.forEach(w=>{ if(!WORD_L[w.key]||!w.s.includes(ch)) return;
+    const hz=hanOf(w.s), k=[isNew(w.key)?1:0,/^[А-ЯЁA-Z]/.test(meaning(w))?1:0,hz.length>1&&hz.every(c=>c===ch)?1:0,hz.length,WORD_L[w.key]];
+    if(!bk||less(k,bk)){ best=w; bk=k; } });
+  return best;
+}
+function wrInfo(k){
+  const t=wrOf(k), forms=wrForms(k);
+  if(isRad(t)){ const n=radNum(t), r=RADS[n-1];
+    return {forms,n,rad:1,head:'ключ №'+n,py:r[2],ru:r[3],say:forms[0],L:KEY_L[n]}; }
+  // чтение: как в словах курса из одного этого знака (还 huán / hái — оба), иначе — в слове-подсказке
+  const w=wrWord(t), one=uniq(WORDS.filter(x=>WORD_L[x.key]&&x.s===t).sort((a,b)=>WORD_L[a.key]-WORD_L[b.key]).map(x=>x.p));
+  const spy=one[0]||(w?charPyIn(t,w):charPy(t));
+  return {forms,ch:t,w,py:one.length>1?one.join(' / '):spy,spy,ru:shortRu(charRu(t)||(w&&hanOf(w.s).length===1?meaning(w):'')),say:t,L:CHAR_L[t]};
+}
+function wrSay(i){ if(Speech.has()) Speech.say(i.say,undefined,i.spy||i.py); }
+function wrTasks(k,used,opts){
+  if(!canHW()||opts.test) return [];
+  return isNew(k)?[{t:'wintro',k},{t:'wtrace',k},{t:'wmem',k}]:[{t:'wmem',k}];
+}
+function hwLoad(c){ return new Promise(ok=>hwData(c,ok,()=>ok(null))); }
+const wrSize=()=>Math.max(220,Math.min(290,(window.innerWidth||360)-70));
+function strokeCap(SN,j,N,named){
+  const x=SN[j];
+  if(!named||!x) return `<span class="wt">черта ${j+1} из ${N}</span>`;
+  return `<span class="wn">${j+1}<small>/${N}</small></span>${x.n?strokeImg(x.n,30):''}<span class="wt">${esc(x.name)}${x.n?` <small>№${x.n}</small>`:''}</span>`;
+}
+function stripHTML(f){ const SN=strokesOf(f); return `<div class="stks">${SN.map((x,i)=>`<span class="sk" data-j="${i}"><i>${i+1}</i>${x.n?strokeImg(x.n,26):'<b>·</b>'}</span>`).join('')}</div>`; }
+function markStrip(host,j,done){ host.querySelectorAll('.sk').forEach((e,i)=>{ e.classList.toggle('done',done?i<=j:i<j); e.classList.toggle('on',!done&&i===j); }); }
+
+// — анимация порядка черт: черта за чертой, подпись — название черты по таблице курса
+function strokeDemo(host,forms){
+  const size=wrSize();
+  host.innerHTML=`${forms.length>1?`<div class="wforms">${forms.map((f,i)=>`<button class="wf${i?'':' on'}" data-i="${i}"><span class="han">${esc(f)}</span><small>${i?'в составе знака':'основная'}</small></button>`).join('')}</div>`:''}
+    <div class="writer wpad" style="width:${size}px;height:${size}px"></div><div class="wcap"></div><div class="wstrip"></div>
+    <div class="actionrow" style="justify-content:center;margin-top:4px"><button class="say" data-replay>${IC('play',18)} Ещё раз</button></div>`;
+  const pad=host.querySelector('.wpad'), cap=host.querySelector('.wcap'), strip=host.querySelector('.wstrip');
+  let tok=0, cur=0;
+  async function run(i,chain){
+    const my=++tok; cur=i;
+    host.querySelectorAll('.wf').forEach((b,j)=>b.classList.toggle('on',j===i));
+    const f=forms[i], SN=strokesOf(f); pad.innerHTML=''; strip.innerHTML=stripHTML(f);
+    if(!canHW()){ cap.textContent='прописи недоступны'; return; }
+    const data=await hwLoad(f); if(my!==tok) return;
+    if(!data){ cap.textContent='нет данных о чертах для '+f+' (нужна сеть)'; return; }
+    const N=data.strokes.length, named=SN.length===N;
+    let hw; try{ hw=HanziWriter.create(pad,f,{width:size,height:size,padding:12,showCharacter:false,showOutline:true,
+      strokeColor:HWC.stroke,outlineColor:HWC.outline,highlightColor:HWC.hl,strokeAnimationSpeed:reducedMotion()?3:.9,delayBetweenStrokes:0,
+      charDataLoader:(x,ok)=>ok(data)}); }catch(e){ cap.textContent='прописи недоступны'; return; }
+    for(let j=0;j<N;j++){
+      if(my!==tok||!host.isConnected) return;
+      cap.innerHTML=strokeCap(SN,j,N,named); markStrip(strip,j);
+      try{ await hw.animateStroke(j); }catch(e){ return; }
+      await new Promise(r=>setTimeout(r,reducedMotion()?60:220));
+    }
+    if(my!==tok) return;
+    markStrip(strip,N-1,true); cap.innerHTML=`<span class="wt">${N} ${plural(N,'черта','черты','черт')} — теперь обведи сам</span>`;
+    if(chain&&i+1<forms.length) setTimeout(()=>{ if(my===tok&&host.isConnected) run(i+1,true); },900);
+  }
+  host.querySelectorAll('.wf').forEach(b=>b.onclick=()=>run(+b.dataset.i,false));
+  host.querySelector('[data-replay]').onclick=()=>run(cur,false);
+  run(0,true);
+}
+// — пропись: формы по очереди; 'trace' — по контуру, подсказка после 1 ошибки, названия черт видны;
+//   'mem' — без контура, подсказка после 3 ошибок, название черты — только после ошибки
+function writePad(host,forms,mode,onDone){
+  const size=wrSize(), trace=mode==='trace';
+  let idx=0, mist=0;
+  host.innerHTML=`<div class="wforms wprog"></div><div class="writer wpad" style="width:${size}px;height:${size}px"></div><div class="wcap"></div>${trace?'<div class="wstrip"></div>':''}`;
+  const pad=host.querySelector('.wpad'), cap=host.querySelector('.wcap'), strip=host.querySelector('.wstrip'), prog=host.querySelector('.wprog');
+  async function mount(){
+    const f=forms[idx], SN=strokesOf(f);
+    prog.innerHTML=forms.length>1?forms.map((x,i)=>`<span class="wf${i===idx?' on':''}${i<idx?' ok':''}">${trace||i<idx?`<span class="han">${esc(x)}</span>`:`<b>${i+1}</b>`}<small>${i?'в составе знака':'основная'}</small></span>`).join(''):'';
+    pad.innerHTML=''; if(strip) strip.innerHTML=stripHTML(f);
+    const data=await hwLoad(f); if(!host.isConnected) return;
+    if(!data){ cap.textContent='нет данных о чертах для '+f+' (нужна сеть)'; onDone(null); return; }
+    const N=data.strokes.length, named=SN.length===N;
+    cap.innerHTML=strokeCap(SN,0,N,trace&&named); if(strip) markStrip(strip,0);
+    try{
+      const hw=HanziWriter.create(pad,f,{width:size,height:size,padding:12,showCharacter:false,showOutline:trace,
+        strokeColor:HWC.stroke,outlineColor:HWC.outline,drawingColor:HWC.draw,highlightColor:HWC.hl,drawingWidth:6,charDataLoader:(x,ok)=>ok(data)});
+      hw.quiz({showHintAfterMisses:trace?1:3,highlightOnComplete:true,
+        onMistake:st=>{ mist++; const j=st.strokeNum; cap.innerHTML=strokeCap(SN,j,N,named)+'<span class="wbad">не так — ещё раз</span>'; },
+        onCorrectStroke:st=>{ const j=st.strokeNum+1; if(st.strokesRemaining>0){ cap.innerHTML=strokeCap(SN,j,N,trace&&named); if(strip) markStrip(strip,j); } },
+        onComplete:()=>{ if(strip) markStrip(strip,N-1,true); cap.innerHTML=`<span class="wt" style="color:var(--ok-text)">✓ ${N} ${plural(N,'черта','черты','черт')}</span>`;
+          idx++; if(idx<forms.length){ cap.innerHTML='<span class="wt">✓ теперь форма '+(idx+1)+'</span>'; setTimeout(()=>{ if(host.isConnected) mount(); },500); }
+          else onDone(mist); }});
+    }catch(e){ cap.textContent='прописи недоступны'; onDone(null); }
+  }
+  mount();
+}
+function wrRight(i){
+  return `<span class="han" style="font-size:30px">${i.forms.map(esc).join(' ')}</span> ${pinyinHTML(i.py)} — ${esc(i.ru)}${i.rad?' · '+esc(i.head):''}`;
+}
+function wrHead(i){ return i.rad?`Ключ №${i.n}`:'Иероглиф'+(i.L?' · урок '+i.L:''); }
+// задание: знакомство
+function tWIntro(stage,x,task){
+  const i=wrInfo(task.k);
+  const c=el('div','qcard introcard wintro'); c.style.minHeight='0';
+  c.innerHTML=`<div class="newtag">${IC('brush',14)} Пропись · ${esc(wrHead(i))}</div>
+    <div class="wmeta"><b>${pinyinHTML(i.py)}</b> — ${esc(i.ru)} <button class="say" aria-label="Слушать">${SPK(18)}</button></div>
+    ${i.rad?`<div class="note" style="margin:2px 0 0">${i.forms.length>1?'Две формы: основная и та, что пишется в составе иероглифов':'Так ключ пишется в иероглифах'}</div>`:''}
+    <div class="wdemo"></div>${i.rad?'':keyFormula(i.ch,{w:i.w})}`;
+  stage.appendChild(c);
+  c.querySelector('.wmeta .say').onclick=()=>wrSay(i);
+  strokeDemo(c.querySelector('.wdemo'),i.forms);
+  const row=el('div','actionrow');
+  const kn=el('button','btn ghost','Уже умею писать'); kn.onclick=()=>wrKnown(task.k);
+  const nx=el('button','btn','Обвести'); nx.dataset.key='space'; nx.onclick=playNext;
+  row.appendChild(kn); row.appendChild(nx); stage.appendChild(row);
+  wrSay(i);
+}
+// «Уже умею писать» — без обводки, но по памяти всё равно напишешь (оценка — по ней)
+function wrKnown(k){
+  const P=PLAY, it=P.items[k], n0=P.queue.length;
+  P.queue=P.queue.filter(t=>!(t.k===k&&t.t==='wtrace'));
+  const rm=n0-P.queue.length; if(it) it.left-=rm; P.total=Math.max(P.done,P.total-rm);
+  save('meta'); playNext();
+}
+function tWTrace(stage,x,task){
+  const i=wrInfo(task.k);
+  head(stage,task.retry?'Обведи ещё раз — по контуру':'Обведи по контуру');
+  const c=el('div','qcard'); c.style.minHeight='0'; c.style.padding='12px';
+  c.innerHTML=`<div class="wmeta"><b>${pinyinHTML(i.py)}</b> — ${esc(i.ru)}${i.rad?' · '+esc(i.head):''}</div><div class="wpadhost"></div>`;
+  stage.appendChild(c);
+  writePad(c.querySelector('.wpadhost'),i.forms,'trace',m=>{ if(m==null){ playAnswer(true,{noFB:true}); return; } wrSay(i);
+    playAnswer(true,{okHtml:m?'ошибок в чертах: '+m:'все черты верно'}); });
+}
+function tWMem(stage,x,task){
+  const i=wrInfo(task.k);
+  head(stage,i.rad?'Напиши ключ по памяти':'Напиши иероглиф по памяти');
+  const c=el('div','qcard'); c.style.minHeight='0'; c.style.padding='12px';
+  let hint='';
+  if(i.rad) hint=`<div class="qbig" style="font-size:19px">${esc(i.head)} «${esc(i.ru)}»</div><div class="qsub">${pinyinHTML(i.py)}${i.forms.length>1?' · '+i.forms.length+' формы: основная и в составе знака':''}</div>`;
+  else{ const w=i.w, multi=w&&hanOf(w.s).length>1;
+    hint=`<div class="qbig" style="font-size:22px">${pinyinHTML(i.py)} — «${esc(i.ru)}»</div>${multi&&hanOf(w.s).some(c=>c!==i.ch)?`<div class="qsub">в слове <span class="han" style="font-size:20px;color:var(--title)">${esc((w.d||w.s).split(i.ch).join('□'))}</span> ${pinyinHTML(w.p)} — ${esc(meaning(w))}</div>`:''}`; }
+  c.innerHTML=`${hint}<button class="say" style="margin-top:4px" aria-label="Слушать">${SPK(18)}</button><div class="wpadhost"></div>`;
+  stage.appendChild(c);
+  c.querySelector('.say').onclick=()=>wrSay(i);
+  if(!task.played){ task.played=1; setTimeout(()=>wrSay(i),250); }
+  const lim=3*i.forms.length, gu=el('button','linkbtn','Не помню — показать');
+  gu.onclick=()=>{ gu.remove(); playAnswer(false,{right:wrRight(i)+'<br><small>обведёшь по контуру в конце урока</small>'}); };
+  writePad(c.querySelector('.wpadhost'),i.forms,'mem',m=>{ gu.remove(); if(m==null){ playAnswer(true,{noFB:true}); return; } wrSay(i);
+    playAnswer(m<=lim,{hard:m>0,right:wrRight(i)+`<br><small>ошибок в чертах: ${m} — обведёшь ещё раз в конце урока</small>`,okHtml:m?'ошибок в чертах: '+m:'без единой ошибки'}); });
+  stage.appendChild(gu);
+}
+
+// — что писать: знаки выученных слов (по порядку уроков) и выученные ключи (2 знака : 1 ключ)
+function newWriteItems(n,kind){
+  const chars=kind==='keys'?[]:uniq(COURSE.filter(k=>!isNew(k)).flatMap(k=>hanOf(BYK[k].s))).sort((a,b)=>(CHAR_L[a]||99)-(CHAR_L[b]||99))
+    .map(c=>'wr:'+c).filter(k=>validKey(k)&&isNew(k));
+  const keys=kind==='chars'?[]:KEY_ORDER.filter(x=>!isNew('r:'+x)).map(x=>'wr:r:'+x).filter(isNew);
+  if(kind) return (kind==='keys'?keys:chars).slice(0,n);
+  const out=[]; let i=0, j=0;
+  while(out.length<n&&(i<chars.length||j<keys.length)){ if((out.length%3===2||i>=chars.length)&&j<keys.length) out.push(keys[j++]); else out.push(chars[i++]); }
+  return out;
+}
+// план дня: новых прописей 6 (фокус-неделя — 3, поездка — 0); повторения прописей — в общих «Повторениях»
+function writeQuota(){ const t=dayType(); return t==='away'?0:t==='focus'?3:6; }
+function writeToday(){ const q=writeQuota(), done=D().wr||0, avail=q?newWriteItems(q).length:0; return {quota:q,done,left:Math.max(0,q-done),avail,need:Math.min(q,done+avail)}; }
+function startWrite(kind){
+  if(!canHW()){ toast('Прописи не загрузились — открой приложение с интернетом'); return; }
+  const fil=k=>isWR(k)&&(kind==='keys'?isRad(wrOf(k)):kind==='chars'?!isRad(wrOf(k)):true);
+  const f=()=>{ const left=kind?4:Math.min(4,writeToday().left); return dueKeys(fil).slice(0,3).concat(newWriteItems(left,kind)); };
+  if(!f().length){ toast(kind==='keys'?'Сначала выучи ключи на Пути — потом пропишем':kind==='chars'?'Сначала выучи слова на Пути — потом пропишем их иероглифы':'Прописи на сегодня сделаны'); return; }
+  playStart(f(),{title:kind==='keys'?'Прописи ключей':kind==='chars'?'Прописи иероглифов':'Прописи',kind:'write',more:f});
+}
+// «Прописи урока» (экран урока): к сроку + по 4 новых знака урока; всё написано — по памяти вразброс
+function startLessonWrite(L){
+  if(!canHW()){ toast('Прописи не загрузились — открой приложение с интернетом'); return; }
+  const ks=LESSON_CHARS[L].map(c=>'wr:'+c).filter(validKey);
+  const f=()=>{ const nw=ks.filter(isNew), due=ks.filter(isDue); return nw.length||due.length?due.slice(0,4).concat(nw.slice(0,4)):[]; };
+  const q=f(); playStart(q.length?q:shuffle(ks).slice(0,6),{title:'Урок '+L+' · прописи',kind:'write',more:f});
+}
+function writeStats(){
+  const ks=Object.keys(State.cards).filter(k=>isWR(k)&&!isNew(k)), r=ks.filter(k=>isRad(wrOf(k)));
+  return {chars:ks.length-r.length,keys:r.length,solid:ks.filter(k=>stab(k)>=7).length,due:dueKeys(isWR).length};
+}
+
+/*==================================================================
   УРОКИ
 ==================================================================*/
 function viewLessons(s){
@@ -2513,7 +2805,7 @@ function viewLesson(s){
   act.appendChild(b1); act.appendChild(b2); v.appendChild(act);
   const act2=el('div','actionrow');
   const b0=el('button','btn mini ghost',IC('cards',18)+' Карточки'); b0.onclick=()=>startSession(poolQueue(keys),mode,'Урок '+L,()=>poolQueue(keys)); act2.appendChild(b0);
-  const b3=el('button','btn mini ghost','笔 Прописи урока'); b3.onclick=()=>go('draw',{chars:LESSON_CHARS[L].slice(),title:'Урок '+L+' · новые иероглифы',back:{name:'lesson',L}});
+  const b3=el('button','btn mini ghost','笔 Прописи урока'); b3.onclick=()=>startLessonWrite(L);
   const b4=el('button','btn mini ghost',SPK()+' Прослушать'); b4.onclick=()=>playAll(ws);
   act2.appendChild(b3); act2.appendChild(b4); v.appendChild(act2);
   lessonExtras(L).forEach(x=>{ const xb=el('button','item rowbtn','＋ '+esc(x.title)+' · '+x.words.length+' слов ›'); xb.style.marginTop='10px'; xb.onclick=()=>go('extra',{L,id:x.id}); v.appendChild(xb); });
@@ -2671,7 +2963,7 @@ function qIntro(stage,w){
   const c=el('div','qcard');
   c.innerHTML=`<div class="qprompt" style="color:var(--cinnabar-2)">${IC('sparkle',14)} Новое слово${EXTRA_OF[w.key]?' · '+esc(EXTRA_OF[w.key]):WORD_L[w.key]?' · урок '+WORD_L[w.key]:''}</div>
     <div class="qhz han" style="font-size:84px">${esc(w.d||w.s)}</div>
-    <div class="reveal" style="margin-top:10px"><div class="py">${pinyinHTML(w.p)}</div>${palladius(w.p)?`<div class="palla">${esc(palladius(w.p))}</div>`:''}<div class="tr">${esc(meaning(w))}</div>
+    <div class="reveal" style="margin-top:10px"><div class="py">${pinyinHTML(w.p)}</div>${palladius(w.p)?`<div class="palla">${esc(palladius(w.p))}</div>`:''}<div class="tr">${esc(meaning(w))}</div>${wordFormulas(w)}
     ${w.ex?`<div class="en han" style="font-size:16px;margin-top:8px">${wrapHz(w.ex[0])}</div><div class="en">${pinyinHTML(w.ex[1])}</div><div class="en">${esc(w.ex[2])}</div><button class="say" data-say="${esc(w.ex[0])}" style="margin-top:6px">${SPK()} Пример</button>`:''}</div>
 `;
   stage.appendChild(c);
@@ -2873,10 +3165,10 @@ function viewDraw(s){
   const back=el('button','back','‹ Назад'); back.onclick=()=>r.back?go(r.back.name,r.back):go(State.tab||'home'); v.appendChild(back);
   v.appendChild(el('h2','title','Прописи · '+esc(r.title||'')));
   if(!chars.length){ v.appendChild(el('p','note','Нет иероглифов для прописей.')); s.appendChild(v); return; }
-  const ch=chars[i], h=HZ.c[ch];
+  const ch=chars[i], h=HZ.c[ch], size=wrSize();
   const c=el('div','card'); c.style.padding='14px';
   const rr=RIDX[ch]!=null?RADS[RIDX[ch]]:null;
-  c.innerHTML=`<div class="bigpy">${h?pinyinHTML(h[7])+' · '+esc(h[6]||''):rr?pinyinHTML(rr[2])+' · ключ «'+esc(rr[3])+'»':''}</div><div id="writer"></div><div class="drawhint" id="drawHint"></div>
+  c.innerHTML=`<div class="bigpy">${h?pinyinHTML(charPy(ch))+' · '+esc(shortRu(charRu(ch))):rr?pinyinHTML(rr[2])+' · ключ №'+rr[0]+' «'+esc(rr[3])+'»':''}</div><div id="writer" style="width:${size}px;height:${size}px"></div><div class="wcap" id="drawHint"></div><div class="wstrip" id="drawStrip"></div>
     <div class="cardbtns"><button class="iconbtn" id="dAnim" aria-label="Анимация">${IC('play',22)}</button><button class="iconbtn" id="dRedo" aria-label="Заново">${IC('undo',22)}</button><button class="iconbtn" id="dOut" aria-label="Контур">${IC('eye',22)}</button><button class="iconbtn primary" data-say="${ch}" aria-label="Слушать">${SPK(26)}</button></div>`;
   v.appendChild(c);
   if(chars.length>1){
@@ -2888,7 +3180,7 @@ function viewDraw(s){
     chars.forEach((x,j)=>{ const b=el('button','han',x); if(j===i) b.style.borderColor='var(--cinnabar)'; b.onclick=()=>go('draw',{...r,i:j}); g.appendChild(b); });
     v.appendChild(g);
   }
-  v.appendChild(el('div','',breakdown(ch)));
+  v.appendChild(el('div','',ET[ch]?keyFormula(ch):'')); v.appendChild(el('div','',breakdown(ch)));
   if(typeof HanziWriter==='undefined') v.appendChild(el('p','note',IC('warn',16)+' Библиотека прописей не загрузилась (нужна сеть при первом запуске).'));
   s.appendChild(v);
   let outline=true;
@@ -2896,16 +3188,18 @@ function viewDraw(s){
     const host=$('#writer'), hint=$('#drawHint'); if(!host) return; host.innerHTML='';
     if(typeof HanziWriter==='undefined'){ hint.textContent='нет библиотеки прописей'; return; }
     try{
-      const hw=HanziWriter.create('writer',ch,{width:250,height:250,padding:10,showCharacter:false,showOutline:outline,
+      const hw=HanziWriter.create('writer',ch,{width:size,height:size,padding:12,showCharacter:false,showOutline:outline,
         strokeColor:HWC.stroke,outlineColor:HWC.outline,drawingColor:HWC.draw,highlightColor:HWC.hl,strokeAnimationSpeed:1.1,delayBetweenStrokes:120,
         charDataLoader:(x,ok)=>hwData(x,ok,()=>{ hint.textContent='нет данных о чертах для '+x+' (нужна сеть)'; })});
-      const SN=strokesOf(ch), sname=i=>SN[i]?(SN[i].name+(SN[i].n?' (№'+SN[i].n+')':'')):'';
-      hint.textContent=(outline?'Обведи по контуру. ':'По памяти. ')+(SN.length?'Черта 1: '+sname(0):'');
-      hw.quiz({showHintAfterMisses:3,
-        onMistake:st=>{ hint.textContent='Черта '+(st.strokeNum+1)+(SN.length?' — '+sname(st.strokeNum):'')+': ещё раз'; },
-        onCorrectStroke:st=>{ hint.textContent=st.strokesRemaining>0?'✓ черта '+(st.strokeNum+2)+(SN.length?': '+sname(st.strokeNum+1):'')+' · осталось '+st.strokesRemaining:'✓'; },
-        onComplete:sum=>{ hint.innerHTML='<span style="color:var(--ok)">Готово! ошибок: '+sum.totalMistakes+'</span>'; Speech.has()&&Speech.say(ch); }});
-      $('#dAnim').onclick=()=>hw.animateCharacter();
+      const SN=strokesOf(ch), N=SN.length, strip=$('#drawStrip');
+      strip.innerHTML=N?stripHTML(ch):'';
+      const capAt=j=>{ hint.innerHTML=N?strokeCap(SN,j,N,outline):''; if(N) markStrip(strip,j); };
+      capAt(0);
+      hw.quiz({showHintAfterMisses:outline?1:3,
+        onMistake:st=>{ hint.innerHTML=(N?strokeCap(SN,st.strokeNum,N,true):'')+'<span class="wbad">не так — ещё раз</span>'; },
+        onCorrectStroke:st=>{ if(st.strokesRemaining>0) capAt(st.strokeNum+1); },
+        onComplete:sum=>{ if(N) markStrip(strip,N-1,true); hint.innerHTML='<span class="wt" style="color:var(--ok-text)">Готово! ошибок в чертах: '+sum.totalMistakes+'</span>'; Speech.has()&&Speech.say(ch); }});
+      $('#dAnim').onclick=()=>{ hw.cancelQuiz&&hw.cancelQuiz(); hw.animateCharacter({onComplete:()=>setTimeout(mount,600)}); };
     }catch(e){ hint.textContent='ошибка: '+e.message; }
   };
   $('#dRedo').onclick=mount; $('#dOut').onclick=()=>{ outline=!outline; mount(); };
@@ -3205,7 +3499,8 @@ function viewRadical(s){
     ${r[4].length>1?`<div class="han" style="font-size:22px;color:var(--paper-dim);margin-bottom:6px">${esc([...r[4]].slice(1).join('  '))}</div>`:''}
     <div class="bigpy">${pinyinHTML(r[2])}</div><div class="bigtr">${esc(r[3])}</div>
     <div class="tagrow"><span class="pill">Ключ №${n}</span><span class="pill">${r[1]} ${plural(r[1],'черта','черты','черт')}</span>${KEY_L[n]?`<span class="pill k">урок ${KEY_L[n]}</span>`:''}<span class="pill">№${KEY_ORDER.indexOf(n)+1} в порядке изучения</span>${st!=='new'?'<span class="pill ok">в работе</span>':''}</div>
-    <div class="cardbtns"><button class="iconbtn primary" data-say="${esc(r[4][0])}" aria-label="Слушать">${SPK(26)}</button><button class="iconbtn" data-draw="${esc(r[4][0])}" aria-label="Прописи">${IC('brush',26)}</button></div>`;
+    <div class="cardbtns"><button class="iconbtn primary" data-say="${esc(r[4][0])}" aria-label="Слушать">${SPK(26)}</button><button class="iconbtn" data-draw="${esc((RADW[n]||[[r[4][0]]]).map(x=>x[0]).join(''))}" aria-label="Прописи">${IC('brush',26)}</button></div>
+    <div class="note" style="margin:8px 0 0">Пишется: <span class="han" style="font-size:22px;color:var(--title)">${(RADW[n]||[[r[4][0]]]).map(x=>esc(x[0])).join(' · ')}</span>${!isNew('wr:r:'+n)?' · <b style="color:var(--ok-text)">в прописях</b>':''}</div>`;
   v.appendChild(card);
   const p2=RAD2[n];
   if(p2){ const ex=p2.e&&HZ.c[p2.e]?`<span class="hz han" data-c="${p2.e}" style="font-size:20px">${esc(p2.e)}</span>`:`<span class="han" style="font-size:20px">${esc(p2.e||'')}</span>`;
@@ -3372,7 +3667,7 @@ function viewSettings(s){
   setRow(b7,'Сбросить прогресс','карточки, XP, серия, достижения, подготовка к проверочным (настройки и свои предложения остаются)',rb);
   v.appendChild(b7);
   const learned=Object.keys(State.cards).filter(k=>validKey(k)&&!isNew(k));
-  v.appendChild(el('p','note',`В работе: ${learned.filter(k=>BYK[k]).length} слов, ${learned.filter(isRad).length} ключей, ${learned.filter(isKC).length} разборов · всего повторений: ${Object.values(State.meta.rev||{}).reduce((a,b)=>a+b,0)}.<br>
+  v.appendChild(el('p','note',`В работе: ${learned.filter(k=>BYK[k]).length} слов, ${learned.filter(isRad).length} ключей, ${learned.filter(isKC).length} разборов, ${learned.filter(isWR).length} прописей · всего повторений: ${Object.values(State.meta.rev||{}).reduce((a,b)=>a+b,0)}.<br>
     Хранилище: ${Store.persistent()?'на устройстве (IndexedDB) — прогресс у каждого браузера свой':'в памяти (превью)'}.<br>
     Данные: Кондрашевский, том 1 (30 уроков, ${COURSE.length} слов, из них ${COURSE.filter(k=>EXTRA_OF[k]).length} — из списка группы и презентации) + HSK 1–6. Тип иероглифа и ключ — по «Пособию по иероглифике» А.Ф. Кондрашевского (ч. 1; 456 из 587 знаков уроков), строение и остальные знаки — 汉典 («Шовэнь») и Make Me a Hanzi; ключ Канси — Unihan, названия ключей — таблица ДВФУ. Озвучка — записи носителей из открытой базы audio-cmn (H. Lopez; слоги — Chen Wang, слова — Yue Tan; CC BY-SA). Интервалы — FSRS-5.<br>Версия приложения: <b>${APP_VER}</b>.`));
   s.appendChild(v);
@@ -3423,9 +3718,11 @@ function viewPractice(s){
   v.appendChild(el('h2','title','Повторение'));
   const due=dueKeys().length, tough=Object.keys(State.cards).filter(k=>validKey(k)&&(cardOf(k).lapses||0)>=3);
   const rows=[
-    ['cycleC','Повторить всё к сроку',due?due+' к сроку — слова, ключи, разборы':'к сроку ничего нет',()=>startPart('rev')],
+    ['cycleC','Повторить всё к сроку',due?due+' к сроку — слова, ключи, разборы, прописи':'к сроку ничего нет',()=>startPart('rev')],
     ['split','Разбор на ключи','как на контрольной: тип, ключ, фонетик, пиньинь, перевод',()=>go('decomp')],
     ['target','Разбери иероглиф (игра)','части, тип, фонетик, ключ',()=>{ const q=decompQueue(8); if(!q.length){ toast('Сначала выучи несколько слов'); return; } playStart(q,{title:'Разбери иероглиф',kind:'chars'}); }],
+    ['brush','Прописи иероглифов',(()=>{ const ws=writeStats(); return (ws.due?'к сроку '+ws.due+' · ':'')+'порядок черт, обвести, по памяти · написано '+ws.chars; })(),()=>startWrite('chars')],
+    ['brush','Прописи ключей','214 ключей в формах упрощённого письма (人 и 亻, 言 и 讠) · написано '+writeStats().keys,()=>startWrite('keys')],
     ['headphones','Тоны на слух','записи носителей: какой тон? слабые слоги — чаще',()=>startToneDrill()],
     ['chat','Перевод предложений','RU→中 и 中→RU, целиком или отрывками',()=>go('sent')],
     ['plus','Свои предложения',State.sets.length?State.sets.length+' '+plural(State.sets.length,'набор','набора','наборов'):'добавить от преподавателя',()=>go('addsent')],
@@ -3433,7 +3730,7 @@ function viewPractice(s){
     ['考','Проверочные','полный цикл подготовки по урокам',()=>go('tests')],
     ['cards','Карточки (классика)','самопроверка, 4 кнопки оценки',()=>go('cards')],
     ['部','Ключи-справочник','214 ключей: формы, названия, примеры',()=>go('keys')],
-    ['笔','Прописи','новые иероглифы урока группы',()=>go('draw',{chars:LESSON_CHARS[groupL()].slice(),title:'Урок '+groupL(),back:{name:'practice'}})],
+    ['笔','Свободные прописи','иероглифы урока группы — без оценки',()=>go('draw',{chars:LESSON_CHARS[groupL()].slice(),title:'Урок '+groupL(),back:{name:'practice'}})],
   ];
   if(tough.length) rows.push(['warn','Трудные слова',tough.length+' — 3 и больше ошибок',()=>playStart(shuffle(tough).slice(0,12),{title:'Трудные',kind:'review'})]);
   if(State.meta.reports.length) rows.push(['flag','Ошибки разбора',State.meta.reports.length+' — отправь список Claude',()=>go('reports')]);
@@ -3454,7 +3751,7 @@ function viewCards(s){
   MODES.forEach(([id,t])=>{ const c=el('button','chip'+(mode===id?' on':''),t); c.onclick=()=>go('cards',{mode:id}); mc.appendChild(c); });
   v.appendChild(mc);
   const N=groupL(), list=el('div','rowlist'); list.style.marginTop='10px';
-  const srcs=[['К сроку',()=>dueKeys().filter(k=>!isKC(k)),'повторения'],['Урок дня',()=>dailyQueue().filter(k=>!isKC(k)),'повторения + новые'],
+  const srcs=[['К сроку',()=>dueKeys().filter(k=>!isKC(k)&&!isWR(k)),'повторения'],['Урок дня',()=>dailyQueue().filter(k=>!isKC(k)&&!isWR(k)),'повторения + новые'],
     ['Урок группы '+N,()=>poolQueue(lessonKeys(N)),'слова урока'],['Уроки 1–'+N,()=>poolQueue(courseKeys(N)),'по порядку курса'],['Все 214 ключей',()=>poolQueue(KEY_ORDER.map(n=>'r:'+n)),'в порядке изучения']];
   srcs.forEach(([t,f,sub])=>{ const n=f().length; const r=el('button','row',`<div class="tt"><b>${esc(t)}</b><small>${esc(sub)}</small></div><span class="cnt">${Math.min(n,SESSION_CAP)}${n>SESSION_CAP?'+':''}</span>`);
     r.onclick=()=>startSession(f().slice(0,SESSION_CAP),mode,t,()=>f().slice(0,SESSION_CAP)); list.appendChild(r); });
@@ -3771,6 +4068,8 @@ function viewProgress(s){
   v.appendChild(el('div','legend',`<span style="--c:var(--line)">новые ${n0}</span><span style="--c:var(--blue)">учу ${lrn}</span><span style="--c:var(--ok)">знаю (≥7 дн.) ${s7}</span><span style="--c:var(--gold)">закреплено (≥21) ${s21}</span>`));
   const ks=KEY_ORDER.map(n=>'r:'+n), kk=ks.filter(k=>stab(k)>=7).length;
   v.appendChild(el('div','note',`Ключи: введено ${kl} из 214, прочно (≥7 дн.) ${kk}. Разобрано иероглифов на ключи: ${Object.keys(State.cards).filter(k=>isKC(k)&&!isNew(k)).length}.`));
+  const wst=writeStats();
+  v.appendChild(el('div','note',`Прописи: иероглифов ${wst.chars} из ${Object.keys(CHAR_L).length}, ключей ${wst.keys} из 214 · прочно (≥7 дн.) ${wst.solid}${wst.due?' · к сроку '+wst.due:''}.`));
   // готовность к контрольной
   const ne=nextExam();
   v.appendChild(el('p','eyebrow','Готовность к контрольной'));
@@ -3809,7 +4108,7 @@ const Splash={hide(){ const sp=document.getElementById('splash'); if(!sp) return
   setTimeout(()=>{ sp.classList.add('out'); const m=document.querySelector('meta[name=theme-color]'); if(m) m.content='#ffffff'; setTimeout(()=>sp.remove(),400); },wait); }};
 // Обновления: проверка при запуске, при каждом возвращении в приложение и раз в 30 мин; когда новая версия
 // встала, service worker сам перезагружает окно (место в уроке сохраняет Resume на pagehide).
-const APP_VER='v20';
+const APP_VER='v21';
 function registerSW(){
   if(!('serviceWorker' in navigator)) return;
   navigator.serviceWorker.register('./service-worker.js',{updateViaCache:'none'}).then(reg=>{

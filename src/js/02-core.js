@@ -129,7 +129,7 @@ async function save(what){
   if(!what||what==='sentences') await Store.set('sentences',State.sets);
 }
 function D(day){ day=day||todayStr(); const m=State.meta.daily;
-  return m[day]||(m[day]={xp:0,t:0,ok:0,new:0,keys:0,dec:0,sent:0,mock:0,rv:0,ls:0}); }
+  return m[day]||(m[day]={xp:0,t:0,ok:0,new:0,keys:0,dec:0,sent:0,mock:0,rv:0,ls:0,wr:0}); }
 const SEM=()=>State.settings.semester;
 const groupL=()=>SEM().groupLesson;
 
@@ -140,7 +140,9 @@ const isRad = k => typeof k==='string' && k.startsWith('r:');
 const radNum = k => +k.slice(2);
 const isKC = k => typeof k==='string' && k.startsWith('key:');      // разбор иероглифа на ключи
 const kcChar = k => k.slice(4);
-const validKey = k => isRad(k) ? (radNum(k)>=1&&radNum(k)<=214) : isKC(k) ? !!(ET[kcChar(k)]||HZ.c[kcChar(k)]) : (k in BYK);
+const isWR = k => typeof k==='string' && k.startsWith('wr:');       // прописи: 'wr:<знак>' или 'wr:r:<№ ключа>'
+const wrOf = k => k.slice(3);
+const validKey = k => isWR(k) ? (isRad(wrOf(k)) ? !!RADW[radNum(wrOf(k))] : !!CHARS[wrOf(k)]) : isRad(k) ? (radNum(k)>=1&&radNum(k)<=214) : isKC(k) ? !!(ET[kcChar(k)]||HZ.c[kcChar(k)]) : (k in BYK);
 const cardOf = k => State.cards[k];
 const isNew = k => { const c=cardOf(k); return !c||!c.state; };
 const isDue = k => { const c=cardOf(k); return !!(c&&c.state&&c.due<=Date.now()); };

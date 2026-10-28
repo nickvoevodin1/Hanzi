@@ -17,6 +17,10 @@ v19 (25.10.2026): ближе к Duolingo — палитра Duolingo (белый
 красный»), свои SVG-иконки вместо эмодзи (`02-icons.js`), маскот — красная панда «Чжу», путь с подсказкой узла и кольцом прогресса,
 кнопка задания внизу экрана; PWA — иконка на весь квадрат (без белых краёв), экран загрузки, продолжение с того же места после
 выгрузки из памяти; озвучка — записи носителей (тоны синтеза почти не слышны), тренажёр «Тоны на слух».
+v20: обновление установленного приложения применяется сразу (service worker, см. «Цикл работы»).
+v21 (28.10.2026): «состав по ключам сразу, не развёртывать» — формула «谢 = 讠 ключ 149 + 射 фонетик» всегда на виду
+(знакомство со словом, прописи; порядок черт в разборе — полосой, без <details>); «учить иероглифы и их написание, написание
+иероглифов и ключей» — прописи с FSRS (`32-write.js`, см. «Прописи» ниже).
 
 **Как работать с пользователем:** общение на русском. Делегирует технику полностью — нужен готовый
 проверенный результат, без лекций. Кратко и по делу. Никаких предположений: если факт не подтверждён —
@@ -32,15 +36,16 @@ v19 (25.10.2026): ближе к Duolingo — палитра Duolingo (белый
 index.html             ← СОБИРАЕТСЯ из src/, руками не править
 hanzi-data.json        ← графика черт 1828 иероглифов (офлайн-прописи)
 manifest.json  service-worker.js  icon-*.png  .nojekyll  make_audio.py  README.md (для пользователя)
+lib/hanzi-writer.min.js ← hanzi-writer 3.7.3 (MIT, lib/LICENSE-hanzi-writer.txt) — локально, чтобы прописи работали без сети
 icon-512/192/180/32.png, icon-maskable(-192).png ← маскот на оранжевом фоне НА ВЕСЬ КВАДРАТ (иначе лаунчер даёт белые края);
                          рисуются tools/make_icons.cjs (голова маскота из 04-game.js; Playwright + Chromium)
 fonts/                  ← Nunito 700/800/900 (OFL, @fontsource/nunito), локально — шрифт есть и без сети
 audio/s/<слог><тон>.mp3 ← слоги путунхуа (Chen Wang), audio/w/<коды знаков>.mp3 ← слова (Yue Tan); база audio-cmn, CC BY-SA,
                          см. audio/README.md; строит tools/make_audio_pack.py
 src/template.html      ← исходник интерфейса: HTML + CSS, на месте /*__JS__*/ — склеенные src/js/*.js
-src/js/NN-*.js         ← модули скрипта (порядок по имени): 01-data 02-core 03-semester 04-game 05-hanzi 20-router
-                         30-path 31-play 40-lessons 41-session 42-draw 43-tests 44-keys 45-dict 46-settings
-                         47-practice 48-progress 99-start
+src/js/NN-*.js         ← модули скрипта (порядок по имени): 01-data 02-core 02-icons 03-semester 04-game 05-hanzi
+                         20-router 21-resume 30-path 31-play 32-write 40-lessons 41-session 42-draw 43-tests 44-keys
+                         45-dict 46-settings 47-practice 48-progress 99-start
 src/data/app_data.json      → /*__DATA__*/    слова и иероглифы
 src/data/hanzi.json         → /*__HANZI__*/   разбор иероглифов (tools/make_hanzi.py)
 src/data/lessons.json       → /*__LESSONS__*/ уроки: порядок слов + блоки тренировки (tools/make_lessons.py)
@@ -52,6 +57,7 @@ src/data/kondr_chars.json   → /*__KCHARS__*/  все «видимые» клю
                                               order (порядок 214 ключей), py/ru 587 знаков
 src/data/etym.json          → /*__ETYM__*/    тип и разбор знака (tools/make_etym.py) — см. «Разбор иероглифа» ниже
 src/data/audio.json         → /*__AUDIO__*/   какие записи есть: s — слоги, w — слова (tools/make_audio_pack.py)
+src/data/rad_write.json     → /*__RADW__*/    RADW[№ключа]=[[форма, коды черт]…] — формы для прописей (tools/make_rad_strokes.py)
 src/data/etym_kondr.txt     ← ручной разбор 587 знаков уроков: тип, части с ролями, примечание (формат — в шапке файла)
 src/data/posobie.txt        ← выписка из «Пособия по иероглифике» Кондрашевского (уроки 1–30): урок, раздел A/Б, знак,
                               ключи (все словарные номера), тип, фонетики с чтениями. Сам PDF и сканы — НЕ в репо
@@ -69,7 +75,9 @@ src/data/master_dataset.json, components.json, kondrashevsky_data.py, lesson_tit
 tools/build.py  tools/make_hanzi.py  tools/make_lessons.py  tools/fix_words.py  tools/pinyin_util.py  tools/make_kchars.py
 tools/fetch_hanzi_sources.py  tools/fetch_strokes.py  tools/make_etym.py  tools/fetch_etym_sources.py  tools/legacy/
 tools/make_audio_pack.py  tools/pitch.py (высота голоса F0 и тон слога — проверка записей)
-tests/*.mjs            ← jsdom-тесты (env.mjs — общая обвязка; 7 наборов, accept.mjs — приёмка ТЗ §9, v19.mjs — озвучка/тоны/продолжение)
+tools/make_rad_strokes.py  ← формы ключей для прописей + их порядок черт и графика (см. «Прописи»)
+tests/*.mjs            ← jsdom-тесты (env.mjs — общая обвязка; 8 наборов, accept.mjs — приёмка ТЗ §9, v19.mjs — озвучка/тоны/продолжение,
+                         v21.mjs — состав сразу, прописи, формы ключей)
 materials/             ← слова по урокам (md). PDF ДВФУ и транскрипты НЕ в репо: он публичный
 related-apps/proverochnaya-urok18/ ← исходное отдельное приложение (архив, логика перенесена в 朱)
 ```
@@ -83,20 +91,22 @@ python3 tools/make_lessons.py # если менялись слова уроко�
 python3 tools/make_kchars.py <mmah dictionary.txt>  # «видимые» ключи (makemeahanzi dictionary.txt)
 python3 tools/make_etym.py    # если менялись etym_kondr.txt / posobie.txt (тип обязан совпасть с пособием — иначе ошибка)
 python3 tools/make_audio_pack.py <hsk> <syl>  # если менялись слова уроков: записи из audio-cmn (скачать 64k/hsk и 64k/syllabs)
+python3 tools/make_rad_strokes.py <hanzi-writer-data/package> <cnchar.order.min.js> <mmah dictionary.txt>  # формы ключей
 python3 tools/build.py      # src → index.html (+ node --check)
-npm test                    # 7 наборов: data, smoke, srs, migrate, cycle, accept, v19 — все ✅
+npm test                    # 8 наборов: data, smoke, srs, migrate, cycle, accept, v19, v21 — все ✅
 npm run serve               # http://localhost:8080
 ```
 После ЛЮБОГО изменения сайта — поднять `const CACHE='hanzi-vNN'` в `service-worker.js` и `APP_VER` в `99-start.js`
-(сейчас **v20**; версия видна внизу Настроек), иначе установленное приложение не обновится.
+(сейчас **v21**; версия видна внизу Настроек), иначе установленное приложение не обновится.
 Service worker (v20): страница — сначала из сети (условный запрос `no-cache`, без сети или >4 с — из кэша), остальное — из
 кэша; установка качает файлы мимо HTTP-кэша (`cache:'reload'`); при замене старой версии (`hanzi-*` кэши) SW сам
 перезагружает открытые окна (не внутри waitUntil — иначе взаимная блокировка); страница проверяет обновления при запуске,
 при возвращении в приложение и раз в 30 мин. До v20 обновление включалось только со второго полного запуска
 (жалоба «ничего не поменялось»). Проверено имитацией v19→v20→v21 и без сети (Playwright, свой сервер).
 В облачной песочнице есть Chromium: Playwright (глобальный, `NODE_PATH=$(npm root -g)`) с
-`executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'`; cdnjs заблокирован — hanzi-writer
-подставлять через `page.route` из npm-пакета hanzi-writer@3.7.3.
+`executablePath:'/opt/pw-browsers/chromium-1194/chrome-linux/chrome'`; hanzi-writer с v21 локальный (lib/), подменять не нужно.
+Пропись в браузере проверяется рисованием мышью по медианам из hanzi-data.json (точка = x·k+pad, высота−(124·k+pad)−y·k,
+k=(размер−2·pad)/1024).
 
 ## Архитектура (один файл, без фреймворков)
 - Навигация: Путь · Повторение · Словарь · Прогресс · Настройки. `go(name,params)` → `render()`; `TAB_OF` — вкладка экрана.
@@ -109,11 +119,12 @@ Service worker (v20): страница — сначала из сети (усл�
   у «Урока дня» восстанавливается dailyPortion). Экран загрузки `#splash` (статичная SVG головы маскота в шаблоне) — ≥0,9 с.
 - Хранилище: IndexedDB `hanzi-trainer` v1, ключи `cards`, `settings`, `meta`, `tests`, `sentences` (фоллбэк — память).
 - **Прогресс: `State.cards[ключ]`**: слово — `w.key` (= иероглифы `w.s`; у омографов «还:hái», «行:xíng»),
-  ключ (радикал) — `'r:N'`, разбор знака на ключи — `'key:<знак>'`. Не индексы! `BYK[key]` → слово, `BYS[s]` → первое слово.
+  ключ (радикал) — `'r:N'`, разбор знака на ключи — `'key:<знак>'`, пропись знака — `'wr:<знак>'`, пропись ключа — `'wr:r:N'`
+  (`isWR`, `wrOf`). Не индексы! `BYK[key]` → слово, `BYS[s]` → первое слово.
   Старые числовые ключи мигрируют в `loadState`; старые `lesson`/`goal` → `settings.semester`; theme и пр. отбрасываются.
 - Настройки: `semester` (см. ниже), `xpGoal` 30/50/80/120, `sound` (вкл), `vibrate` (выкл), `voiceRec` (живые записи, вкл),
   `mockMin` 40, `scale` [90,75,60], `newPerDay` (только без семестра), `voiceName`. Удержание `REQ`=0.90.
-- `State.meta`: `rev{дата:n}` (журнал повторений, старый), `daily{дата:{xp,t,ok,new,keys,dec,sent,mock,rv,ls,met,fz,more,q}}`,
+- `State.meta`: `rev{дата:n}` (журнал повторений, старый), `daily{дата:{xp,t,ok,new,keys,dec,sent,mock,rv,ls,wr,met,fz,more,q}}` (wr — новых прописей),
   `ach{id:дата}`, `nodes{узел:дата}`, `jumps{юнит:дата}`, `mocks[]`, `reports[]` (ошибки разбора), `sentErr{id:n}`,
   `fz{n,day,checked}` (заморозки), `chest{неделя:дата}`, `toneErr{слог:n}` (ошибки «Тонов на слух»). `D(дата)` — запись дня. `State.sets` — свои наборы предложений.
 - **Семестр** (`03-semester.js`): `settings.semester={on,endDate,targetLesson,groupLesson,holidays{from,to,capacity},
@@ -171,7 +182,22 @@ Service worker (v20): страница — сначала из сети (усл�
 - Даты: только `dstr()`/`todayStr()` (локальное время). `toISOString` для дней НЕ использовать.
 - Клавиатура (глобально, по `data-key`/`data-ch`; при открытой панели ответа — в ней): Пробел/Enter — показать/дальше,
   1–4 — варианты и оценки, ←/→ — «не помню»/«помню», Backspace — отменить (карточки).
-- Прописи: hanzi-writer 3.7.3 с cdnjs; графика из `hanzi-data.json` → `window.HZDATA`, иначе jsdelivr.
+- **Прописи** (`32-write.js`, v21): карточки FSRS `wr:<знак>` (знаки уроков) и `wr:r:N` (ключ — в формах упрощённого письма
+  `RADW[N]`: 人 и 亻, 言 и 讠, 水 и 氵; 見→见, 辵→辶; не больше двух форм). Новое: `wintro` (черта за чертой — `animateStroke`,
+  подпись — название черты по таблице курса, полоса черт; у знака — формула состава), `wtrace` (по контуру, подсказка после
+  1 ошибки, названия черт видны), позже — `wmem` (по памяти: пиньинь + значение + слово-подсказка с □; подсказка после 3 ошибок;
+  верно, если ошибок ≤3 на форму). Повторение — `wmem`; ошибка/«Не помню» → в конце урока `wtrace`, FSRS «не помню».
+  «Уже умею писать» убирает обводку, по памяти всё равно. На Пути: в юните урока узлы «Иероглифы: разбор» и «Иероглифы:
+  пропись» по 8 знаков чередуются; в юните ключей после каждых 7 ключей — «Пропись ключей» (открыт после их узла, `after`).
+  План дня — «Прописи — 6» (знаки выученных слов по урокам + выученные ключи, 2:1; `newWriteItems`, `writeToday`; в поездку
+  и фокус-неделю нет); повторения прописей — в общих «Повторениях»/«Уроке дня», в «Карточки (классика)» не идут.
+  Повторение: «Прописи иероглифов», «Прописи ключей», «Свободные прописи» (экран draw, без оценки).
+  Библиотека — lib/hanzi-writer.min.js (в CORE SW); графика — `hanzi-data.json` → `window.HZDATA` (1832 знака + 113 форм
+  ключей), иначе jsdelivr. Порядок черт `strokesOf(ch)` — HZ.c[ch][10], у форм ключей — `FORM_CODES` из RADW
+  (cnchar; где нет — по radStrokes знаков с этим ключом, большинством; 亅 丬 耂 ⺌ ⺍ — вручную по 了 将 老 当 学).
+- Состав знака одной строкой `keyFormula(ch,{w})` (05-hanzi.js): плитки частей (ключ №/фонетик с чтением/смысловая часть),
+  тип, пиньинь — значение, `keyLine`. В знакомстве со словом (`wordFormulas`) — сразу, без «развернуть».
+  `strokeStrip(ch,{names})` — порядок черт полосой (в шторке знака — и названия списком).
 - Материалы курса в интерфейсе: порядок черт с названиями по таблице 24 черт (`STROKE_TABLE`, коды `STROKE_NO`;
   e→E 横钩 и y→Y 卧钩 уточняются по геометрии черты в make_hanzi.py; 点/点2 = точка вправо/влево), экран «Черты»;
   Палладий `palladius(p)` на карточке/интро/разборе; эволюция письма в разборе 20 знаков (`EVO`); пособие Петросяна

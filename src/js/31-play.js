@@ -5,7 +5,7 @@
   «Уже знаю» — Easy. Досрочная практика без ошибок расписание не трогает.
 ==================================================================*/
 let PLAY=null;
-const FAST={choice:4000,produce:4500,listen:5000,keyname:4000,keyform:4000,keyvar:4000,tones:7000,pinyin:9000,assemble:12000,build:15000,pairs:20000};
+const FAST={wtrace:60000,wmem:30000,choice:4000,produce:4500,listen:5000,keyname:4000,keyform:4000,keyvar:4000,tones:7000,pinyin:9000,assemble:12000,build:15000,pairs:20000};
 const PUNCT=/[\s，。！？、；：,.!?;:“”"'‘’（）()…—·《》<>\-–]/;
 let WORDSET=null;
 function segment(zh){                                   // предложение → слова словаря (жадно, до 4 знаков)
@@ -52,6 +52,7 @@ function itemTasks(k,used,opts){
     return pickTypes(pool,1,used).map(t=>({t,k,n}));
   }
   if(isKC(k)) return [{t:'assemble',k,ch:kcChar(k)}];
+  if(isWR(k)) return wrTasks(k,used,opts);
   const w=BYK[k]; if(!w) return [];
   const ok=t=>wordOK(w,t);
   if(opts.test) return pickTypes(['choice','produce','tones'].filter(ok),1,used).map(t=>({t,k}));
@@ -117,7 +118,8 @@ function viewPlay(s){
   const stage=el('div',''); v.appendChild(stage); s.appendChild(v);
   const w=x.k&&BYK[x.k];
   ({intro:tIntro,choice:tChoice,produce:tProduce,listen:tListen,pinyin:tPinyin,tones:tTones,recall:tRecall,write:tWrite,build:tBuild,
-    pairs:tPairs,assemble:tAssemble,rintro:tRadIntro,keyname:tKeyName,keyform:tKeyForm,keyvar:tKeyVar,hear:tHear}[x.t]||tChoice)(stage,w||x,x);
+    pairs:tPairs,assemble:tAssemble,rintro:tRadIntro,keyname:tKeyName,keyform:tKeyForm,keyvar:tKeyVar,hear:tHear,
+    wintro:tWIntro,wtrace:tWTrace,wmem:tWMem}[x.t]||tChoice)(stage,w||x,x);
   footify(stage);
 }
 // Главная кнопка задания («Проверить», «Дальше», «Уже знаю/Дальше») — в нижнюю панель, как у Duolingo
@@ -138,8 +140,8 @@ function playAnswer(ok,info){
     if([3,5,10,15,20,30,40,50].includes(P.combo)) comboPop(P.combo); else Sfx.ok();
     if(x.sid&&!P.sents.has(x.sid)){ P.sents.add(x.sid); d.sent++; }
   }else{
-    P.combo=0; P.errors++; Sfx.bad(); buzz();      // ошибку — в конец урока; прописи не зацикливаем: повтор — выбор иероглифов
-    if(x.t!=='pairs'&&!P.opts.test){ P.queue.push(Object.assign({},x,{retry:1,t0:0,played:0},x.t==='write'?{t:'produce'}:{})); P.total++; P.undo.pushed=true; if(x.k) P.fails.add(x.k); if(x.sid) P.fails.add('sent:'+x.sid); }
+    P.combo=0; P.errors++; Sfx.bad(); buzz();      // ошибку — в конец урока; прописи не зацикливаем: повтор слова — выбор иероглифов, знака — обвести по контуру
+    if(x.t!=='pairs'&&!P.opts.test){ P.queue.push(Object.assign({},x,{retry:1,t0:0,played:0},x.t==='write'?{t:'produce'}:x.t==='wmem'?{t:'wtrace'}:{})); P.total++; P.undo.pushed=true; if(x.k) P.fails.add(x.k); if(x.sid) P.fails.add('sent:'+x.sid); }
   }
   const it=x.k&&!x.ungraded&&P.items[x.k];
   if(it){
@@ -172,7 +174,7 @@ function finishItem(k){
   const g = it.known?4 : it.fail?1 : it.hard?2 : (!wasNew&&!it.slow?4:3);
   State.cards[k]=FSRS.review(cardOf(k)||{},g,REQ);
   const d=D();
-  if(wasNew){ if(isRad(k)) d.keys++; else if(isKC(k)) d.dec++; else if(inSem(k)) d.new++; }
+  if(wasNew){ if(isRad(k)) d.keys++; else if(isKC(k)) d.dec++; else if(isWR(k)) d.wr=(d.wr||0)+1; else if(inSem(k)) d.new++; }
   else{ d.rv++; State.meta.rev[todayStr()]=(State.meta.rev[todayStr()]||0)+1; if(isKC(k)) d.dec++; }
   save('cards');
 }
@@ -219,16 +221,18 @@ function tIntro(stage,w){
   const c=el('div','qcard introcard');
   c.innerHTML=`<div class="newtag">${IC('sparkle',14)} Новое слово${EXTRA_OF[w.key]?' · '+esc(EXTRA_OF[w.key]):L?' · урок '+L:''}</div>${wordHead(w,80)}
     <div class="reveal" style="border:0;margin-top:4px;padding-top:4px"><div class="py">${pinyinHTML(w.p)}</div>${palladius(w.p)?`<div class="palla">${esc(palladius(w.p))}</div>`:''}<div class="tr">${esc(meaning(w))}</div>
+    ${wordFormulas(w)}
     ${w.ex?`<div class="han" style="font-size:17px;margin-top:10px;color:var(--title)">${wrapHz(w.ex[0])}</div><div class="en">${pinyinHTML(w.ex[1])}</div><div class="en">${esc(w.ex[2])}</div>`:''}
     <div class="actionrow" style="justify-content:center"><button class="say" ${sayA(w)}>${SPK()} Слово</button>${w.ex?`<button class="say" data-say="${esc(w.ex[0])}">${SPK()} Пример</button>`:''}</div></div>`;
   stage.appendChild(c);
-  const bk=el('details','strk'); bk.style.marginTop='10px'; bk.innerHTML=`<summary>Разбор по иероглифам и ключам</summary>${hanOf(w.s).filter(c=>HZ.c[c]).map(c=>decompHTML(c,{short:1,w})).join('')}`; stage.appendChild(bk);
   const row=el('div','actionrow');
   const kn=el('button','btn ghost','Уже знаю'); kn.onclick=()=>introKnown(w.key);
   const nx=el('button','btn','Дальше'); nx.dataset.key='space'; nx.onclick=playNext;
   row.appendChild(kn); row.appendChild(nx); stage.appendChild(row);
   Speech.has()&&sayW(w);
 }
+// состав каждого знака слова — сразу на виду (без «развернуть»): знак = ключ + фонетик / части, тип, ключ по пособию
+function wordFormulas(w){ const cs=uniq(hanOf(w.s)).filter(c=>ET[c]||HZ.c[c]); return cs.length?`<div class="kfs-wrap"><div class="lbl">Состав по ключам</div>${cs.map(c=>keyFormula(c,{w})).join('')}</div>`:''; }
 function introKnown(k){
   const P=PLAY, it=P.items[k];
   P.queue=P.queue.filter(t=>t.k!==k); P.total=Math.max(P.done,P.total-(it?it.left:0));

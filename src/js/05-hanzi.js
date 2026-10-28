@@ -36,7 +36,7 @@ function charBox(ch,opts){
     ${ET[ch]?etymParts(ch):`<div><span class="lbl">Ключ:</span> <b class="han">${esc(form)}</b> — №${kx} <span class="han">${r[4][0]}</span> ${esc(r[2])}, ${esc(radName(kx))}${alt?` <span class="lbl">(в других словарях — №${alt} ${RADS[alt-1]?esc(RADS[alt-1][4][0]):''})</span>`:''}</div>
     <div><span class="lbl">Состав:</span> ${sostav}</div>
     ${type?`<div class="lbl">Тип: ${TYPES[type]}${type==='p'&&(sem||phon)?` — смысловая часть <b class="han">${esc(sem||'—')}</b>, звуковая <b class="han">${esc(phon||'—')}</b>`:''}</div>`:''}`}
-    ${(()=>{ const st=strokesOf(ch); return st.length?`<details class="strk"><summary>Порядок черт (${st.length}) — по таблице черт курса</summary><ol>${st.map(x=>`<li>${strokeImg(x.n,18)}${esc(x.name)}${x.n?` <span class="lbl">№${x.n}</span>`:' <span class="lbl">(нет в таблице)</span>'}</li>`).join('')}</ol></details>`:''; })()}
+    ${strokeStrip(ch,{names:opts&&opts.actions})}
     ${EVO.includes(ch)?`<div class="evo"><div class="lbl">Эволюция написания (таблица курса):</div><img src="evolution/${ch.codePointAt(0).toString(16)}.jpg" loading="lazy" alt="эволюция ${ch}"><div class="evocap"><span>Инь, гадат. надписи</span><span>Чжоу, бронза</span><span>сяо-чжуань</span><span>лишу</span><span>кайшу</span><span>цаошу</span><span>синшу</span><span>сокращ.</span></div></div>`:''}
     ${opts&&opts.actions?`<div class="actionrow" style="margin-top:6px"><button class="say" data-say="${ch}">${SPK()} Слушать</button><button class="say" data-draw="${ch}">${IC('brushW',18)} Прописи</button></div>`:''}
   </div>`;
@@ -60,7 +60,7 @@ $('#sheet').addEventListener('click',e=>{
 document.addEventListener('click',e=>{
   const h=e.target.closest('[data-c]'); if(h){ e.preventDefault(); e.stopPropagation(); openChar(h.dataset.c); return; }
   const sb=e.target.closest('[data-say]'); if(sb){ Speech.say(sb.dataset.say, sb.dataset.rate?+sb.dataset.rate:undefined, sb.dataset.py); return; }
-  const db=e.target.closest('[data-draw]'); if(db){ closeSheet(); go('draw',{chars:[db.dataset.draw], title:db.dataset.draw, back:State.route}); }
+  const db=e.target.closest('[data-draw]'); if(db){ closeSheet(); go('draw',{chars:[...db.dataset.draw], title:db.dataset.draw, back:State.route}); }
 },true);
 
 
@@ -124,6 +124,39 @@ function etymParts(ch,o){
     <div class="ds dkey">${keyLine(ch)}</div>
     <div class="dparts">${rows}</div>
     <div class="ds">${note?esc(note)+' · ':''}${disp?'<span class="disp">мнения расходятся</span> · ':''}<span class="lbl">${srcLine(ch)}</span></div>`;
+}
+// Состав знака одной строкой — всегда на виду (знакомство со словом, прописи): 谢 = 讠 ключ 149 «речь» + 射 фонетик shè
+function kfTile(p){
+  const [f,role,n,py,ru]=p, r=n?RADS[n-1]:null;
+  const lab=role==='s'?'ключ'+(n?' '+n:''):role==='f'?'фонетик':role==='m'?(r?'ключ '+n:'по смыслу'):role==='x'?'знак упрощения':'';
+  const sub=role==='f'?pinyinHTML(py||''):esc(r?r[3]:(ru||''));
+  return `<span class="kft ${role}"><b class="han">${esc(f)}</b><small>${esc(lab)}</small>${sub?`<small class="kfs">${sub}</small>`:''}</span>`;
+}
+function keyFormula(ch,o){
+  o=o||{}; const e=ET[ch], py=charPyIn(ch,o.w), ru=charRu(ch);
+  let body, t='';
+  if(e){ t=e[0]; const ps=e[1];
+    body=ps.length===1&&ps[0][1]==='w' ? `<span class="kfw">${roleText(ps[0],t)}</span>` : ps.map(kfTile).join('<i class="kfop">+</i>'); }
+  else{ const ip=idsParts(ch);
+    body=ip.length ? ip.map(f=>{ const i=RIDX[f]; return kfTile([f,i!=null?'s':'m',i!=null?RADS[i][0]:0,'',(HZ.p[f]||[])[1]||charRu(f)]); }).join('<i class="kfop">+</i>') : '<span class="kfw">на части не делится</span>'; }
+  return `<div class="kf"><div class="kfh"><span class="han hz" data-c="${ch}">${ch}</span><i class="kfop">=</i>${body}</div>
+    <div class="kfm">${t?`<span class="tpill ${t}">${ETYPE[t]}</span> `:''}<b>${pinyinHTML(py)}</b>${ru?' — '+esc(shortRu(ru)):''}</div>
+    ${o.nokey?'':`<div class="kfk">${keyLine(ch)}</div>`}</div>`;
+}
+// Короткое значение знака для подсказок (до ~32 знаков, по границе запятой/точки с запятой вне скобок)
+function shortRu(s){
+  s=s||''; const parts=[]; let d=0, cur='';
+  for(const c of s){ if(c==='(') d++; if(c===')') d=Math.max(0,d-1); if(!d&&(c===','||c===';')){ parts.push(cur.trim()); cur=''; } else cur+=c; }
+  if(cur.trim()) parts.push(cur.trim());
+  let out=''; for(const p of parts.filter(Boolean)){ if(out&&(out+', '+p).length>32) break; out=out?out+', '+p:p; }
+  return out||s;
+}
+// Порядок черт по таблице черт курса — полосой: номер и картинка черты; названия — списком (o.names)
+function strokeStrip(ch,o){
+  const st=strokesOf(ch); if(!st.length) return '';
+  o=o||{};
+  return `<div class="stk">${o.nolabel?'':`<div class="lbl">Порядок черт (${st.length}) — по таблице черт курса</div>`}<div class="stks">${st.map((x,i)=>`<span class="sk" title="${esc(x.name)}"><i>${i+1}</i>${x.n?strokeImg(x.n,26):'<b>·</b>'}</span>`).join('')}</div>
+    ${o.names?`<ol class="stkn">${st.map(x=>`<li>${esc(x.name)}${x.n?` <span class="lbl">№${x.n}</span>`:' <span class="lbl">(нет в таблице)</span>'}</li>`).join('')}</ol>`:''}</div>`;
 }
 // «Сообщить об ошибке разбора» — список хранится в meta.reports, виден в Повторении
 function reportDecomp(ch){

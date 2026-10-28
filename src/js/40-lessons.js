@@ -51,7 +51,7 @@ function viewLesson(s){
   act.appendChild(b1); act.appendChild(b2); v.appendChild(act);
   const act2=el('div','actionrow');
   const b0=el('button','btn mini ghost',IC('cards',18)+' Карточки'); b0.onclick=()=>startSession(poolQueue(keys),mode,'Урок '+L,()=>poolQueue(keys)); act2.appendChild(b0);
-  const b3=el('button','btn mini ghost','笔 Прописи урока'); b3.onclick=()=>go('draw',{chars:LESSON_CHARS[L].slice(),title:'Урок '+L+' · новые иероглифы',back:{name:'lesson',L}});
+  const b3=el('button','btn mini ghost','笔 Прописи урока'); b3.onclick=()=>startLessonWrite(L);
   const b4=el('button','btn mini ghost',SPK()+' Прослушать'); b4.onclick=()=>playAll(ws);
   act2.appendChild(b3); act2.appendChild(b4); v.appendChild(act2);
   lessonExtras(L).forEach(x=>{ const xb=el('button','item rowbtn','＋ '+esc(x.title)+' · '+x.words.length+' слов ›'); xb.style.marginTop='10px'; xb.onclick=()=>go('extra',{L,id:x.id}); v.appendChild(xb); });

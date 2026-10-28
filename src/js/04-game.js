@@ -54,6 +54,7 @@ const ACH=[
   {id:'w300',ic:'leaf',t:'300 слов',d:'выучено 300 слов',f:()=>wordsLearned()>=300},
   {id:'wall',ic:'tree',t:'Все слова',d:'все слова уроков 1–30',f:()=>semRemaining()===0},
   {id:'k214',ic:'部',t:'214 ключей',d:'введены все ключи',f:()=>keysDeckLeft()===0},
+  {id:'wr50',ic:'brush',t:'50 иероглифов',d:'50 иероглифов в прописях по памяти',f:()=>writeStats().chars>=50},
   {id:'crown5',ic:'crown',t:'5 корон',d:'юнит на 5 корон',f:()=>pathUnits().some(u=>unitCrowns(u)>=5)},
   {id:'s7',ic:'flame',t:'Серия 7',d:'7 дней подряд',f:()=>streakLen()>=7},
   {id:'s30',ic:'flame',t:'Серия 30',d:'30 дней подряд',f:()=>streakLen()>=30},

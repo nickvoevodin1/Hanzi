@@ -8,7 +8,8 @@ export async function load(opts={}){
     w.speechSynthesis={getVoices:()=>[{name:'Ting-Ting',lang:'zh-CN'},{name:'Google 普通话',lang:'zh-CN'}],speak(){},cancel(){},onvoiceschanged:null,addEventListener(){}};
     w.SpeechSynthesisUtterance=function(){}; w.scrollTo=()=>{}; w.requestAnimationFrame=cb=>setTimeout(cb,0);
     w.__played=[]; w.HTMLMediaElement.prototype.play=function(){ w.__played.push(this.src); return Promise.resolve(); }; w.HTMLMediaElement.prototype.pause=function(){};
-    if(opts.writer) w.HanziWriter={create(id,ch,o){ const inst={quiz(q){ inst.q=q; w.__quiz=q; }, animateCharacter(){}}; return inst; }};
+    if(opts.writer) w.HanziWriter={create(id,ch,o){ const inst={ch,o,quiz(q){ inst.q=q; w.__quiz=q; }, animateCharacter(){}, cancelQuiz(){},
+      animateStroke(){ w.__anim=(w.__anim||0)+1; return Promise.resolve(); }, hideCharacter(){ return Promise.resolve(); }}; w.__hw=inst; return inst; }};
     if(opts.before) opts.before(w);
   }});
   const w=dom.window;

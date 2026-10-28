@@ -49,6 +49,8 @@ function viewProgress(s){
   v.appendChild(el('div','legend',`<span style="--c:var(--line)">новые ${n0}</span><span style="--c:var(--blue)">учу ${lrn}</span><span style="--c:var(--ok)">знаю (≥7 дн.) ${s7}</span><span style="--c:var(--gold)">закреплено (≥21) ${s21}</span>`));
   const ks=KEY_ORDER.map(n=>'r:'+n), kk=ks.filter(k=>stab(k)>=7).length;
   v.appendChild(el('div','note',`Ключи: введено ${kl} из 214, прочно (≥7 дн.) ${kk}. Разобрано иероглифов на ключи: ${Object.keys(State.cards).filter(k=>isKC(k)&&!isNew(k)).length}.`));
+  const wst=writeStats();
+  v.appendChild(el('div','note',`Прописи: иероглифов ${wst.chars} из ${Object.keys(CHAR_L).length}, ключей ${wst.keys} из 214 · прочно (≥7 дн.) ${wst.solid}${wst.due?' · к сроку '+wst.due:''}.`));
   // готовность к контрольной
   const ne=nextExam();
   v.appendChild(el('p','eyebrow','Готовность к контрольной'));

@@ -15,7 +15,10 @@ function buildUnits(){
   const U=[];
   KEY_UNITS.forEach((ns,i)=>{
     const id='K'+(i+1), items=ns.map(n=>'r:'+n), a=Math.round(i*214/11);
-    const nodes=chunk(items,7).map((c,j)=>({id:id+'n'+(j+1),type:'learn',icon:'部',title:'Ключи '+(a+j*7+1)+'–'+(a+j*7+c.length),items:c}));
+    const nodes=[];                   // 7 новых ключей → их пропись
+    chunk(items,7).forEach((c,j)=>{ const t=(a+j*7+1)+'–'+(a+j*7+c.length);
+      nodes.push({id:id+'n'+(j+1),type:'learn',icon:'部',title:'Ключи '+t,items:c});
+      nodes.push({id:id+'w'+(j+1),type:'write',alt:1,icon:'brushW',title:'Пропись ключей '+t,items:c.map(k=>'wr:'+k),after:id+'n'+(j+1)}); });
     nodes.push({id:id+'rev',type:'review',alt:1,icon:'cycle',title:'Повторение ключей',items});
     U.push({id,sec:'keys',title:'Ключи · юнит '+(i+1),sub:ns.slice(0,8).map(n=>RADS[n-1][4][0]).join(' '),items,nodes,color:UCOL[(i+1)%UCOL.length]});
   });
@@ -23,7 +26,12 @@ function buildUnits(){
     const id='L'+L, words=lessonKeys(L), main=words.filter(k=>!EXTRA_OF[k]), ext=words.filter(k=>EXTRA_OF[k]), nodes=[];
     chunk(main,7).forEach((c,j,a)=>nodes.push({id:id+'w'+(j+1),type:'learn',icon:'star',title:'Новые слова'+(a.length>1?' '+(j+1):''),items:c}));
     chunk(ext,7).forEach((c,j,a)=>nodes.push({id:id+'x'+(j+1),type:'learn',icon:'star',title:EXTRA_OF[c[0]].split(' · ')[0]+(a.length>1?' '+(j+1):''),items:c}));
-    chunk(LESSON_CHARS[L].map(c=>'key:'+c).filter(validKey),8).forEach((c,j,a)=>nodes.push({id:id+'c'+(j+1),type:'chars',alt:1,icon:'splitW',title:'Иероглифы: разбор'+(a.length>1?' '+(j+1):''),items:c}));
+    // иероглифы урока порциями по 8: разбор на ключи → пропись тех же знаков
+    const kc=chunk(LESSON_CHARS[L].map(c=>'key:'+c).filter(validKey),8), wc=chunk(LESSON_CHARS[L].map(c=>'wr:'+c).filter(validKey),8);
+    for(let j=0;j<Math.max(kc.length,wc.length);j++){
+      if(kc[j]) nodes.push({id:id+'c'+(j+1),type:'chars',alt:1,icon:'splitW',title:'Иероглифы: разбор'+(kc.length>1?' '+(j+1):''),items:kc[j]});
+      if(wc[j]) nodes.push({id:id+'p'+(j+1),type:'write',alt:1,icon:'brushW',title:'Иероглифы: пропись'+(wc.length>1?' '+(j+1):''),items:wc[j]});
+    }
     nodes.push({id:id+'h',type:'hear',alt:1,icon:'headphones',title:'Тоны на слух',L});
     if(lessonSents(L).length) nodes.push({id:id+'s',type:'sent',alt:1,icon:'chatW',title:'Предложения',L});
     nodes.push({id:id+'rev',type:'review',alt:1,icon:'cycle',title:'Повторение урока',items:words});
@@ -41,11 +49,11 @@ function crownsOf(keys){
 function unitCrowns(u){ return crownsOf(u.items); }
 const learnNodes=u=>u.nodes.filter(n=>n.type==='learn');
 function nodeDone(n){
-  if(n.type==='learn'||n.type==='chars') return n.items.length>0&&n.items.every(k=>!isNew(k));
+  if(n.type==='learn'||n.type==='chars'||n.type==='write') return n.items.length>0&&n.items.every(k=>!isNew(k));
   if(n.type==='test'){ const tp=State.tp[n.tid]; return !!(tp&&tp.final); }
   return !!State.meta.nodes[n.id];
 }
-function nodeCracked(n){ return (n.type==='learn'||n.type==='chars'||n.type==='review')&&nodeDone(n)&&n.items.some(isDue); }
+function nodeCracked(n){ return (n.type==='learn'||n.type==='chars'||n.type==='write'||n.type==='review')&&nodeDone(n)&&n.items.some(isDue); }
 function unitComplete(u){ return learnNodes(u).every(nodeDone); }
 function unitOpen(u,i,list){ return i===0||!!State.meta.jumps[u.id]||u.items.some(k=>!isNew(k))||unitComplete(list[i-1]); }
 function nodeState(u,n,open){
@@ -56,6 +64,7 @@ function nodeState(u,n,open){
   if(n.type==='learn'){ const j=ln.indexOf(n); return j===0||nodeDone(ln[j-1])||n.items.some(k=>!isNew(k))?'avail':'locked'; }
   if(n.type==='mini') return ln.every(nodeDone)?'avail':'locked';
   if(n.type==='test') return 'avail';
+  if(n.after){ const a=u.nodes.find(x=>x.id===n.after); return !a||nodeDone(a)||n.items.some(k=>!isNew(k))?'avail':'locked'; }   // пропись ключей — после их узла
   return !ln.length||nodeDone(ln[0])?'avail':'locked';
 }
 function examBosses(L){
@@ -65,7 +74,7 @@ function examBosses(L){
 
 // — запуск узла
 function openNode(u,n,st){
-  if(st==='locked'){ toast(n.type==='learn'?'Сначала пройди предыдущий узел — или «Перепрыгни»':'Откроется после первых слов юнита'); return; }
+  if(st==='locked'){ toast(n.type==='learn'?'Сначала пройди предыдущий узел — или «Перепрыгни»':n.after?'Откроется, когда выучишь эти ключи':'Откроется после первых слов юнита'); return; }
   const base={title:(u?u.title+' · ':'')+n.title,node:n.id};
   if(n.type==='learn'){
     const nw=n.items.filter(isNew), due=n.items.filter(isDue);
@@ -74,6 +83,10 @@ function openNode(u,n,st){
   }else if(n.type==='chars'){
     const nw=n.items.filter(isNew), due=n.items.filter(isDue);
     playStart((nw.length||due.length?due.concat(nw):shuffle(n.items)).slice(0,6),{...base,kind:'chars'});
+  }else if(n.type==='write'){
+    if(!canHW()){ toast('Прописи не загрузились — открой приложение с интернетом'); return; }
+    const nw=n.items.filter(isNew), due=n.items.filter(isDue);   // по 4 новых за раз: знакомство + обвести + по памяти
+    playStart(nw.length||due.length?due.slice(0,4).concat(nw.slice(0,4)):shuffle(n.items).slice(0,6),{...base,kind:'write'});
   }else if(n.type==='review'){
     const got=n.items.filter(k=>!isNew(k)); if(!got.length){ toast('Сначала выучи слова юнита'); return; }
     playStart(got.filter(isDue).concat(got.filter(k=>!isDue(k)).sort((a,b)=>stab(a)-stab(b))).slice(0,12),{...base,kind:'review'});
@@ -100,6 +113,7 @@ function startPart(id){
   else if(id==='new'){ const f=()=>newWordsToday().slice(0,5); if(!f().length){ toast('Квота новых слов выполнена'); return; } playStart(f(),{title:'Новые слова',kind:'learn',more:f}); }
   else if(id==='keys'){ const f=()=>newKeysToday().slice(0,5); if(!f().length){ toast('Ключи на сегодня введены'); return; } playStart(f(),{title:'Новые ключи',kind:'learn',more:f}); }
   else if(id==='dec') go('decomp');
+  else if(id==='wr') startWrite();
   else if(id==='sent') go('sent');
   else if(id==='mock') go('mock');
 }
@@ -209,9 +223,10 @@ function nodeGlyph(n,st){
 }
 function nodeDesc(n,st){
   const it=n.items||[], nw=it.filter(isNew).length, due=it.filter(isDue).length;
-  if(st==='locked') return n.type==='learn'?'Сначала пройди предыдущие узлы — или «Перепрыгни» тестом':'Откроется после первых слов юнита';
+  if(st==='locked') return n.type==='learn'?'Сначала пройди предыдущие узлы — или «Перепрыгни» тестом':n.after?'Откроется, когда выучишь эти ключи':'Откроется после первых слов юнита';
   if(n.type==='learn') return nw?`${nw} ${n.items[0]&&isRad(n.items[0])?plural(nw,'новый ключ','новых ключа','новых ключей'):plural(nw,'новое слово','новых слова','новых слов')}${due?' · повторить '+due:''}`:due?'Пора повторить: '+due:'Пройдено — можно потренироваться';
   if(n.type==='chars') return `Разбор ${it.length} ${plural(it.length,'иероглифа','иероглифов','иероглифов')}: тип, ключ, фонетик`;
+  if(n.type==='write'){ const kk=it[0]&&isRad(wrOf(it[0])); return (nw?`Пропись: ${nw} ${kk?plural(nw,'новый ключ','новых ключа','новых ключей'):plural(nw,'новый иероглиф','новых иероглифа','новых иероглифов')}`:due?'Пропись по памяти — к сроку: '+due:'Повторить пропись')+' · порядок черт, обвести, по памяти'; }
   if(n.type==='sent') return 'Перевод предложений урока RU→中 и 中→RU';
   if(n.type==='hear') return 'Слоги и слова урока в записи носителей: угадай тон';
   if(n.type==='review') return due?'К сроку: '+due:'Повторение всего юнита';
@@ -225,7 +240,7 @@ function nodePop(u,n,st,x){
   if(st!=='locked'&&u){ p.style.background=u.color[0]; p.style.setProperty('--lip',u.color[1]); p.style.setProperty('--npbg',u.color[0]); }
   p.style.setProperty('--ax',x+'px');
   p.innerHTML=`<b>${esc(n.title)}</b><small>${esc(nodeDesc(n,st))}</small>`;
-  if(st!=='locked'){ const b=el('button','popbtn',st==='done'?'Повторить':'Начать'+(n.type==='learn'||n.type==='chars'||n.type==='sent'||n.type==='review'?' · +'+XP.task+' XP':''));
+  if(st!=='locked'){ const b=el('button','popbtn',st==='done'?'Повторить':'Начать'+(n.type==='learn'||n.type==='chars'||n.type==='write'||n.type==='sent'||n.type==='review'?' · +'+XP.task+' XP':''));
     b.style.color=u?u.color[0]:'var(--primary-text)'; b.dataset.key='space'; b.onclick=()=>{ PATH_POP=null; openNode(u,n,st); }; p.appendChild(b); }
   return p;
 }

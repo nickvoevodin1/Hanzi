@@ -5,6 +5,7 @@
 Данные собираются отдельными скриптами (запускать при изменении исходников данных):
   tools/make_hanzi.py   -> src/data/hanzi.json   (разбор иероглифов)
   tools/make_lessons.py -> src/data/lessons.json (порядок слов и блоки тренировки по урокам)
+  tools/make_rad_strokes.py -> src/data/rad_write.json (формы ключей для прописей и их порядок черт)
   src/data/tests.json — настоящие проверочные/диктанты/контрольные (правится вручную)
 После каждой правки шаблона/данных:
   1) python3 tools/build.py
@@ -35,6 +36,7 @@ def main():
         "/*__KCHARS__*/": (DATA / "kondr_chars.json").read_text(encoding="utf-8"),
         "/*__ETYM__*/": (DATA / "etym.json").read_text(encoding="utf-8"),
         "/*__AUDIO__*/": (DATA / "audio.json").read_text(encoding="utf-8"),
+        "/*__RADW__*/": (DATA / "rad_write.json").read_text(encoding="utf-8"),
     }
     for ph, body in parts.items():
         if tpl.count(ph) != 1:
