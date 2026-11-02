@@ -79,7 +79,11 @@ function openNode(u,n,st){
   if(n.type==='learn'){
     const nw=n.items.filter(isNew), due=n.items.filter(isDue);
     const keys=u&&u.sec==='keys';
-    if(nw.length||due.length) playStart(keys?n.items.filter(k=>isNew(k)||isDue(k)):due.concat(nw),{...base,kind:'learn'});
+    if(nw.length||due.length){
+      const portion=keys?n.items.filter(k=>isNew(k)||isDue(k)):due.concat(nw);
+      const mixed=withLearnedReview(portion,{kind:keys?'keys':'words',lessonMax:u&&u.L});
+      playStart(mixed,{...base,title:base.title+(mixed.length>portion.length?' · повторение пройденного':''),kind:'learn'});
+    }
     else playStart((keys?n.items:shuffle(n.items)).slice(0,8),{...base,kind:'practice'});
   }else if(n.type==='chars'){
     const nw=n.items.filter(isNew), due=n.items.filter(isDue);
@@ -101,17 +105,16 @@ function openNode(u,n,st){
 }
 // — «Урок дня»: порции по 10–15 заданий (новое слово = знакомство + 2 задания, повторение = 1)
 function dailyPortion(){
-  const due=dueKeys(), nk=newKeysToday(), nw=newWordsToday();
-  const W=nw.slice(0,3), K=nk.slice(0,2); let cost=2*(W.length+K.length);
-  const R=due.slice(0,Math.max(0,12-cost)); cost+=R.length;
-  let i=3, j=2; while(cost<10&&(i<nw.length||j<nk.length)){ if(i<nw.length) W.push(nw[i++]); else K.push(nk[j++]); cost+=2; }
-  return R.slice(0,3).concat(K,W,R.slice(3));
+  const K=newKeysToday().slice(0,1), W=newWordsToday().slice(0,2), fresh=K.concat(W);
+  const R=dueKeys().slice(0,Math.max(0,12-3*fresh.length));
+  const base=R.slice(0,2).concat(fresh,R.slice(2));
+  return withLearnedReview(base,{limit:Math.max(0,2-R.length)});
 }
 function startDaily(){ const p=dailyPortion(); if(!p.length){ toast('На сегодня всё: повторения и новые сделаны'); return; } playStart(p,{title:'Урок дня',kind:'daily',more:dailyPortion}); }
 function startPart(id){
   if(id==='rev'){ const f=()=>dueKeys().slice(0,12); if(!f().length){ toast('Повторений к сроку нет'); return; } playStart(f(),{title:'Повторения',kind:'review',more:f}); }
-  else if(id==='new'){ const f=()=>newWordsToday().slice(0,5); if(!f().length){ toast('Квота новых слов выполнена'); return; } playStart(f(),{title:'Новые слова',kind:'learn',more:f}); }
-  else if(id==='keys'){ const f=()=>newKeysToday().slice(0,5); if(!f().length){ toast('Ключи на сегодня введены'); return; } playStart(f(),{title:'Новые ключи',kind:'learn',more:f}); }
+  else if(id==='new'){ const f=()=>withLearnedReview(newWordsToday().slice(0,3),{kind:'words'}); if(!f().length){ toast('Квота новых слов выполнена'); return; } playStart(f(),{title:'Новые слова + пройденное',kind:'learn',more:f}); }
+  else if(id==='keys'){ const f=()=>withLearnedReview(newKeysToday().slice(0,3),{kind:'keys'}); if(!f().length){ toast('Ключи на сегодня введены'); return; } playStart(f(),{title:'Новые ключи + пройденное',kind:'learn',more:f}); }
   else if(id==='dec') go('decomp');
   else if(id==='wr') startWrite();
   else if(id==='sent') go('sent');
@@ -160,7 +163,6 @@ function viewPath(s){
   [['pencil','Готовлюсь к диктанту','dictation'],['brush','Пишу на экране','write']].forEach(([ic,title,route])=>{
     const b=el('button','',IC(ic,22)+esc(title)); b.onclick=()=>route==='write'?startWrite():go(route); shortcuts.appendChild(b);
   }); v.appendChild(shortcuts);
-  if(SEM().on) v.appendChild(semCard());
   const extra=el('details','study-extra'); extra.style.marginTop='14px';
   extra.appendChild(el('summary','','Другие тренировки на сегодня')); extra.appendChild(planCard(plan)); v.appendChild(extra);
   const wk=weekInfo();
@@ -169,29 +171,6 @@ function viewPath(s){
   v.appendChild(pathEl());
   s.appendChild(v);
   checkQuests(); checkAch();
-}
-function semCard(){
-  const sem=SEM(), st=semStats(), wq=todayWordsQuota(), fc=forecast(), ne=nextExam(), dl=daysTo(sem.endDate), bg=behindGroup(), kl=keysDeckLeft();
-  const c=el('div','hero sem');
-  const pace=wq.capLeft>0?(Math.round(wq.pace*10)/10):0;
-  c.innerHTML=`<div class="kind">Семестр · уроки 1–${sem.targetLesson} · до ${fmtDate(sem.endDate)}</div>
-    <h2 style="margin-top:4px">Знакомо ${st.learned} из ${st.total} слов</h2>
-    <div class="bar"><i style="width:${st.total?st.learned/st.total*100:0}%"></i></div>
-    <div class="note" style="margin-top:6px">узнавание, стабильность ≥21 дня: <b style="color:var(--ok-text)">${st.solid}</b> · ключей введено: ${214-kl} из 214</div>
-    <div class="row2"><div class="cell"><b>${dl!=null&&dl>=0?dl:'—'}</b><span>${dl!=null&&dl>=0?plural(dl,'день','дня','дней')+' до конца':'дата не задана'}</span></div>
-      <div class="cell"><b>${wq.quota}</b><span>новых сегодня</span></div>
-      <div class="cell"><b>${pace?pace.toString().replace('.',','):'—'}</b><span>нужный темп, слов/день</span></div></div>
-    ${ne?`<div class="info">${IC('calendar',18)} ${esc(ne.title||'Контрольная')} — ${fmtDate(ne.date)} (${whenText(daysTo(ne.date))})${(ne.lessons||[]).length?', уроки '+esc(ne.lessons.join(', ')):''}</div>`:`<div class="note">Даты контрольных не заданы — добавь их в Настройках → Семестр.</div>`}
-    ${fc.date?`<div class="note">В текущем темпе (${(Math.round(fc.avg*10)/10).toString().replace('.',',')} слов/день за 2 недели) новые слова закончатся к ${fmtDate(fc.date)}${fc.date>sem.newWordsUntil?' — <b style="color:var(--bad-text)">позже плана ('+fmtDate(sem.newWordsUntil)+')</b>':''}.</div>`:''}
-    ${wq.late?`<div class="warn">${IC('warn',18)} Срок новых слов (${fmtDate(sem.newWordsUntil)}) прошёл, осталось ${wq.remaining}. Квота считается до ${fmtDate(sem.endDate)}.</div>`:''}
-    ${bg?`<div class="warn">Отстаёшь от группы на ${bg} ${plural(bg,'слово','слова','слов')} (уроки 1–${groupL()}) — они идут первыми.</div>`:''}`;
-  const row=el('div','actionrow');
-  const t=dayType();
-  if(t==='away'){ const b=el('button','btn ghost mini','Я сегодня дома'); b.onclick=()=>{ sem.awayDays=sem.awayDays.filter(x=>x!==todayStr()); save('settings'); render(); }; row.appendChild(b); }
-  else{ const b=el('button','btn ghost mini',IC('suitcase',18)+' Я сегодня уезжаю'); b.onclick=()=>{ sem.awayDays=uniq(sem.awayDays.concat([todayStr()])).sort(); save('settings'); toast('Отмечено: сегодня поездка — только повторения'); render(); }; row.appendChild(b); }
-  if((t==='away'||t==='holiday')&&semRemaining()){ const m=el('button','btn ghost mini',D().more?'✓ Учу больше':'Учить больше'); m.onclick=()=>{ D().more=D().more?0:1; save('meta'); render(); }; row.appendChild(m); }
-  c.appendChild(row);
-  return c;
 }
 function planCard(plan){
   const c=el('div','hero'); c.style.marginTop='12px';
@@ -258,9 +237,10 @@ function renderNodes(host,u,open,curId){
     const w=el('div','pnode '+st+(isCur?' cur':''));
     w.style.transform=`translateX(${x}px)`;
     if(st!=='locked'){ w.style.setProperty('--nc',u.color[0]); w.style.setProperty('--nl',u.color[1]); }
+    const face=el('div','nodeface');
     if(isCur){
       const it=n.items||[], f=it.length?it.filter(k=>!isNew(k)).length/it.length:0, R=44, C=2*Math.PI*R;
-      w.insertAdjacentHTML('beforeend',`<svg class="nring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="${R}" fill="none" stroke="#e5e5e5" stroke-width="9"/>
+      face.insertAdjacentHTML('beforeend',`<svg class="nring" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="${R}" fill="none" stroke="#e5e5e5" stroke-width="9"/>
         <circle cx="50" cy="50" r="${R}" fill="none" stroke="${u.color[0]}" stroke-width="9" stroke-linecap="round" stroke-dasharray="${(C*f).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 50 50)"/></svg>`);
       w.appendChild(el('div','startbubble','Начать'));
       w.insertAdjacentHTML('beforeend',`<div class="pmascot ${x>=0?'l':'r'}">${mascot('calm',86)}</div>`);
@@ -268,7 +248,7 @@ function renderNodes(host,u,open,curId){
     const b=el('button','disc',nodeGlyph(n,st));
     b.setAttribute('aria-label',n.title+(st==='locked'?' (закрыт)':st==='cracked'?' (пора повторить)':st==='done'?' (пройден)':''));
     b.onclick=e=>{ e.stopPropagation(); PATH_POP=PATH_POP===n.id?null:n.id; render(); };
-    w.appendChild(b);
+    face.appendChild(b); w.appendChild(face);
     if(st==='cracked') w.insertAdjacentHTML('beforeend',`<span class="nbadge" title="пора повторить">${IC('dumbbell',22)}</span>`);
     p.appendChild(w);
     if(PATH_POP===n.id) p.appendChild(nodePop(u,n,st,x));

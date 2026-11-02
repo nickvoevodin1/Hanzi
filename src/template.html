@@ -177,9 +177,10 @@ h2.title{margin:2px 0 4px;font-size:22px;font-weight:900;color:var(--title)}
 .pnode.boss{width:auto}
 .pnode.boss button.disc{width:92px;height:80px;border-radius:26px;background:var(--purple);box-shadow:0 8px 0 var(--purple-lip)}
 .pnode.boss.done button.disc{background:var(--gold);box-shadow:0 8px 0 var(--gold-lip)}
-/* текущий узел: кольцо прогресса строго вокруг «лица» узла (центр — в центре круга, кромка не сдвигает), «Начать» сверху */
+/* Кольцо центрируется по всему значку, включая нижнюю кромку 8 px. */
 .pnode.cur{margin-top:56px}
-.pnode .nring{position:absolute;z-index:1;width:100px;height:100px;left:0;top:-18px;pointer-events:none}
+.pnode .nodeface{position:relative;width:100px;height:72px;display:flex;justify-content:center;align-items:flex-start}
+.pnode .nring{position:absolute;z-index:1;width:100px;height:100px;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none}
 .startbubble{position:absolute;z-index:4;bottom:calc(100% + 26px);left:50%;transform:translateX(-50%);background:var(--card);border:2px solid var(--line);
   color:var(--nc);font-weight:900;font-size:14px;letter-spacing:.06em;text-transform:uppercase;padding:8px 14px;border-radius:12px;white-space:nowrap;
   animation:bob 1.6s ease-in-out infinite}

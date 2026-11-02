@@ -16,6 +16,9 @@ function viewProgress(s){
   const skills=el('div','hero');
   skills.innerHTML=`<h2>Знание проверяется тремя способами</h2><div class="study-summary"><div><b>${ms.words.threeDays}</b><small>слов · три дня практики</small></div><div><b>${ms.words.ready}</b><small>слов · все навыки ≥7 дней</small></div><div><b>${ms.keys.ready}</b><small>ключей · все навыки ≥7 дней</small></div></div><p class="note">Цель: ${total} слов уроков 1–${SEM().targetLesson} и 214 ключей. Закреплены все три навыка (стабильность ≥21 дня): ${ms.words.solid} слов и ${ms.keys.solid} ключей. Это оценка памяти, а не гарантия результата диктанта.</p><p class="study-tip">Знакомые слова в старых карточках сохранены. Тетрадь отдельно проверит, можешь ли ты написать их, прочитать с тонами и вспомнить значение.</p>`;
   const mb=el('button','btn ghost mini','Открыть тетрадь'); mb.onclick=()=>go('memory'); skills.appendChild(mb); v.appendChild(skills);
+  const nextCircle=memoryPlan(), circle=el('div','hero'); circle.style.marginTop='12px';
+  circle.innerHTML=`<div class="kind">Накопительное повторение</div><h2>${st.learned} знакомых слов и ${kl} ключей</h2><p class="note">После знакомства материал остаётся в повторении. В следующем круге: ${nextCircle.freshKeys.length} новых и ${nextCircle.dueKeys.length+nextCircle.maintenanceKeys.length} знакомых элементов. Ошибки и задания к сроку идут первыми; старые слова и ключи чередуются.</p><p class="note">Неизученное остаётся новым. Досрочный правильный ответ не увеличивает интервал; оценки письма, пиньиня и перевода считаются отдельно.</p>`;
+  const cb=el('button','btn ghost mini','Короткий круг'); cb.disabled=!nextCircle.keys.length; cb.onclick=()=>memoryStart(); circle.appendChild(cb); v.appendChild(circle);
   // тепловая карта: 20 недель, столбец — неделя (пн…вс)
   v.appendChild(el('p','eyebrow','Дни занятий'));
   const heat=el('div','heat'), t=todayStr(), g=State.settings.xpGoal;

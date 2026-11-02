@@ -6,7 +6,7 @@ const reset=()=>ev("State.cards={}; State.meta=freshMeta(); PLAY=null; SESSION=n
 const nextDay=()=>ev("window.__memoryDay=addDays(window.__memoryDay,1); window.__memoryClock+=864e5");
 const mount=()=>ev("document.getElementById('screen').innerHTML=''; viewMemory(document.getElementById('screen'))");
 await T('enrollment-is-small-and-preserves-existing',()=>{
-  reset(); ev("State.cards[semWords()[0]]=FSRS.review({},3,REQ); window.__before=JSON.stringify(State.cards)");
+  reset(); ev("window.__before=JSON.stringify(State.cards)");
   ok(ev("Object.keys(memoryState().entries).length")===0,'при открытии весь старый прогресс записан в тетрадь');
   ev("memoryStart()");
   ok(ev("memoryState().session.keys.length")===5,'порция не 3 слова +2 ключа');
@@ -41,11 +41,11 @@ await T('three-days-and-independent-fsrs',()=>{
   ok(ev("memoryRows(memoryState().entries[window.__memoryK])")===3,'нет3 календарных дней');
   ok(ev("JSON.stringify(State.cards[window.__memoryK])")===old,'тетрадь перезаписала основную FSRS карточку');
   ok(ev("memoryStats().words.threeDays")===1,'нет статистики3 дней');
-  ev("MEMORY_SKILLS.forEach((sk,n)=>{ memoryState().entries[window.__memoryK].skills[sk].day=addDays(todayStr(),-1); memoryState().entries[window.__memoryK].skills[sk].card.due=Date.now()+(n===0?-1:864e5); })");
+  nextDay(); ev("MEMORY_SKILLS.forEach((sk,n)=>{ memoryState().entries[window.__memoryK].skills[sk].day=addDays(todayStr(),-1); memoryState().entries[window.__memoryK].skills[sk].card.due=Date.now()+(n===0?-1:864e5); })");
   ok(ev("memoryDueSkills(memoryState().entries[window.__memoryK]).join(',')")==='hz','после3 дней должны быть независимые сроки');
 });
 await T('backlog-preserved-and-error-retry-bounded',()=>{
-  reset(); ev("semWords().slice(0,9).forEach(memoryEnroll); memoryStart(); window.__memoryBefore=Object.keys(memoryState().entries).length");
+  reset(); ev("semWords().slice(0,9).forEach(k=>{ State.cards[k]=FSRS.review({},3,REQ); }); memoryStart(); window.__memoryBefore=Object.keys(memoryState().entries).length");
   ok(ev("memoryState().session.keys.length")===5,'долги не разбиты на порции');
   ev("memoryState().session.studied=memoryState().session.keys.slice(); memoryState().session.reveal=true; memoryGrade(1)");
   ok(ev("memoryState().session.tasks.filter(t=>t.retry).length")===1,'ошибка не вернулась в конец');

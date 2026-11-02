@@ -140,7 +140,8 @@ function playAnswer(ok,info){
     if([3,5,10,15,20,30,40,50].includes(P.combo)) comboPop(P.combo); else Sfx.ok();
     if(x.sid&&!P.sents.has(x.sid)){ P.sents.add(x.sid); d.sent++; }
   }else{
-    P.combo=0; P.errors++; Sfx.bad(); buzz();      // ошибку — в конец урока; прописи не зацикливаем: повтор слова — выбор иероглифов, знака — обвести по контуру
+    P.combo=0; P.errors++; Sfx.bad(); buzz();
+    if(typeof recordGameMemoryFailure==='function') recordGameMemoryFailure(x);      // ошибку — в конец урока; прописи не зацикливаем: повтор слова — выбор иероглифов, знака — обвести по контуру
     if(x.t!=='pairs'&&!P.opts.test){ P.queue.push(Object.assign({},x,{retry:1,t0:0,played:0},x.t==='write'?{t:'produce'}:x.t==='wmem'?{t:'wtrace'}:{})); P.total++; P.undo.pushed=true; if(x.k) P.fails.add(x.k); if(x.sid) P.fails.add('sent:'+x.sid); }
   }
   const it=x.k&&!x.ungraded&&P.items[x.k];
@@ -170,6 +171,7 @@ function finishItem(k){
   const P=PLAY, it=P.items[k]; if(!it||it.graded) return; it.graded=1;
   if(P.opts.test) return;
   const wasNew=isNew(k), due=isDue(k);
+  if(!wasNew&&typeof markLearnedPractice==='function') markLearnedPractice(k);
   if(!(wasNew||due||it.fail)) return;
   // Speed and recognition are not evidence of effortless recall. Keep a conservative
   // Good interval; explicit self-ratings live in the classic cards screen.
@@ -177,7 +179,8 @@ function finishItem(k){
   State.cards[k]=FSRS.review(cardOf(k)||{},g,REQ);
   const d=D();
   if(wasNew){ if(isRad(k)) d.keys++; else if(isKC(k)) d.dec++; else if(isWR(k)) d.wr=(d.wr||0)+1; else if(inSem(k)) d.new++;
-    if((isRad(k)||inSem(k))&&typeof memoryEnroll==='function') memoryEnroll(k); }
+    if((isRad(k)||inSem(k))&&typeof memoryEnroll==='function') memoryEnroll(k,{fresh:true});
+    if(typeof markLearnedPractice==='function') markLearnedPractice(k); }
   else{ d.rv++; State.meta.rev[todayStr()]=(State.meta.rev[todayStr()]||0)+1; if(isKC(k)) d.dec++; }
   save('cards');
 }
