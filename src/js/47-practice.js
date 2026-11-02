@@ -43,6 +43,8 @@ function viewPractice(s){
   v.appendChild(el('h2','title','Повторение'));
   const due=dueKeys().length, tough=Object.keys(State.cards).filter(k=>validKey(k)&&(cardOf(k).lapses||0)>=3);
   const rows=[
+    ['brush','Тетрадь памяти','письмо, пиньинь и перевод · три дня и повторения',()=>go('memory')],
+    ['pencil','Подготовка к диктанту','уроки 18 и 19 · ключи 1–40 и 1–115 · свой набор',()=>go('dictation')],
     ['cycleC','Повторить всё к сроку',due?due+' к сроку — слова, ключи, разборы, прописи':'к сроку ничего нет',()=>startPart('rev')],
     ['split','Разбор на ключи','как на контрольной: тип, ключ, фонетик, пиньинь, перевод',()=>go('decomp')],
     ['target','Разбери иероглиф (игра)','части, тип, фонетик, ключ',()=>{ const q=decompQueue(8); if(!q.length){ toast('Сначала выучи несколько слов'); return; } playStart(q,{title:'Разбери иероглиф',kind:'chars'}); }],

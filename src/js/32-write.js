@@ -28,7 +28,7 @@ function wrInfo(k){
 }
 function wrSay(i){ if(Speech.has()) Speech.say(i.say,undefined,i.spy||i.py); }
 function wrTasks(k,used,opts){
-  if(!canHW()||opts.test) return [];
+  if(opts.test) return [];
   return isNew(k)?[{t:'wintro',k},{t:'wtrace',k},{t:'wmem',k}]:[{t:'wmem',k}];
 }
 function hwLoad(c){ return new Promise(ok=>hwData(c,ok,()=>ok(null))); }
@@ -78,11 +78,11 @@ function strokeDemo(host,forms){
 //   'mem' — без контура, подсказка после 3 ошибок, название черты — только после ошибки
 function writePad(host,forms,mode,onDone){
   const size=wrSize(), trace=mode==='trace';
-  let idx=0, mist=0;
+  let idx=0, mist=0, assisted=false;
   host.innerHTML=`<div class="wforms wprog"></div><div class="writer wpad" style="width:${size}px;height:${size}px"></div><div class="wcap"></div>${trace?'<div class="wstrip"></div>':''}`;
   const pad=host.querySelector('.wpad'), cap=host.querySelector('.wcap'), strip=host.querySelector('.wstrip'), prog=host.querySelector('.wprog');
   async function mount(){
-    const f=forms[idx], SN=strokesOf(f);
+    const f=forms[idx], SN=strokesOf(f), misses={};
     prog.innerHTML=forms.length>1?forms.map((x,i)=>`<span class="wf${i===idx?' on':''}${i<idx?' ok':''}">${trace||i<idx?`<span class="han">${esc(x)}</span>`:`<b>${i+1}</b>`}<small>${i?'в составе знака':'основная'}</small></span>`).join(''):'';
     pad.innerHTML=''; if(strip) strip.innerHTML=stripHTML(f);
     const data=await hwLoad(f); if(!host.isConnected) return;
@@ -93,11 +93,13 @@ function writePad(host,forms,mode,onDone){
       const hw=HanziWriter.create(pad,f,{width:size,height:size,padding:12,showCharacter:false,showOutline:trace,
         strokeColor:HWC.stroke,outlineColor:HWC.outline,drawingColor:HWC.draw,highlightColor:HWC.hl,drawingWidth:6,charDataLoader:(x,ok)=>ok(data)});
       hw.quiz({showHintAfterMisses:trace?1:3,highlightOnComplete:true,
-        onMistake:st=>{ mist++; const j=st.strokeNum; cap.innerHTML=strokeCap(SN,j,N,named)+'<span class="wbad">не так — ещё раз</span>'; },
+        onMistake:st=>{ mist++; const j=st.strokeNum;
+          misses[j]=(misses[j]||0)+1; if(!trace&&misses[j]>=3) assisted=true;
+          cap.innerHTML=strokeCap(SN,j,N,named)+'<span class="wbad">не так — ещё раз</span>'; },
         onCorrectStroke:st=>{ const j=st.strokeNum+1; if(st.strokesRemaining>0){ cap.innerHTML=strokeCap(SN,j,N,trace&&named); if(strip) markStrip(strip,j); } },
-        onComplete:()=>{ if(strip) markStrip(strip,N-1,true); cap.innerHTML=`<span class="wt" style="color:var(--ok-text)">✓ ${N} ${plural(N,'черта','черты','черт')}</span>`;
+        onComplete:()=>{ if(!host.isConnected) return; if(strip) markStrip(strip,N-1,true); cap.innerHTML=`<span class="wt" style="color:var(--ok-text)">✓ ${N} ${plural(N,'черта','черты','черт')}</span>`;
           idx++; if(idx<forms.length){ cap.innerHTML='<span class="wt">✓ теперь форма '+(idx+1)+'</span>'; setTimeout(()=>{ if(host.isConnected) mount(); },500); }
-          else onDone(mist); }});
+          else onDone(mist,{assisted}); }});
     }catch(e){ cap.textContent='прописи недоступны'; onDone(null); }
   }
   mount();
@@ -106,6 +108,20 @@ function wrRight(i){
   return `<span class="han" style="font-size:30px">${i.forms.map(esc).join(' ')}</span> ${pinyinHTML(i.py)} — ${esc(i.ru)}${i.rad?' · '+esc(i.head):''}`;
 }
 function wrHead(i){ return i.rad?`Ключ №${i.n}`:'Иероглиф'+(i.L?' · урок '+i.L:''); }
+// Missing graphics must never become a correct answer. Keep an explicit paper
+// alternative so an offline learner can still practice and rate actual recall.
+function wrPaperFallback(host,i,trace,onDone){
+  host.innerHTML=`<p class="note">Поле письма недоступно. Можно продолжить на бумаге.</p><p>${trace?'Перепиши по образцу:':'Напиши по памяти, затем открой образец для сверки.'}</p>`;
+  const reveal=()=>{
+    host.appendChild(el('div','reveal',wrRight(i)));
+    const row=el('div','actionrow');
+    const no=el('button','btn ghost','Не получилось'); no.onclick=()=>onDone(false);
+    const yes=el('button','btn',trace?'Переписал на бумаге':'Написал верно на бумаге'); yes.onclick=()=>onDone(true);
+    row.append(no,yes); host.appendChild(row);
+  };
+  if(trace) reveal();
+  else { const b=el('button','btn','Показать образец'); b.onclick=()=>{ b.remove(); reveal(); }; host.appendChild(b); }
+}
 // задание: знакомство
 function tWIntro(stage,x,task){
   const i=wrInfo(task.k);
@@ -136,7 +152,8 @@ function tWTrace(stage,x,task){
   const c=el('div','qcard'); c.style.minHeight='0'; c.style.padding='12px';
   c.innerHTML=`<div class="wmeta"><b>${pinyinHTML(i.py)}</b> — ${esc(i.ru)}${i.rad?' · '+esc(i.head):''}</div><div class="wpadhost"></div>`;
   stage.appendChild(c);
-  writePad(c.querySelector('.wpadhost'),i.forms,'trace',m=>{ if(m==null){ playAnswer(true,{noFB:true}); return; } wrSay(i);
+  const host=c.querySelector('.wpadhost');
+  writePad(host,i.forms,'trace',m=>{ if(m==null){ wrPaperFallback(host,i,true,ok=>playAnswer(ok,{noFB:true,hard:true})); return; } wrSay(i);
     playAnswer(true,{okHtml:m?'ошибок в чертах: '+m:'все черты верно'}); });
 }
 function tWMem(stage,x,task){
@@ -151,10 +168,11 @@ function tWMem(stage,x,task){
   stage.appendChild(c);
   c.querySelector('.say').onclick=()=>wrSay(i);
   if(!task.played){ task.played=1; setTimeout(()=>wrSay(i),250); }
-  const lim=3*i.forms.length, gu=el('button','linkbtn','Не помню — показать');
+  const gu=el('button','linkbtn','Не помню — показать');
   gu.onclick=()=>{ gu.remove(); playAnswer(false,{right:wrRight(i)+'<br><small>обведёшь по контуру в конце урока</small>'}); };
-  writePad(c.querySelector('.wpadhost'),i.forms,'mem',m=>{ gu.remove(); if(m==null){ playAnswer(true,{noFB:true}); return; } wrSay(i);
-    playAnswer(m<=lim,{hard:m>0,right:wrRight(i)+`<br><small>ошибок в чертах: ${m} — обведёшь ещё раз в конце урока</small>`,okHtml:m?'ошибок в чертах: '+m:'без единой ошибки'}); });
+  const host=c.querySelector('.wpadhost');
+  writePad(host,i.forms,'mem',(m,details)=>{ gu.remove(); if(m==null){ wrPaperFallback(host,i,false,ok=>playAnswer(ok,{noFB:true})); return; } wrSay(i);
+    playAnswer(!details.assisted,{hard:m>0,right:wrRight(i)+`<br><small>Была подсказка. Ошибок в чертах: ${m} — обведёшь ещё раз в конце урока</small>`,okHtml:m?'ошибок в чертах: '+m:'без единой ошибки'}); });
   stage.appendChild(gu);
 }
 
@@ -172,7 +190,6 @@ function newWriteItems(n,kind){
 function writeQuota(){ const t=dayType(); return t==='away'?0:t==='focus'?3:6; }
 function writeToday(){ const q=writeQuota(), done=D().wr||0, avail=q?newWriteItems(q).length:0; return {quota:q,done,left:Math.max(0,q-done),avail,need:Math.min(q,done+avail)}; }
 function startWrite(kind){
-  if(!canHW()){ toast('Прописи не загрузились — открой приложение с интернетом'); return; }
   const fil=k=>isWR(k)&&(kind==='keys'?isRad(wrOf(k)):kind==='chars'?!isRad(wrOf(k)):true);
   const f=()=>{ const left=kind?4:Math.min(4,writeToday().left); return dueKeys(fil).slice(0,3).concat(newWriteItems(left,kind)); };
   if(!f().length){ toast(kind==='keys'?'Сначала выучи ключи на Пути — потом пропишем':kind==='chars'?'Сначала выучи слова на Пути — потом пропишем их иероглифы':'Прописи на сегодня сделаны'); return; }
@@ -180,7 +197,6 @@ function startWrite(kind){
 }
 // «Прописи урока» (экран урока): к сроку + по 4 новых знака урока; всё написано — по памяти вразброс
 function startLessonWrite(L){
-  if(!canHW()){ toast('Прописи не загрузились — открой приложение с интернетом'); return; }
   const ks=LESSON_CHARS[L].map(c=>'wr:'+c).filter(validKey);
   const f=()=>{ const nw=ks.filter(isNew), due=ks.filter(isDue); return nw.length||due.length?due.slice(0,4).concat(nw.slice(0,4)):[]; };
   const q=f(); playStart(q.length?q:shuffle(ks).slice(0,6),{title:'Урок '+L+' · прописи',kind:'write',more:f});

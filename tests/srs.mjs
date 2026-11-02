@@ -37,9 +37,10 @@ await T('play-good-easy',()=>{ reset(); ev("playStart(['好'],{title:'t',kind:'l
   const c=ev("State.cards['好']"); ok(c&&c.lapses===0&&Math.abs(c.S-3.173)<.01,'без ошибок — Good: '+JSON.stringify(c));
   ev("State.cards['好'].due=Date.now()-1; State.cards['好'].last=Date.now()-3*864e5; playStart(['好'],{title:'t',kind:'review'})");
   ok(!/Новое слово/.test(txt()),'повторение без знакомства'); ev("PLAY.cur.t0=Date.now()"); const t=ev("PLAY.cur.t");
-  if(['choice','produce','listen'].includes(t)){ pick(true); ok(ev("State.cards['好'].S")>20,'быстро и верно — Easy: S='+ev("State.cards['好'].S")); } });
-await T('already-known',()=>{ reset(); ev("playStart(['床','你'],{title:'t',kind:'learn'})"); click(/Уже знаю/); const c=ev("State.cards['床']"); ok(c&&c.S>10,'«Уже знаю» не дал Easy');
-  ok(!ev("PLAY.queue.some(t=>t.k==='床')"),'задания на 床 не убраны'); });
+  if(['choice','produce','listen'].includes(t)){ pick(true); ok(ev("State.cards['好'].S")<20,'быстрый выбор не должен получать Easy: S='+ev("State.cards['好'].S")); } });
+await T('already-known',()=>{ reset(); ev("playStart(['床','你'],{title:'t',kind:'learn'})"); click(/Уже знаю/); ok(!ev("State.cards['床']"),'«Уже знаю» не должен засчитывать слово без проверки');
+  ok(ev("PLAY.cur.t")==='recall','нет проверки по памяти'); click(/Показать ответ/); click(/Написал верно/); const c=ev("State.cards['床']"); ok(c&&c.S<4,'после проверки — Good');
+  ok(!ev("PLAY.queue.some(t=>t.k==='床')"),'лишние задания на 床 не убраны'); });
 await T('practice-no-reschedule',()=>{ reset(); ev("State.cards['床']={state:1,S:30,D:5,due:Date.now()+9e9,last:Date.now()-864e5,reps:3,lapses:0}"); const before=ev("JSON.stringify(State.cards['床'])");
   ev("playStart(['床'],{title:'t',kind:'practice'})"); ev("PLAY.items['床'].left=1; finishItem('床')"); ok(ev("JSON.stringify(State.cards['床'])")===before,'досрочная практика изменила расписание'); });
 await T('key-items',()=>{ reset(); ev("playStart(['r:38'],{title:'t',kind:'learn'})"); ok(/Новый ключ №38/.test(txt())&&/женщина/.test(txt()),'знакомство с ключом'); key(' ');

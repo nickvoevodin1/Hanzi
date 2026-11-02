@@ -12,7 +12,8 @@ const Resume=(()=>{
   const rev=(k,v)=>v&&typeof v==='object'&&Array.isArray(v.__set)?new Set(v.__set):v;
   function snap(){
     return {v:1,ts:Date.now(),route:State.route,tab:State.tab,y:Math.round(window.scrollY||0),
-      play:PLAY,session:SESSION,dec:DEC,sent:SENT,mock:MOCK,test:T};
+      play:PLAY,session:SESSION,dec:DEC,sent:SENT,mock:MOCK,test:T,
+      study:['memory','dictation'].includes(State.route.name)?{memory:State.meta.memory,dictation:State.meta.dictation}:undefined};
   }
   function save(){
     if(!enabled) return;
@@ -21,6 +22,7 @@ const Resume=(()=>{
   function later(){ clearTimeout(t); t=setTimeout(save,250); }
   function clear(){ try{ localStorage.removeItem(KEY); }catch(e){} }
   // восстановить; true — если экран восстановлен (иначе стартуем с Пути)
+  function saveStateStudy(){ Store.set('meta',State.meta); }
   function restore(){
     enabled=true;
     let s=null; try{ s=JSON.parse(localStorage.getItem(KEY)||'null',rev); }catch(e){ s=null; }
@@ -30,6 +32,13 @@ const Resume=(()=>{
       if(PLAY){ PLAY.opts=PLAY.opts||{}; if(PLAY.opts.kind==='daily') PLAY.opts.more=dailyPortion;
         PLAY.fails=PLAY.fails instanceof Set?PLAY.fails:new Set(); PLAY.sents=PLAY.sents instanceof Set?PLAY.sents:new Set(); }
       const name=s.route.name;
+      // Последний штрих/ввод мог ещё ждать асинхронной записи в IndexedDB.
+      // pagehide снимает актуальное состояние синхронно вместе с маршрутом.
+      if(s.study&&['memory','dictation'].includes(name)){
+        if(s.study.memory) State.meta.memory=s.study.memory;
+        if(s.study.dictation) State.meta.dictation=s.study.dictation;
+        saveStateStudy();
+      }
       if(name==='play'&&!PLAY || name==='session'&&!SESSION) return false;
       State.route=s.route; if(s.tab) State.tab=s.tab;
       render();

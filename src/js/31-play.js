@@ -118,7 +118,7 @@ function viewPlay(s){
   const stage=el('div',''); v.appendChild(stage); s.appendChild(v);
   const w=x.k&&BYK[x.k];
   ({intro:tIntro,choice:tChoice,produce:tProduce,listen:tListen,pinyin:tPinyin,tones:tTones,recall:tRecall,write:tWrite,build:tBuild,
-    pairs:tPairs,assemble:tAssemble,rintro:tRadIntro,keyname:tKeyName,keyform:tKeyForm,keyvar:tKeyVar,hear:tHear,
+    pairs:tPairs,assemble:tAssemble,rintro:tRadIntro,radrecall:tRadRecall,keyname:tKeyName,keyform:tKeyForm,keyvar:tKeyVar,hear:tHear,
     wintro:tWIntro,wtrace:tWTrace,wmem:tWMem}[x.t]||tChoice)(stage,w||x,x);
   footify(stage);
 }
@@ -171,10 +171,13 @@ function finishItem(k){
   if(P.opts.test) return;
   const wasNew=isNew(k), due=isDue(k);
   if(!(wasNew||due||it.fail)) return;
-  const g = it.known?4 : it.fail?1 : it.hard?2 : (!wasNew&&!it.slow?4:3);
+  // Speed and recognition are not evidence of effortless recall. Keep a conservative
+  // Good interval; explicit self-ratings live in the classic cards screen.
+  const g = it.fail?1 : it.hard?2 : 3;
   State.cards[k]=FSRS.review(cardOf(k)||{},g,REQ);
   const d=D();
-  if(wasNew){ if(isRad(k)) d.keys++; else if(isKC(k)) d.dec++; else if(isWR(k)) d.wr=(d.wr||0)+1; else if(inSem(k)) d.new++; }
+  if(wasNew){ if(isRad(k)) d.keys++; else if(isKC(k)) d.dec++; else if(isWR(k)) d.wr=(d.wr||0)+1; else if(inSem(k)) d.new++;
+    if((isRad(k)||inSem(k))&&typeof memoryEnroll==='function') memoryEnroll(k); }
   else{ d.rv++; State.meta.rev[todayStr()]=(State.meta.rev[todayStr()]||0)+1; if(isKC(k)) d.dec++; }
   save('cards');
 }
@@ -234,9 +237,12 @@ function tIntro(stage,w){
 // состав каждого знака слова — сразу на виду (без «развернуть»): знак = ключ + фонетик / части, тип, ключ по пособию
 function wordFormulas(w){ const cs=uniq(hanOf(w.s)).filter(c=>ET[c]||HZ.c[c]); return cs.length?`<div class="kfs-wrap"><div class="lbl">Состав по ключам</div>${cs.map(c=>keyFormula(c,{w})).join('')}</div>`:''; }
 function introKnown(k){
-  const P=PLAY, it=P.items[k];
-  P.queue=P.queue.filter(t=>t.k!==k); P.total=Math.max(P.done,P.total-(it?it.left:0));
-  if(it){ it.known=1; it.left=0; finishItem(k); }
+  const P=PLAY, it=P.items[k]; if(!it) return;
+  // A familiar-looking card still needs one retrieval attempt before scheduling it.
+  const removed=P.queue.filter(t=>t.k===k).length;
+  P.queue=P.queue.filter(t=>t.k!==k);
+  P.queue.unshift({t:isRad(k)?'radrecall':'recall',k,n:isRad(k)?radNum(k):undefined});
+  P.total=Math.max(P.done+1,P.total-removed+1); it.left=1;
   save('meta'); playNext();
 }
 function optionBox(stage,opts,right,done,cls){
@@ -272,13 +278,31 @@ function tListen(stage,w,x){
   const opts=shuffle(others((pool.length>=6?pool:WORDS).map(x=>x.s),w.s,3).concat([w.s]));
   optionBox(stage,opts.map(o=>[o,'<span class="han" style="font-size:28px">'+esc(o)+'</span>']),w.s,ok=>playAnswer(ok,{right:rightWord(w),okHtml:esc(meaning(w))}),'two');
 }
+// Canonical syllables preserve tones. Accept nǐ / ni3, lǜ / lv4 / lu:4;
+// a plain syllable denotes the neutral tone, 0 and 5 both denote neutral.
+function normalizePinyin(value){
+  const text=(value||'').normalize('NFC').toLowerCase().replace(/u:/g,'ü').replace(/v/g,'ü').trim();
+  if(!text||/[^a-züāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜńňǹ\s'’0-5-]/u.test(text)) return '';
+  const chunks=text.replace(/[’'\-]/g,' ').match(/[a-züāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜńňǹ]+[0-5]?/gu)||[];
+  if(chunks.join('').length!==text.replace(/[\s’'\-]/g,'').length) return '';
+  const out=[];
+  for(const token of chunks){
+    const match=token.match(/([0-5])$/), number=match?+match[1]:null;
+    const letters=token.replace(/[0-5]$/,''), marked=[...letters].filter(c=>TONE_MAP[c]&&TONE_MAP[c][1]<5);
+    if(marked.length>1) return ''; // separate marked syllables with spaces
+    const tone=marked.length?TONE_MAP[marked[0]][1]:number==null?5:(number||5);
+    if(number!=null&&marked.length&&tone!==(number||5)) return '';
+    out.push(toneless(letters)+tone);
+  }
+  return out.join('');
+}
 function tPinyin(stage,w){
   head(stage,'Напиши пиньинь');
   const c=el('div','qcard'); c.style.minHeight='16vh'; c.innerHTML=wordHead(w,72)+`<div class="qsub">${esc(meaning(w))}</div>`; stage.appendChild(c);
-  const inp=el('input','tinput'); inp.placeholder='пиньинь (тоны можно не ставить)'; inp.autocapitalize='off'; inp.autocomplete='off'; inp.spellcheck=false; stage.appendChild(inp);
+  const inp=el('input','tinput'); inp.placeholder='nǐ hǎo или ni3 hao3 · тоны обязательны'; inp.autocapitalize='off'; inp.autocomplete='off'; inp.spellcheck=false; stage.appendChild(inp);
   const chk=el('button','btn showbtn','Проверить'); chk.disabled=true; stage.appendChild(chk);
   inp.oninput=()=>{ chk.disabled=!inp.value.trim(); };
-  const check=()=>{ if(!inp.value.trim()) return; const ok=toneless(inp.value)===toneless(w.p); inp.disabled=true; chk.remove(); Speech.has()&&sayW(w);
+  const check=()=>{ if(!inp.value.trim()) return; const got=normalizePinyin(inp.value), ok=!!got&&got===normalizePinyin(w.p); inp.disabled=true; chk.remove(); Speech.has()&&sayW(w);
     playAnswer(ok,{right:rightWord(w)+(inp.value?`<br><small>ты написал: ${esc(inp.value)}</small>`:''),okHtml:pinyinHTML(w.p)}); };
   inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); check(); } });
   chk.onclick=check; setTimeout(()=>inp.focus(),60);
@@ -327,7 +351,11 @@ function tWrite(stage,w){
   const c=el('div','card'); c.style.padding='12px';
   c.innerHTML=`<div class="qbig" style="font-size:20px">«${esc(meaning(w))}»</div><div class="qsub" style="margin-top:4px">${pinyinHTML(w.p)}</div><div id="wqHost"></div>`;
   stage.appendChild(c);
-  writeQuiz($('#wqHost'),hanOf(w.s),m=>playAnswer(m<=3,{hard:m>0,right:rightWord(w)+`<br><small>ошибок в чертах: ${m}</small>`,okHtml:m?'ошибок в чертах: '+m:'без ошибок'}));
+  const host=c.querySelector('#wqHost'), info={forms:hanOf(w.s),py:w.p,ru:meaning(w)};
+  writePad(host,info.forms,'mem',(m,details)=>{
+    if(m==null){ wrPaperFallback(host,info,false,ok=>playAnswer(ok,{noFB:true})); return; }
+    playAnswer(!details.assisted,{hard:m>0,right:rightWord(w)+`<br><small>Была подсказка. Ошибок в чертах: ${m}</small>`,okHtml:m?'ошибок в чертах: '+m:'без ошибок'});
+  });
   const gu=el('button','linkbtn','Не помню — показать'); gu.onclick=()=>{ gu.remove(); playAnswer(false,{right:rightWord(w)}); }; stage.appendChild(gu);
 }
 // — Собери предложение: RU → 中 (плитки слов) или 中 → RU (плитки русских слов)
@@ -460,6 +488,17 @@ function tRadIntro(stage,x){
   row.appendChild(kn); row.appendChild(nx); stage.appendChild(row);
 }
 function radRight(n){ const r=RADS[n-1]; return `<span class="han">${esc([...r[4]].join(' '))}</span> №${n} · ${esc(r[2])} — ${esc(r[3])}`; }
+function tRadRecall(stage,x,task){
+  const n=task.n||radNum(task.k), r=RADS[n-1];
+  head(stage,'Проверь себя: напиши ключ по памяти');
+  const c=el('div','qcard',`<div class="qbig">Ключ №${n} · «${esc(r[3])}»</div><div class="qsub">На бумаге напиши ключ и его пиньинь, затем сверь.</div>`); stage.appendChild(c);
+  const b=el('button','btn showbtn','Показать ответ'); b.dataset.key='space'; stage.appendChild(b);
+  b.onclick=()=>{ b.remove(); c.appendChild(el('div','reveal',radRight(n)));
+    const bar=el('div','actionrow');
+    const no=el('button','btn ghost','Ошибся'); no.onclick=()=>playAnswer(false,{noFB:true});
+    const yes=el('button','btn','Написал верно'); yes.onclick=()=>playAnswer(true,{noFB:true});
+    bar.append(no,yes); stage.appendChild(bar); };
+}
 function radNear(n){ const k=KEY_ORDER.filter(x=>x!==n); return k; }
 function tKeyName(stage,x){
   const n=x.n, r=RADS[n-1];

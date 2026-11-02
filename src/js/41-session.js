@@ -95,7 +95,7 @@ function qIntro(stage,w){
 `;
   stage.appendChild(c);
   const row=el('div','actionrow');
-  const known=el('button','btn ghost','Уже знаю'); known.onclick=()=>{ SESSION.intro[w.key]=1; afterGrade(4); };
+  const known=el('button','btn ghost','Уже знаю'); known.onclick=()=>{ SESSION.intro[w.key]=1; SESSION.cur='recall'; render(); };
   const go2=el('button','btn','Запомнил → проверить'); go2.dataset.key='space'; go2.onclick=()=>{ SESSION.intro[w.key]=1; render(); };
   row.appendChild(known); row.appendChild(go2); stage.appendChild(row);
   stage.appendChild(el('p','eyebrow','Разбор по иероглифам'));
@@ -145,10 +145,11 @@ function qRecall(stage,w){
 function qPinyin(stage,w){
   stage.appendChild(el('div','qprompt','Напиши пиньинь'));
   const c=el('div','qcard'); c.style.minHeight='22vh'; c.innerHTML=`<div class="qhz han">${esc(w.d||w.s)}</div><div class="qsub">${esc(meaning(w))}</div>`; stage.appendChild(c);
-  const inp=el('input','tinput'); inp.placeholder='пиньинь (тоны можно не ставить)'; inp.autocapitalize='off'; inp.autocomplete='off'; inp.spellcheck=false; stage.appendChild(inp);
+  const inp=el('input','tinput'); inp.placeholder='nǐ hǎo или ni3 hao3 · с тонами'; inp.autocapitalize='off'; inp.autocomplete='off'; inp.spellcheck=false; stage.appendChild(inp);
   const chk=el('button','btn showbtn','Проверить'); stage.appendChild(chk);
   const check=()=>{
-    const ok=!!inp.value.trim()&&toneless(inp.value)===toneless(w.p);
+    const got=normalizePinyin(inp.value);
+    const ok=!!got&&w.p.split(/\s*[/／;；]\s*/).some(p=>got===normalizePinyin(p));
     c.innerHTML=`<div class="qhz han" style="font-size:64px">${wrapHz(w.d||w.s)}</div>`+answerHTML(w,`<div class="verdict ${ok?'ok':'bad'}">${ok?'✓ верно':'ты написал: '+esc(inp.value||'—')}</div>`);
     inp.remove(); chk.remove(); Speech.has()&&sayW(w); gradeAuto(stage,ok?3:1);
   };
@@ -199,36 +200,29 @@ function hwData(c,onC,onErr){
 }
 const HWC={stroke:'#3c3c3c',outline:'#e5e5e5',draw:'#ff9600',hl:'#1cb0f6'};   // прописи: написанное — тёмным, контур — светло-серым, рука — оранжевым, подсказка — голубым
 function writeQuiz(host,chars,onDone){
-  let idx=0, mistakes=0; host.innerHTML='<div class="writer" id="wq"></div><div class="drawhint" id="wqHint"></div>';
-  function mount(){
-    const hint=$('#wqHint'); $('#wq').innerHTML='';
-    hint.textContent=chars.length>1?'Иероглиф '+(idx+1)+' из '+chars.length:'Пиши по чертам';
-    try{
-      const inst=HanziWriter.create('wq',chars[idx],{width:230,height:230,padding:8,showCharacter:false,showOutline:false,
-        strokeColor:HWC.stroke,drawingColor:HWC.draw,highlightColor:HWC.hl,charDataLoader:(c,ok)=>hwData(c,ok,()=>{ hint.textContent='нет данных о чертах (нужна сеть)'; })});
-      const SN=strokesOf(chars[idx]);
-      inst.quiz({showHintAfterMisses:3,onMistake:st=>{ mistakes++; if(SN[st.strokeNum]) hint.textContent='Черта '+(st.strokeNum+1)+': '+SN[st.strokeNum].name; },
-        onComplete:()=>{ idx++; if(idx<chars.length){ hint.textContent='✓'; setTimeout(mount,400); } else onDone(mistakes); }});
-    }catch(e){ hint.textContent='прописи недоступны'; onDone(99); }
-  }
-  mount();
+  writePad(host,chars,'mem',(m,info)=>{
+    if(m==null){ wrPaperFallback(host,{forms:chars,py:'',ru:''},false,ok=>onDone(ok?0:99)); return; }
+    onDone(info&&info.assisted?99:m);
+  });
 }
-function writeGrade(m){ return m===0?3:m<=3?2:1; }
+function writeGrade(m){ return m===0?3:m<3?2:1; }
 function qWrite(stage,w){
+  let settled=false;
   stage.appendChild(el('div','qprompt','Напиши иероглифами'));
   const c=el('div','card'); c.style.padding='14px';
   c.innerHTML=`<div class="qbig">${esc(meaning(w))}</div><div class="qsub" style="margin-top:4px">${pinyinHTML(w.p)}</div><div id="wqHost"></div>`;
   stage.appendChild(c);
-  writeQuiz($('#wqHost'),hanOf(w.s),m=>{ c.appendChild(el('div','',answerHTML(w,`<div class="verdict ${m===0?'ok':m<=3?'':'bad'}">${m===0?'✓ без ошибок':'ошибок в чертах: '+m}</div>`))); Speech.has()&&sayW(w); gradeAuto(stage,writeGrade(m)); });
-  const giveup=el('button','linkbtn','Не помню — показать'); giveup.onclick=()=>{ giveup.remove(); c.appendChild(el('div','',`<div class="qhz han" style="font-size:60px">${wrapHz(w.d||w.s)}</div>`+answerHTML(w))); gradeAuto(stage,1); }; stage.appendChild(giveup);
+  writeQuiz($('#wqHost'),hanOf(w.s),m=>{ if(settled||!c.isConnected) return; settled=true; const gu=stage.querySelector('.linkbtn'); if(gu) gu.remove(); c.appendChild(el('div','',answerHTML(w,`<div class="verdict ${m===0?'ok':m<=3?'':'bad'}">${m===0?'✓ без ошибок':'ошибок в чертах: '+m}</div>`))); Speech.has()&&sayW(w); gradeAuto(stage,writeGrade(m)); });
+  const giveup=el('button','linkbtn','Не помню — показать'); giveup.onclick=()=>{ if(settled) return; settled=true; giveup.remove(); c.querySelector('#wqHost').replaceChildren(); c.appendChild(el('div','',`<div class="qhz han" style="font-size:60px">${wrapHz(w.d||w.s)}</div>`+answerHTML(w))); gradeAuto(stage,1); }; stage.appendChild(giveup);
 }
 function qDictate(stage,w){
+  let settled=false;
   stage.appendChild(el('div','qprompt','Диктант: напиши на слух'));
   const c=el('div','card'); c.style.padding='14px';
   c.innerHTML=`<button class="iconbtn primary" style="width:56px;height:56px;font-size:24px;margin:0 auto" ${sayA(w)} aria-label="Слушать">${SPK(28)}</button><div id="wqHost"></div>`;
   stage.appendChild(c); setTimeout(()=>sayW(w),200);
-  writeQuiz($('#wqHost'),hanOf(w.s),m=>{ c.appendChild(el('div','',answerHTML(w,`<div class="verdict ${m===0?'ok':m<=3?'':'bad'}">${m===0?'✓ без ошибок':'ошибок в чертах: '+m}</div>`))); gradeAuto(stage,writeGrade(m)); });
-  const giveup=el('button','linkbtn','Не помню — показать'); giveup.onclick=()=>{ giveup.remove(); c.appendChild(el('div','',`<div class="qhz han" style="font-size:60px">${wrapHz(w.d||w.s)}</div>`+answerHTML(w))); gradeAuto(stage,1); }; stage.appendChild(giveup);
+  writeQuiz($('#wqHost'),hanOf(w.s),m=>{ if(settled||!c.isConnected) return; settled=true; const gu=stage.querySelector('.linkbtn'); if(gu) gu.remove(); c.appendChild(el('div','',answerHTML(w,`<div class="verdict ${m===0?'ok':m<=3?'':'bad'}">${m===0?'✓ без ошибок':'ошибок в чертах: '+m}</div>`))); gradeAuto(stage,writeGrade(m)); });
+  const giveup=el('button','linkbtn','Не помню — показать'); giveup.onclick=()=>{ if(settled) return; settled=true; giveup.remove(); c.querySelector('#wqHost').replaceChildren(); c.appendChild(el('div','',`<div class="qhz han" style="font-size:60px">${wrapHz(w.d||w.s)}</div>`+answerHTML(w))); gradeAuto(stage,1); }; stage.appendChild(giveup);
 }
 // — ключи
 function radChars(n,limit){ const lc=Object.keys(CHAR_L).filter(c=>radOf(c)===n).sort((a,b)=>CHAR_L[a]-CHAR_L[b]); return limit?lc.slice(0,limit):lc; }
@@ -243,7 +237,7 @@ function radIntro(stage,n){
     ${RAD2[n]&&RAD2[n].e?`<div class="en">Пример из пособия: <span class="han" style="font-size:18px">${esc(RAD2[n].e)}</span> ${esc(RAD2[n].ep)} — ${esc(RAD2[n].er)}</div>`:''}</div>`;
   stage.appendChild(c);
   const row=el('div','actionrow');
-  const known=el('button','btn ghost','Уже знаю'); known.onclick=()=>{ SESSION.intro['r:'+n]=1; afterGrade(4); };
+  const known=el('button','btn ghost','Уже знаю'); known.onclick=()=>{ SESSION.intro['r:'+n]=1; SESSION.cur='rname'; render(); };
   const g=el('button','btn','Запомнил → проверить'); g.dataset.key='space'; g.onclick=()=>{ SESSION.intro['r:'+n]=1; render(); };
   row.appendChild(known); row.appendChild(g); stage.appendChild(row);
 }

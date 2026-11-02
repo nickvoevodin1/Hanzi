@@ -9,8 +9,13 @@ function viewProgress(s){
   v.appendChild(el('div','stats4',`
     <div class="stbox"><span class="si">${IC('flame',30)}</span><div><b>${streakLen()}</b><small>${plural(streakLen(),'день','дня','дней')} подряд</small></div></div>
     <div class="stbox"><span class="si">${IC('bolt',30)}</span><div><b>${totalXP}</b><small>XP всего · сегодня ${d.xp}</small></div></div>
-    <div class="stbox"><span class="si">${IC('books',30)}</span><div><b>${st.learned}</b><small>слов из ${st.total}</small></div></div>
+    <div class="stbox"><span class="si">${IC('books',30)}</span><div><b>${st.learned}</b><small>знакомых слов из ${st.total}</small></div></div>
     <div class="stbox"><span class="si han">部</span><div><b>${kl}</b><small>ключей из 214</small></div></div>`));
+  const ms=memoryStats(), total=semWords().length;
+  v.appendChild(el('p','eyebrow','Письмо + пиньинь + перевод'));
+  const skills=el('div','hero');
+  skills.innerHTML=`<h2>Знание проверяется тремя способами</h2><div class="study-summary"><div><b>${ms.words.threeDays}</b><small>слов · три дня практики</small></div><div><b>${ms.words.ready}</b><small>слов · все навыки ≥7 дней</small></div><div><b>${ms.keys.ready}</b><small>ключей · все навыки ≥7 дней</small></div></div><p class="note">Цель: ${total} слов уроков 1–${SEM().targetLesson} и 214 ключей. Закреплены все три навыка (стабильность ≥21 дня): ${ms.words.solid} слов и ${ms.keys.solid} ключей. Это оценка памяти, а не гарантия результата диктанта.</p><p class="study-tip">Знакомые слова в старых карточках сохранены. Тетрадь отдельно проверит, можешь ли ты написать их, прочитать с тонами и вспомнить значение.</p>`;
+  const mb=el('button','btn ghost mini','Открыть тетрадь'); mb.onclick=()=>go('memory'); skills.appendChild(mb); v.appendChild(skills);
   // тепловая карта: 20 недель, столбец — неделя (пн…вс)
   v.appendChild(el('p','eyebrow','Дни занятий'));
   const heat=el('div','heat'), t=todayStr(), g=State.settings.xpGoal;

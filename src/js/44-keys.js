@@ -9,20 +9,22 @@ function radGrid(nums){
   return g;
 }
 function viewKeys(s){
-  const v=el('div','view'), scope=State.route.scope||'order';
+  const v=el('div','view'), scope=State.route.scope==='learned'?'learned':'order';
   const back=el('button','back','‹ Повторение'); back.onclick=()=>go('practice'); v.appendChild(back);
   v.appendChild(el('h2','title','Ключи'));
   const all=KEY_ORDER.slice(), la=learnedCount(all.map(n=>'r:'+n)), kq=todayKeysQuota();
-  v.appendChild(el('p','note',`Колода «Ключи» — все 214, в порядке изучения: сначала частые в иероглифах уроков 1–30 (口, 一, 人, 木…), в конце — ${all.filter(n=>!KEY_CHARS[n]).length}, которых в уроках нет. Введено ${la} из 214; сегодня новых — ${kq.quota} (осталось ${kq.left}). Номера — по Канси; названия — таблица ДВФУ.`));
+  v.appendChild(el('p','note',`Все 214 ключей идут последовательно, от №1 до №214. Диапазоны в пути и диктантах совпадают с номерами ключей. Введено ${la} из 214; сегодня новых — ${kq.quota} (осталось ${kq.left}). Номера — по Канси; названия — таблица ДВФУ.`));
   const act=el('div','actionrow');
   const b1=el('button','btn',IC('play',16)+' Учить ключи'); const q1=()=>poolQueue(all.map(n=>'r:'+n),8); b1.onclick=()=>playStart(q1(),{title:'Ключи',kind:'learn',more:q1});
   const b2=el('button','btn ghost',IC('cards',18)+' Карточки'); const q2=()=>poolQueue(all.map(n=>'r:'+n)); b2.onclick=()=>startSession(q2(),'auto','Все ключи',q2);
   act.appendChild(b1); act.appendChild(b2); v.appendChild(act);
   const tabs=el('div','tabs');
-  [['order','По порядку изучения'],['all','По номеру']].forEach(([id,t])=>{ const b=el('button','tab'+(scope===id?' on':''),t); b.onclick=()=>go('keys',{scope:id}); tabs.appendChild(b); });
+  [['order','Все по номерам'],['learned','В работе']].forEach(([id,t])=>{ const b=el('button','tab'+(scope===id?' on':''),t); b.onclick=()=>go('keys',{scope:id}); tabs.appendChild(b); });
   const sb=el('button','tab','Черты'); sb.onclick=()=>go('strokes'); tabs.appendChild(sb);
   v.appendChild(tabs);
-  v.appendChild(radGrid(scope==='all'?RADS.map(r=>r[0]):all));
+  const nums=scope==='learned'?all.filter(n=>!isNew('r:'+n)):all;
+  if(!nums.length) v.appendChild(el('p','note','Здесь появятся ключи, которые ты уже начал учить.'));
+  v.appendChild(radGrid(nums));
   s.appendChild(v);
 }
 function viewStrokes(s){
@@ -48,7 +50,7 @@ function viewRadical(s){
   card.innerHTML=`<div class="bighz han" style="font-size:76px">${esc(r[4][0])}</div>
     ${r[4].length>1?`<div class="han" style="font-size:22px;color:var(--paper-dim);margin-bottom:6px">${esc([...r[4]].slice(1).join('  '))}</div>`:''}
     <div class="bigpy">${pinyinHTML(r[2])}</div><div class="bigtr">${esc(r[3])}</div>
-    <div class="tagrow"><span class="pill">Ключ №${n}</span><span class="pill">${r[1]} ${plural(r[1],'черта','черты','черт')}</span>${KEY_L[n]?`<span class="pill k">урок ${KEY_L[n]}</span>`:''}<span class="pill">№${KEY_ORDER.indexOf(n)+1} в порядке изучения</span>${st!=='new'?'<span class="pill ok">в работе</span>':''}</div>
+    <div class="tagrow"><span class="pill">Ключ №${n}</span><span class="pill">${r[1]} ${plural(r[1],'черта','черты','черт')}</span>${KEY_L[n]?`<span class="pill k">урок ${KEY_L[n]}</span>`:''}${st!=='new'?'<span class="pill ok">в работе</span>':''}</div>
     <div class="cardbtns"><button class="iconbtn primary" data-say="${esc(r[4][0])}" aria-label="Слушать">${SPK(26)}</button><button class="iconbtn" data-draw="${esc((RADW[n]||[[r[4][0]]]).map(x=>x[0]).join(''))}" aria-label="Прописи">${IC('brush',26)}</button></div>
     <div class="note" style="margin:8px 0 0">Пишется: <span class="han" style="font-size:22px;color:var(--title)">${(RADW[n]||[[r[4][0]]]).map(x=>esc(x[0])).join(' · ')}</span>${!isNew('wr:r:'+n)?' · <b style="color:var(--ok-text)">в прописях</b>':''}</div>`;
   v.appendChild(card);

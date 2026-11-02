@@ -35,7 +35,7 @@ await T('decomp-谢',()=>{ ok(JSON.stringify(ev("keysOf('谢')"))==='[["讠",149
 await T('chars-587',()=>{ ok(K.chars.length===587,'в JSON не 587'); const bad=ev(`${JSON.stringify(K.chars.map(c=>c.c))}.filter(c=>!charPy(c)||!charRu(c)||!keysOf(c).length||!keysOf(c).every(([f,n])=>f&&n>=1&&n<=214)||!CHAR_L[c])`);
   ok(!bad.length,'без пиньиня/перевода/ключей: '+bad.join('')); });
 await T('keys-deck',()=>{ ev(`State.cards={}; State.meta=freshMeta(); State.settings.semester=${sem({newWordsUntil:ev("addDays(todayStr(),60)"),holidays:{from:'2000-01-01',to:'2000-01-02',capacity:.3}})}`);
-  ok(ev("KEY_ORDER.length")===214&&ev("KEY_ORDER.join()")===K.keys_study_order.join(),'214 ключей в порядке keys_study_order');
+  ok(ev("KEY_ORDER.length")===214&&ev("KEY_ORDER.join()")===Array.from({length:214},(_,i)=>i+1).join(),'214 ключей по номерам Канси');
   ok(ev("newKeysToday().join()")===ev("KEY_ORDER.slice(0,10).map(n=>'r:'+n).join()"),'10 первых ключей сегодня');
   ok(ev(`keysQuota('2026-10-25',${sem()})`)===10&&ev(`keysQuota('2026-10-25',${sem({awayDays:['2026-10-25']})})`)===0&&ev(`keysQuota('2027-01-02',${sem()})`)===0,'квота ключей 10 / поездка 0 / каникулы 0');
   ev("D().keys=10"); ok(ev("newKeysToday().length")===0,'квота ключей исчерпана'); });
@@ -62,8 +62,11 @@ await T('path-states',()=>{ ev("State.cards={}; State.meta=freshMeta(); UNITS=nu
   ok(ev("(()=>{ const l=pathUnits().filter(u=>u.sec==='lessons'); return unitOpen(l[1],1,l); })()")===true,'после урока 1 открыт урок 2');
   ev("State.cards[lessonKeys(1)[0]].due=Date.now()-1"); ok(ev("nodeState(pathUnits()[11],pathUnits()[11].nodes[0],true)")==='cracked','узел «треснул» — пора повторять'); });
 await T('jump',()=>{ ev("State.cards={}; State.meta=freshMeta(); PLAY=null"); ev("jumpStart(pathUnits().find(u=>u.id==='L3'))"); ok(ev("PLAY.opts.test")===true&&ev("PLAY.opts.jump.units.join()")==='L2,L3','тест прыжка: '+ev("PLAY.opts.jump.units.join()"));
-  ok(!/Новое слово/.test(txt()),'в тесте нет знакомства'); ev("PLAY.first=10; PLAY.firstOk=8; PLAY.queue=[]; PLAY.cur=null; render()");
-  ok(/Перепрыгнул/.test(txt()),'80% — засчитано'); ok(ev("lessonKeys(3).every(k=>State.cards[k]&&State.cards[k].state===1)")&&ev("!!State.meta.jumps.L3"),'слова получили карточки'); });
+  ok(!/Новое слово/.test(txt()),'в тесте нет знакомства'); const tested=ev("Object.keys(PLAY.items)");
+  ev("Object.values(PLAY.items).forEach(it=>it.left=0); PLAY.first=15; PLAY.firstOk=12; PLAY.queue=[]; PLAY.cur=null; render()");
+  ok(/Перепрыгнул/.test(txt()),'80% — засчитано'); ok(ev("!!State.meta.jumps.L3"),'юниты открыты');
+  ok(ev("Object.keys(State.cards).length")===tested.length&&tested.every(k=>ev(`!!State.cards[${JSON.stringify(k)}]`)),'карточки только у проверенных слов');
+  ok(ev("PLAY.opts.jump.items.filter(k=>!PLAY.items[k]).every(isNew)"),'непроверенные слова остаются новыми'); });
 await T('user-sentences',async()=>{ ev("State.sets=[]; resetBank()"); const r=ev(`addSentSet('Проверочная 20','20, 21',"我们去看电影吧。| Wǒmen qù kàn diànyǐng ba. | Давай пойдём в кино.\\nплохая строка\\n他是我朋友。 | Tā shì wǒ péngyou. | Он мой друг.")`);
   ok(r.ok&&r.bad.join()==='2'&&r.set.items.length===2&&r.set.lessons.join()==='20,21','набор: '+JSON.stringify(r)); ok(ev("lessonSents(20).some(x=>x.user&&x.zh==='他是我朋友。')"),'не попал в банк урока');
   await A.sleep(10); const stored=await ev("Store.get('sentences')"); ok(Array.isArray(stored)&&stored.length===1&&stored[0].title==='Проверочная 20','не сохранён в хранилище'); });

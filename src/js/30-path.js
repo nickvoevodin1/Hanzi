@@ -14,13 +14,13 @@ function pathUnits(){ return UNITS||(UNITS=buildUnits()); }
 function buildUnits(){
   const U=[];
   KEY_UNITS.forEach((ns,i)=>{
-    const id='K'+(i+1), items=ns.map(n=>'r:'+n), a=Math.round(i*214/11);
+    const id='K'+(i+1), items=ns.map(n=>'r:'+n);
     const nodes=[];                   // 7 новых ключей → их пропись
-    chunk(items,7).forEach((c,j)=>{ const t=(a+j*7+1)+'–'+(a+j*7+c.length);
+    chunk(items,7).forEach((c,j)=>{ const first=radNum(c[0]), last=radNum(c[c.length-1]), t=first===last?String(first):first+'–'+last;
       nodes.push({id:id+'n'+(j+1),type:'learn',icon:'部',title:'Ключи '+t,items:c});
       nodes.push({id:id+'w'+(j+1),type:'write',alt:1,icon:'brushW',title:'Пропись ключей '+t,items:c.map(k=>'wr:'+k),after:id+'n'+(j+1)}); });
     nodes.push({id:id+'rev',type:'review',alt:1,icon:'cycle',title:'Повторение ключей',items});
-    U.push({id,sec:'keys',title:'Ключи · юнит '+(i+1),sub:ns.slice(0,8).map(n=>RADS[n-1][4][0]).join(' '),items,nodes,color:UCOL[(i+1)%UCOL.length]});
+    U.push({id,sec:'keys',title:'Ключи '+ns[0]+'–'+ns[ns.length-1],sub:ns.slice(0,8).map(n=>RADS[n-1][4][0]).join(' '),items,nodes,color:UCOL[(i+1)%UCOL.length]});
   });
   for(let L=1;L<=NL;L++){
     const id='L'+L, words=lessonKeys(L), main=words.filter(k=>!EXTRA_OF[k]), ext=words.filter(k=>EXTRA_OF[k]), nodes=[];
@@ -78,13 +78,13 @@ function openNode(u,n,st){
   const base={title:(u?u.title+' · ':'')+n.title,node:n.id};
   if(n.type==='learn'){
     const nw=n.items.filter(isNew), due=n.items.filter(isDue);
-    if(nw.length||due.length) playStart(due.concat(nw),{...base,kind:'learn'});
-    else playStart(shuffle(n.items).slice(0,8),{...base,kind:'practice'});
+    const keys=u&&u.sec==='keys';
+    if(nw.length||due.length) playStart(keys?n.items.filter(k=>isNew(k)||isDue(k)):due.concat(nw),{...base,kind:'learn'});
+    else playStart((keys?n.items:shuffle(n.items)).slice(0,8),{...base,kind:'practice'});
   }else if(n.type==='chars'){
     const nw=n.items.filter(isNew), due=n.items.filter(isDue);
     playStart((nw.length||due.length?due.concat(nw):shuffle(n.items)).slice(0,6),{...base,kind:'chars'});
   }else if(n.type==='write'){
-    if(!canHW()){ toast('Прописи не загрузились — открой приложение с интернетом'); return; }
     const nw=n.items.filter(isNew), due=n.items.filter(isDue);   // по 4 новых за раз: знакомство + обвести + по памяти
     playStart(nw.length||due.length?due.slice(0,4).concat(nw.slice(0,4)):shuffle(n.items).slice(0,6),{...base,kind:'write'});
   }else if(n.type==='review'){
@@ -117,7 +117,8 @@ function startPart(id){
   else if(id==='sent') go('sent');
   else if(id==='mock') go('mock');
 }
-// — «Перепрыгнуть»: тест по закрытым юнитам до выбранного; 80%+ → юниты засчитаны, слова получают начальные карточки
+// — «Перепрыгнуть»: тест по закрытым юнитам до выбранного; 80%+ открывает юниты.
+// Карточки получают только проверенные слова — выборка не доказывает знание остальных.
 function jumpStart(u){
   const list=pathUnits().filter(x=>x.sec===u.sec), b=list.indexOf(u);
   let a=list.findIndex((x,i)=>!unitOpen(x,i,list)); if(a<0||a>b) a=b;
@@ -128,7 +129,7 @@ function jumpStart(u){
 function jumpFinish(){
   const P=PLAY, pct=P.first?P.firstOk/P.first:0; P.pct=Math.round(pct*100); P.passed=pct>=0.8;
   if(P.passed){
-    P.opts.jump.items.forEach(k=>{ if(!isNew(k)) return; const it=P.items[k]; const g=it?(it.fail?1:3):2;
+    P.opts.jump.items.forEach(k=>{ const it=P.items[k]; if(!isNew(k)||!it||it.left>0) return; const g=it.fail?1:3;
       State.cards[k]=FSRS.review({},g,REQ); });
     P.opts.jump.units.forEach(id=>{ State.meta.jumps[id]=todayStr(); });
     D().ls++; confetti(); Sfx.done();
@@ -139,7 +140,7 @@ function jumpEnd(s){
   const P=PLAY, v=el('div','view endwrap');
   v.innerHTML=mascot(P.passed?'cheer':'cheer',110)+`<h2 style="color:${P.passed?'var(--ok-text)':'var(--primary-text)'}">${P.passed?'Перепрыгнул!':'Пока рано'}</h2>
     <div class="endstats"><div class="estat acc"><small>Верно</small><b>${P.pct}%</b></div><div class="estat"><small>Нужно</small><b>80%</b></div></div>
-    <p class="note">${P.passed?'Юниты засчитаны, слова получили начальные карточки — FSRS скоро проверит их ещё раз.':'Пройди юниты по порядку — так надёжнее. Попробовать снова можно в любой момент.'}</p>`;
+    <p class="note">${P.passed?'Юниты открыты. Проверенные слова попадут в повторение. Остальные учи по порядку — они ещё не проверены.':'Пройди юниты по порядку — так надёжнее. Попробовать снова можно в любой момент.'}</p>`;
   const b=el('button','btn','На путь'); b.dataset.key='space'; b.onclick=()=>{ PLAY=null; go('path'); }; v.appendChild(b);
   s.appendChild(v);
 }
@@ -154,8 +155,14 @@ function viewPath(s){
   else if(d.met) { mst='happy'; say='День засчитан — серия '+streakLen()+' '+plural(streakLen(),'день','дня','дней')+'!'; }
   v.insertAdjacentHTML('beforeend',mascotRow(mst,say));
   if(PLAY&&!PLAY.end&&playLeft()){ const cb=el('button','btn blue',IC('play',16)+' Продолжить урок ('+playLeft()+')'); cb.style.marginBottom='12px'; cb.onclick=()=>go('play'); v.appendChild(cb); }
+  v.appendChild(memoryCard());
+  const shortcuts=el('div','study-shortcuts');
+  [['pencil','Готовлюсь к диктанту','dictation'],['brush','Пишу на экране','write']].forEach(([ic,title,route])=>{
+    const b=el('button','',IC(ic,22)+esc(title)); b.onclick=()=>route==='write'?startWrite():go(route); shortcuts.appendChild(b);
+  }); v.appendChild(shortcuts);
   if(SEM().on) v.appendChild(semCard());
-  v.appendChild(planCard(plan));
+  const extra=el('details','study-extra'); extra.style.marginTop='14px';
+  extra.appendChild(el('summary','','Другие тренировки на сегодня')); extra.appendChild(planCard(plan)); v.appendChild(extra);
   const wk=weekInfo();
   if(wk.chest==='ready'){ const ch=el('div','hero chest',`<span class="cico">${IC('chest',52)}</span><div style="flex:1"><b style="color:var(--title)">Недельный сундук!</b><div class="note" style="margin:2px 0 0">Цель недели ${wk.goal} XP выполнена</div></div>`);
     ch.style.marginTop='12px'; const ob=el('button','btn gold mini','Открыть'); ob.onclick=()=>{ ch.classList.add('open'); const g=openChest(); Sfx.done(); confetti(); setTimeout(()=>{ toast('+'+g+' XP'); render(); },900); }; ch.appendChild(ob); v.appendChild(ch); }
@@ -168,9 +175,9 @@ function semCard(){
   const c=el('div','hero sem');
   const pace=wq.capLeft>0?(Math.round(wq.pace*10)/10):0;
   c.innerHTML=`<div class="kind">Семестр · уроки 1–${sem.targetLesson} · до ${fmtDate(sem.endDate)}</div>
-    <h2 style="margin-top:4px">Выучено ${st.learned} из ${st.total} слов</h2>
+    <h2 style="margin-top:4px">Знакомо ${st.learned} из ${st.total} слов</h2>
     <div class="bar"><i style="width:${st.total?st.learned/st.total*100:0}%"></i></div>
-    <div class="note" style="margin-top:6px">закреплено (≥21 дня в памяти): <b style="color:var(--ok-text)">${st.solid}</b> · ключей введено: ${214-kl} из 214</div>
+    <div class="note" style="margin-top:6px">узнавание, стабильность ≥21 дня: <b style="color:var(--ok-text)">${st.solid}</b> · ключей введено: ${214-kl} из 214</div>
     <div class="row2"><div class="cell"><b>${dl!=null&&dl>=0?dl:'—'}</b><span>${dl!=null&&dl>=0?plural(dl,'день','дня','дней')+' до конца':'дата не задана'}</span></div>
       <div class="cell"><b>${wq.quota}</b><span>новых сегодня</span></div>
       <div class="cell"><b>${pace?pace.toString().replace('.',','):'—'}</b><span>нужный темп, слов/день</span></div></div>

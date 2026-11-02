@@ -9,7 +9,7 @@ await T('lesson-words',()=>{ const n=ev("Object.keys(LESSONS).length"); ok(n===3
   ok(nc>=750,'слов курса мало: '+nc); });
 await T('homographs',()=>{ ok(ev("BYK['还'].p")==='huán'&&ev("BYK['还:hái'].p")==='hái','还'); ok(ev("BYK['行:xíng'].k[0]")===28,'行');
   ok(ev("LESSONS[15].o.includes('还:hái')")&&ev("LESSONS[11].o.includes('还')"),'омографы в уроках'); });
-await T('textbook-pinyin',()=>{ for(const [s,p] of [['大夫','dài fu'],['多少','duō shao'],['教','jiāo'],['告诉','gào su'],['东西','dōng xi'],['一起','yì qǐ'],['得','de']]) ok(ev(`BYK['${s}'].p`)===p,s+' → '+ev(`BYK['${s}'].p`)); });
+await T('textbook-pinyin',()=>{ for(const [s,p] of [['大夫','dài fu'],['多少','duō shao'],['教','jiāo'],['告诉','gào su'],['东西','dōng xi'],['一起','yì qǐ'],['得','de'],['民歌','mín gē']]) ok(ev(`BYK['${s}'].p`)===p,s+' → '+ev(`BYK['${s}'].p`)); });
 await T('group-words',()=>{ const x=ev("JSON.stringify(LESSONS[16].x.map(x=>[x.id,x.o.length]))"); ok(x==='[["g16",70]]','список группы: '+x);
   ok(ev("WORD_L['女儿']")===16&&ev("EXTRA_OF['女儿']").includes('Список группы'),'女儿 в списке группы'); ok(ev("BYK['姥姥'].p")==='lǎo lao','姥姥');
   ok(ev("LESSONS[17].x[0].o.includes('洗脸')"),'презентация 17'); });
@@ -29,8 +29,8 @@ await T('hanzi-kangxi',()=>{
   ok(ev("HZ.c['语'][0]")===149&&ev("HZ.c['语'][1]")==='讠','语 → 讠 №149');
   ok(ev("HZ.c['好'][2]")==='⿰女子','состав 好'); ok(ev("HZ.c['点'][3]")==='p'&&ev("HZ.c['点'][4]")==='灬','点 смысл+звук'); });
 await T('keys-deck',()=>{
-  const ord=JSON.parse(fs.readFileSync(new URL('../src/data/kondr_1-30.json',import.meta.url),'utf8')).keys_study_order;
-  ok(ev("KEY_ORDER.join()")===ord.join(),'порядок ключей ≠ keys_study_order'); ok(new Set(ord).size===214&&ord.every(n=>n>=1&&n<=214),'214 разных ключей');
+  const ord=Array.from({length:214},(_,i)=>i+1);
+  ok(ev("KEY_ORDER.join()")===ord.join(),'ключи должны идти по номерам 1–214'); ok(new Set(ord).size===214&&ord.every(n=>n>=1&&n<=214),'214 разных ключей');
   ok(ev("KEY_UNITS.length")===11&&ev("KEY_UNITS.flat().join()")===ord.join(),'11 юнитов ключей');
   ok(ev("COURSE.every(k=>!isRad(k))"),'в COURSE остались ключи'); });
 await T('drill-units',()=>{

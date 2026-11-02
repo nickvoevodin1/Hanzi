@@ -114,9 +114,11 @@ for(let L=1;L<=NL;L++){
   lessonWords(L).forEach(add);
   lessonExtras(L).forEach(x=>x.words.forEach(w=>{ if(!(w.key in EXTRA_OF)) EXTRA_OF[w.key]=x.title; add(w); }));   // после урока — слова группы
 }
-const KEY_ORDER = (KC.order&&KC.order.length===214) ? KC.order.slice() : RADS.map(r=>r[0]);   // колода «Ключи»: все 214
+// Учим по номерам Канси: 1 → 214. KC.order — старый порядок по частоте в уроках;
+// он не соответствует числовым диапазонам пути и диктантов. ID карточек r:n остаются прежними.
+const KEY_ORDER = RADS.map(r=>r[0]).sort((a,b)=>a-b);
 // Иероглифы уроков, в которых встречается ключ (для карточки ключа)
 const KEY_CHARS = {};
 Object.keys(CHAR_L).sort((a,b)=>CHAR_L[a]-CHAR_L[b]).forEach(c=>keysOf(c).forEach(([,n])=>{ (KEY_CHARS[n]=KEY_CHARS[n]||[]); if(!KEY_CHARS[n].includes(c)) KEY_CHARS[n].push(c); }));
-// Путь, раздел «Ключи»: 11 юнитов по ~20 ключей в порядке изучения
+// Путь, раздел «Ключи»: 11 последовательных юнитов по ~20 ключей по номерам Канси
 const KEY_UNITS=[]; for(let i=0;i<11;i++) KEY_UNITS.push(KEY_ORDER.slice(Math.round(i*214/11),Math.round((i+1)*214/11)));
