@@ -4,7 +4,7 @@
 // Убираем заставку сразу после готовности; даём анимации спокойно проиграться перед открытием приложения.
 const Splash={
   hide(){ const sp=document.getElementById('splash'); if(!sp) return;
-    const wait=Math.max(0,2500-performance.now());
+    const wait=Math.max(0,4000-performance.now());
     setTimeout(()=>{ sp.classList.add('out'); const m=document.querySelector('meta[name=theme-color]'); if(m) m.content='#ffffff'; setTimeout(()=>sp.remove(),320); },wait);
   },
   fail(){ const status=document.getElementById('splashStatus'), retry=document.getElementById('splashRetry');
@@ -14,7 +14,7 @@ const Splash={
 };
 // Обновления: проверка при запуске, при каждом возвращении в приложение и раз в 30 мин; когда новая версия
 // встала, service worker сам перезагружает окно (место в уроке сохраняет Resume на pagehide).
-const APP_VER='v23';
+const APP_VER='v24';
 function registerSW(){
   if(!('serviceWorker' in navigator)) return;
   navigator.serviceWorker.register('./service-worker.js',{updateViaCache:'none'}).then(reg=>{
