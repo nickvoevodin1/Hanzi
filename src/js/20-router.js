@@ -11,6 +11,7 @@ function go(name,params){
 function render(){
   if(State.meta.day!==todayStr()){ State.meta.day=todayStr(); applyFreezes(); save('meta'); }
   document.body.classList.toggle('focus',['play','session'].includes(State.route.name));
+  document.body.classList.toggle('notebook-focus',State.route.name==='notebook'&&!!State.route.practice);
   document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.nav===State.tab));
   renderTop();
   const V={path:viewPath,classroom:viewClassroom,notebook:viewNotebook,play:viewPlay,practice:viewPractice,memory:viewMemory,dictation:viewDictation,grammar:viewGrammar,cards:viewCards,decomp:viewDecomp,sent:viewSent,addsent:viewAddSent,mock:viewMock,reports:viewReports,

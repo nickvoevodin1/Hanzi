@@ -43,7 +43,7 @@ await T('missed-day-catchup-does-not-fill-several-days',()=>{
   next();ok(ev("notebookStatus('你').active")===2,'remaining third row lost');
 });
 await T('screen-ink-persists-with-pointer-input-and-dot-strokes',()=>{
-  reset();ev("document.getElementById('screen').replaceChildren(notebookPanel('你',{skill:'hz',compact:true,showSample:false}))");
+  reset();ev("go('notebook',{k:'你',practice:true,skill:'hz'})");
   const canvas=doc.querySelector('.notebook-canvas');
   canvas.getBoundingClientRect=()=>({left:0,top:0,width:300,height:100});
   const pointer=(type,x,y)=>{const e=new A.w.Event(type,{bubbles:true,cancelable:true});Object.defineProperties(e,{clientX:{value:x},clientY:{value:y},pointerId:{value:1},button:{value:0}});canvas.dispatchEvent(e);};
@@ -55,7 +55,8 @@ await T('screen-ink-persists-with-pointer-input-and-dot-strokes',()=>{
   ev("window.__nbInk=JSON.stringify(notebookData('你',false)); State.meta.memory=JSON.parse(JSON.stringify(memoryState()))");
   ok(ev("JSON.stringify(notebookData('你',false))===window.__nbInk"),'saved ink changed on reload');
   ok(ev("notebookMark('你','hz','screen')"),'real screen ink could not be recorded');
-  ok(ev("notebookData('你',false).days[0].hz.source")==='screen','screen source not recorded');
+  ok(ev("notebookCount('你','hz',0)")===1,'one submitted screen attempt not counted');
+  ok(!ev("notebookData('你',false).days[0].hz.done"),'one attempt prematurely finished all ten');
 });
 await T('empty-screen-cannot-be-marked-as-written',()=>{
   reset();ok(!ev("notebookMark('你','hz','screen')"),'empty screen counted as written');
@@ -67,7 +68,7 @@ await T('radical-forms-characters-and-word-pools',()=>{
   ok(ev("notebookKey('语')")!=null,'single course character unavailable');
   ev("State.route={name:'notebook',scope:'keys',k:'r:85'}; document.getElementById('screen').replaceChildren(); viewNotebook(document.getElementById('screen'))");
   ok(doc.querySelectorAll('.notebook-day').length===3,'three actual day sheets absent');
-  ok(doc.querySelectorAll('.notebook-canvas').length===6,'separate character/pinyin lines absent');
+  ok(doc.querySelectorAll('.notebook-canvas').length===0,'overview must launch fullscreen practice instead of small rows');
   ok(ev("Object.keys(memoryState().entries).length")===0,'selector enrolled all radicals');
 });
 await T('hide-sample-also-hides-selected-word-label',()=>{
