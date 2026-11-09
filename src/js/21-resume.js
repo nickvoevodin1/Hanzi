@@ -13,7 +13,7 @@ const Resume=(()=>{
   function snap(){
     return {v:1,ts:Date.now(),route:State.route,tab:State.tab,y:Math.round(window.scrollY||0),
       play:PLAY,session:SESSION,dec:DEC,sent:SENT,mock:MOCK,test:T,
-      study:['memory','dictation'].includes(State.route.name)?{memory:State.meta.memory,dictation:State.meta.dictation}:undefined};
+      study:['memory','dictation','grammar','classroom','notebook'].includes(State.route.name)?{memory:State.meta.memory,dictation:State.meta.dictation,grammar:State.meta.grammar,classroom:State.meta.classroom}:undefined};
   }
   function save(){
     if(!enabled) return;
@@ -34,9 +34,11 @@ const Resume=(()=>{
       const name=s.route.name;
       // Последний штрих/ввод мог ещё ждать асинхронной записи в IndexedDB.
       // pagehide снимает актуальное состояние синхронно вместе с маршрутом.
-      if(s.study&&['memory','dictation'].includes(name)){
+      if(s.study&&['memory','dictation','grammar','classroom','notebook'].includes(name)){
         if(s.study.memory) State.meta.memory=s.study.memory;
         if(s.study.dictation) State.meta.dictation=s.study.dictation;
+        if(s.study.grammar) State.meta.grammar=s.study.grammar;
+        if(s.study.classroom) State.meta.classroom=s.study.classroom;
         saveStateStudy();
       }
       if(name==='play'&&!PLAY || name==='session'&&!SESSION) return false;

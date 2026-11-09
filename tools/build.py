@@ -25,11 +25,19 @@ def main():
     if tpl.count("/*__JS__*/") != 1:
         sys.exit("Плейсхолдер /*__JS__*/ должен встречаться ровно 1 раз")
     tpl = tpl.replace("/*__JS__*/", "\n".join(p.read_text(encoding="utf-8") for p in js_parts))
+    grammar = {"topics": [], "sources": json.loads((DATA / "grammar-sources.json").read_text(encoding="utf-8"))}
+    for name in ("grammar-early.json", "grammar-late.json"):
+        grammar["topics"].extend(json.loads((DATA / name).read_text(encoding="utf-8"))["topics"])
+    grammar["topics"].sort(key=lambda t: (t["lesson"], t["id"]))
+    if len({t["id"] for t in grammar["topics"]}) != len(grammar["topics"]):
+        sys.exit("Повторяющиеся идентификаторы тем грамматики")
     parts = {
         "/*__DATA__*/": (DATA / "app_data.json").read_text(encoding="utf-8"),
         "/*__HANZI__*/": (DATA / "hanzi.json").read_text(encoding="utf-8"),
         "/*__LESSONS__*/": (DATA / "lessons.json").read_text(encoding="utf-8"),
         "/*__TESTS__*/": (DATA / "tests.json").read_text(encoding="utf-8"),
+        "/*__GRAMMAR__*/": json.dumps(grammar, ensure_ascii=False),
+        "/*__CLASSROOM__*/": (DATA / "classroom.json").read_text(encoding="utf-8"),
         "/*__RADS__*/": (DATA / "radicals.json").read_text(encoding="utf-8"),
         "/*__PALL__*/": (DATA / "palladius.json").read_text(encoding="utf-8"),
         "/*__RAD2__*/": (DATA / "rad_petrosyan.json").read_text(encoding="utf-8"),

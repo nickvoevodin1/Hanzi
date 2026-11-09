@@ -43,6 +43,8 @@ function viewPractice(s){
   v.appendChild(el('h2','title','Повторение'));
   const due=dueKeys().length, tough=Object.keys(State.cards).filter(k=>validKey(k)&&(cardOf(k).lapses||0)>=3);
   const rows=[
+    ['brush','Три дня прописей','пиши на экране или отмечай «Прописал» в бумажной тетради',()=>go('notebook')],
+    ['book','Грамматика','темы уроков 1–30 · правила с пары · '+grammarDueIds().length+' к повторению',()=>go('grammar')],
     ['brush','Тетрадь памяти','письмо, пиньинь и перевод · три дня и повторения',()=>go('memory')],
     ['pencil','Подготовка к диктанту','уроки 18 и 19 · ключи 1–40 и 1–115 · свой набор',()=>go('dictation')],
     ['cycleC','Повторить всё к сроку',due?due+' к сроку — слова, ключи, разборы, прописи':'к сроку ничего нет',()=>startPart('rev')],

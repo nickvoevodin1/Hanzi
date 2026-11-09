@@ -43,6 +43,6 @@ await T('no-emoji',()=>{ ev("go('path')"); const h=doc.body.innerHTML; ok(!/[\u{
   ev("go('practice')"); ok(!/[\u{1F300}-\u{1FAFF}]/u.test(doc.body.innerHTML),'эмодзи в Повторении');
   ok(doc.querySelectorAll('.nav svg.ico').length===5,'иконки навигации'); });
 await T('node-popover',()=>{ reset(); ev("go('path')"); const d=doc.querySelector('.pnode.cur .disc'); ok(d,'нет текущего узла'); d.click();
-  ok(doc.querySelector('.npop .popbtn'),'нет подсказки «Начать»'); doc.querySelector('.npop .popbtn').click(); ok(ev("State.route.name")==='play','узел не запустил урок'); });
+  ok(doc.querySelector('.npop .popbtn'),'нет подсказки «Начать»'); doc.querySelector('.npop .popbtn').click(); ok(ev("State.route.name")==='classroom','узел не запустил занятие'); });
 await T('splash',async()=>{ await A.sleep(Math.max(0,6100-A.w.performance.now())); ok(!doc.getElementById('splash')||doc.getElementById('splash').classList.contains('out'),'заставка не убрана'); });
 A.finish('v19: записи носителей, тоны на слух, продолжение после перезапуска, иконки, путь');

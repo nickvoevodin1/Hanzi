@@ -24,7 +24,7 @@ await T('unknown-never-old-and-fresh-obeys-quotas',()=>{
   reset(); ev("semWords().slice(0,20).forEach(memoryEnroll); window.__cmP=memoryPlan()");
   ok(ev("window.__cmP.oldCount")===0,'empty unknown entries treated as learned reviews');
   ok(ev("window.__cmP.dueKeys.length")===0,'unknown vocabulary migrated to review');
-  ok(ev("window.__cmP.freshKeys.every(k=>isNew(k)&&!memoryState().entries[k])"),'fresh overlaps enrolled or learned');
+  ok(ev("window.__cmP.freshKeys.every(k=>isNew(k)&&!memoryActuallyStarted(memoryState().entries[k]))"),'fresh overlaps enrolled or learned');
   ev("D().new=99999; D().keys=99999; window.__cmP=memoryPlan()");
   ok(ev("window.__cmP.freshKeys.length")===0,'exhausted daily quota ignored');
 });

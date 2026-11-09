@@ -19,6 +19,9 @@ function viewProgress(s){
   const nextCircle=memoryPlan(), circle=el('div','hero'); circle.style.marginTop='12px';
   circle.innerHTML=`<div class="kind">Накопительное повторение</div><h2>${st.learned} знакомых слов и ${kl} ключей</h2><p class="note">После знакомства материал остаётся в повторении. В следующем круге: ${nextCircle.freshKeys.length} новых и ${nextCircle.dueKeys.length+nextCircle.maintenanceKeys.length} знакомых элементов. Ошибки и задания к сроку идут первыми; старые слова и ключи чередуются.</p><p class="note">Неизученное остаётся новым. Досрочный правильный ответ не увеличивает интервал; оценки письма, пиньиня и перевода считаются отдельно.</p>`;
   const cb=el('button','btn ghost mini','Короткий круг'); cb.disabled=!nextCircle.keys.length; cb.onclick=()=>memoryStart(); circle.appendChild(cb); v.appendChild(circle);
+  const gs=grammarStats(), gc=el('div','hero'); gc.style.marginTop='12px';
+  gc.innerHTML=`<div class="kind">Грамматика курса</div><h2>Проверено ${gs.completed} из ${gs.total} тем</h2><p class="note">К повторению: ${gs.due}. Закреплено (стабильность ≥21 дня): ${gs.solid}. Чтение правила и исправление по подсказке не заменяют самостоятельные ответы.</p>`;
+  const gb=el('button','btn ghost mini','Повторить грамматику'); gb.onclick=()=>go('grammar'); gc.appendChild(gb); v.appendChild(gc);
   // тепловая карта: 20 недель, столбец — неделя (пн…вс)
   v.appendChild(el('p','eyebrow','Дни занятий'));
   const heat=el('div','heat'), t=todayStr(), g=State.settings.xpGoal;

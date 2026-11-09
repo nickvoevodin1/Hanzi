@@ -62,8 +62,8 @@ function memoryPlan(o){
   const d=(State.meta.daily||{})[todayStr()]||{}, sem=SEM();
   const wq=sem.on?wordsQuota({remaining:semWords().filter(isNew).length,introduced:d.new||0,more:!!d.more}).left:Math.max(0,(State.settings.newPerDay||0)-(d.new||0));
   const kq=Math.max(0,keysQuota()-(d.keys||0));
-  const wp=semWords().filter(k=>(!L||WORD_L[k]===L)&&isNew(k)&&!es[k]);
-  const kp=KEY_ORDER.map(n=>'r:'+n).filter(k=>isNew(k)&&!es[k]);
+  const wp=semWords().filter(k=>(!L||WORD_L[k]===L)&&isNew(k)&&!memoryActuallyStarted(es[k]));
+  const kp=KEY_ORDER.map(n=>'r:'+n).filter(k=>isNew(k)&&!memoryActuallyStarted(es[k]));
   let nw=wp.slice(0,Math.min(wq,o.kind==='keys'?0:old.length?1:3));
   let nk=kp.slice(0,Math.min(kq,o.kind==='words'?0:old.length?1:2));
   if(o.kind&&old.length){ if(o.kind==='words') nw=wp.slice(0,Math.min(wq,2)); else nk=kp.slice(0,Math.min(kq,2)); }
@@ -111,7 +111,7 @@ function memoryStats(){
 }
 function memoryNewCandidates(rad,L){
   const es=(State.meta.memory||{}).entries||{}, pool=rad?KEY_ORDER.map(n=>'r:'+n):semWords().filter(k=>!L||WORD_L[k]===L);
-  return pool.filter(k=>isNew(k)&&!es[k]);
+  return pool.filter(k=>isNew(k)&&!memoryActuallyStarted(es[k]));
 }
 function memoryPaceNote(){ return 'Каждый круг соединяет новое со знакомым. Если повторений накопилось много, новая порция станет меньше. Можно остановиться после одного круга.'; }
 function memoryPlanLabel(p){ const n=p.freshKeys.length, old=p.dueKeys.length+p.maintenanceKeys.length; return n+' '+plural(n,'новый элемент','новых элемента','новых элементов')+' + '+old+' '+plural(old,'знакомый','знакомых','знакомых'); }
@@ -216,6 +216,7 @@ function viewMemory(s){
       const c=el('div','qcard introcard');
       c.innerHTML=`<div class="newtag">${IC('brush',16)} День 1 · первая строка</div><div class="han" style="font-size:64px">${esc(i.hz)}</div><div class="py">${pinyinHTML(i.py)}</div><div class="tr">${esc(i.ru)}</div><p class="note">Прочитай вслух. Запиши слово, пиньинь и перевод. Под ними оставь по три строки для иероглифов и пиньиня: сегодня заполни первую, завтра вторую, послезавтра третью.</p>${i.w?wordFormulas(i.w):''}`;
       v.appendChild(c);
+      const paper=el('button','btn ghost mini','Открыть три дня прописей'); paper.onclick=()=>go('notebook',{k:t.k}); v.appendChild(paper);
       const say=el('button','say',SPK(18)+' Послушать'); say.onclick=()=>Speech.say(i.rad?(RADW[radNum(t.k)]||[[i.hz]])[0][0]:i.w.s,undefined,i.py); v.appendChild(say);
       const b=el('button','btn','Закрыть образец и вспомнить'); b.dataset.key='space'; b.style.marginTop='12px';
       b.onclick=()=>{ ss.studied.push(t.k); e.studied=true; save('meta'); render(); }; v.appendChild(b); return;
@@ -226,6 +227,7 @@ function viewMemory(s){
     c.innerHTML=t.skill==='hz'?`<div class="qbig" style="font-size:25px">${esc(i.ru)}</div>`:`<div class="han" style="font-size:64px">${esc(i.hz)}</div>`;
     c.insertAdjacentHTML('beforeend',`<p class="note">${t.skill==='hz'?(i.rad?'Основная форма и форма в составе знака, если она есть. ':'')+'Заполни одну строку на бумаге. Сначала вспомни, потом сверяй.':t.skill==='py'?'Заполни одну строку пиньиня на бумаге. Не забудь тон каждого слога.':'Произнеси или запиши значение до открытия ответа.'}</p>`);
     v.appendChild(c);
+    if(!ss.reveal&&(t.skill==='hz'||t.skill==='py')) v.appendChild(notebookPanel(t.k,{skill:t.skill,compact:true,showSample:false}));
     if(!ss.reveal){
       const b=el('button','btn','Сверить с образцом'); b.dataset.key='space'; b.onclick=()=>{ ss.reveal=true; save('meta'); render(); }; v.appendChild(b);
       v.appendChild(el('p','note','Самопроверка на бумаге. Приложение не распознаёт рукописный ответ.'));
@@ -253,6 +255,7 @@ function viewMemory(s){
   const guide=el('div','hero');
   guide.innerHTML=`<div class="kind">Метод репетитора + повторения</div><h2>Три строки. Три дня.</h2><ol style="padding-left:22px;line-height:1.65"><li><b>Сегодня:</b> запиши слово, пиньинь, перевод. Оставь по 3 строки для письма и пиньиня. Заполни первую, затем закрой образец и проверь память.</li><li><b>Завтра:</b> заполни вторые строки по памяти. Отдельно проверь тоны и перевод.</li><li><b>Послезавтра:</b> заполни третьи строки. Дальше приложение вернёт каждый навык к своему сроку.</li></ol><p class="note"><b>В каждом круге:</b> немного нового и уже выученное. Знакомое выбирается из твоего сохранённого прогресса. Сначала слабые навыки и повторения к сроку; иногда один знакомый знак возвращается раньше срока, без увеличения интервала за правильный ответ.</p><p class="note">Ошибка — подсказка, чему уделить минуту. Не нужно переписывать страницу: исправь, закрой ответ и попробуй ещё раз.</p>`;
   v.appendChild(guide);
+  const nb=el('button','btn ghost','Прописывать на экране · три дня'); nb.style.marginTop='12px'; nb.onclick=()=>go('notebook'); v.appendChild(nb);
   const status=el('div','hero'); status.style.marginTop='12px';
   const upcoming=memoryPlan();
   status.innerHTML=`<b>Следующий круг: ${esc(memoryPlanLabel(upcoming))}</b><div class="note">Старые карточки уже участвуют в повторении. Незнакомые слова не попадают в проверку знакомого.</div>`;

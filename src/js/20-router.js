@@ -2,18 +2,18 @@
   РОУТЕР И НАВИГАЦИЯ: Путь · Повторение · Словарь · Прогресс · Настройки
 ==================================================================*/
 const TAB_OF={path:'path',play:'path',practice:'practice',cards:'practice',session:'practice',decomp:'practice',sent:'practice',addsent:'practice',
-  memory:'practice',dictation:'practice',mock:'practice',tests:'practice',test:'practice',keys:'practice',radical:'practice',reports:'practice',
+  classroom:'path',notebook:'practice',memory:'practice',dictation:'practice',grammar:'practice',mock:'practice',tests:'practice',test:'practice',keys:'practice',radical:'practice',reports:'practice',
   dict:'dict',list:'dict',lessons:'dict',lesson:'dict',extra:'dict',strokes:'dict',progress:'progress',settings:'settings'};
 function go(name,params){
   State.route={name,...params}; if(TAB_OF[name]) State.tab=TAB_OF[name];
-  closeSheet(); hideFB(); clearTimeout(playT); Speech.stop(); render(); window.scrollTo(0,0);
+  closeSheet(); hideFB(); clearTimeout(playT); Speech.stop(); if(typeof stopClassListening==='function') stopClassListening(); render(); window.scrollTo(0,0);
 }
 function render(){
   if(State.meta.day!==todayStr()){ State.meta.day=todayStr(); applyFreezes(); save('meta'); }
   document.body.classList.toggle('focus',['play','session'].includes(State.route.name));
   document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.nav===State.tab));
   renderTop();
-  const V={path:viewPath,play:viewPlay,practice:viewPractice,memory:viewMemory,dictation:viewDictation,cards:viewCards,decomp:viewDecomp,sent:viewSent,addsent:viewAddSent,mock:viewMock,reports:viewReports,
+  const V={path:viewPath,classroom:viewClassroom,notebook:viewNotebook,play:viewPlay,practice:viewPractice,memory:viewMemory,dictation:viewDictation,grammar:viewGrammar,cards:viewCards,decomp:viewDecomp,sent:viewSent,addsent:viewAddSent,mock:viewMock,reports:viewReports,
     lessons:viewLessons,lesson:viewLesson,extra:viewExtra,strokes:viewStrokes,card:viewCard,session:viewSession,draw:viewDraw,
     tests:viewTests,test:viewTest,keys:viewKeys,radical:viewRadical,dict:viewDict,list:viewList,progress:viewProgress,settings:viewSettings};
   const s=$('#screen'); s.innerHTML=''; (V[State.route.name]||viewPath)(s);
