@@ -179,9 +179,11 @@ function viewNotebook(s){
   choose.onchange=()=>go('notebook',{scope,lesson:L,k:choose.value});filters.appendChild(choose);v.appendChild(filters);
   if(!info){v.appendChild(el('p','note','Для выбранного набора пока нет элементов.'));return;}
   const sample=el('div','hero notebook-header');
-  if(show)sample.innerHTML=`<div class="kind">${esc(info.label)}</div><div class="han" style="font-size:48px">${esc(info.hz)}</div><div class="py">${pinyinHTML(info.py)}</div><div class="tr">${esc(info.ru)}</div>`;
-  else sample.innerHTML=`<div class="kind">${esc(info.label)}</div><div class="tr">${esc(info.ru)}</div><p class="note">Сегодня попробуй написать по памяти. Образец можно открыть после попытки.</p>`;
-  const toggle=el('button','linkbtn',show?'Закрыть образец':'Сверить образец');toggle.onclick=()=>go('notebook',{scope,lesson:L,k,sample:!show});sample.appendChild(toggle);v.appendChild(sample);
+  const content=el('div','notebook-sample-text');
+  if(show)content.innerHTML=`<div class="kind">${esc(info.label)}</div><div class="han" style="font-size:48px">${esc(info.hz)}</div><div class="py">${pinyinHTML(info.py)}</div><div class="tr">${esc(info.ru)}</div>`;
+  else content.innerHTML=`<div class="kind">${esc(info.label)}</div><div class="tr">${esc(info.ru)}</div><p class="note">Сегодня попробуй написать по памяти. Образец можно открыть после попытки.</p>`;
+  const toggle=el('button','linkbtn',show?'Закрыть образец':'Сверить образец');toggle.onclick=()=>go('notebook',{scope,lesson:L,k,sample:!show});content.appendChild(toggle);sample.appendChild(content);v.appendChild(sample);
+  if(show){const demo=el('div');sample.appendChild(demo);notebookStrokeDemo(demo,info);}
   for(let index=0;index<3;index++){
     const section=el('section','hero notebook-day');section.style.marginTop='14px';section.dataset.notebookDay=String(index+1);
     const existing=status.days[index],isDone=!!notebookCompletedDay(existing),active=status.active===index;

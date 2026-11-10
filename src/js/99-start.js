@@ -14,7 +14,7 @@ const Splash={
 };
 // Обновления: проверка при запуске, при каждом возвращении в приложение и раз в 30 мин; когда новая версия
 // встала, service worker сам перезагружает окно (место в уроке сохраняет Resume на pagehide).
-const APP_VER='v27';
+const APP_VER='v28';
 function registerSW(){
   if(!('serviceWorker' in navigator)) return;
   navigator.serviceWorker.register('./service-worker.js',{updateViaCache:'none'}).then(reg=>{
@@ -28,7 +28,7 @@ function registerSW(){
   applyFreezes();
   Speech.setPref(State.settings.voiceName);
   window.HZDATA=null;
-  fetch('./hanzi-data.json').then(r=>r.ok?r.json():null).then(d=>{ window.HZDATA=d||{}; }).catch(()=>{ window.HZDATA={}; });
+  window.HZREADY=fetch('./hanzi-data.json').then(r=>r.ok?r.json():null).then(d=>{ window.HZDATA=d||{}; return window.HZDATA; }).catch(()=>{ window.HZDATA={}; return window.HZDATA; });
   registerSW();
   if(!Resume.restore()) go('path');      // вернуться туда, где был (урок, карточки, экран), если свернул приложение
   Splash.hide();
