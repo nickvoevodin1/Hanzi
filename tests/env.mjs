@@ -16,6 +16,7 @@ export async function load(opts={}){
   w.addEventListener('error',e=>errors.push('error: '+(e.error&&e.error.stack||e.message)));
   w.addEventListener('unhandledrejection',e=>{ if(e.reason&&!/no-net/.test(''+(e.reason.message||e.reason))) errors.push('rej: '+(e.reason.stack||e.reason)); });
   await new Promise(r=>setTimeout(r,200));
+  if(w.APPREADY)await w.APPREADY;
   const doc=w.document;
   const E=[];
   const api={w,doc,E,errors,

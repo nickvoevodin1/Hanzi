@@ -14,7 +14,7 @@ const Splash={
 };
 // Обновления: проверка при запуске, при каждом возвращении в приложение и раз в 30 мин; когда новая версия
 // встала, service worker сам перезагружает окно (место в уроке сохраняет Resume на pagehide).
-const APP_VER='v29';
+const APP_VER='v30';
 function registerSW(){
   if(!('serviceWorker' in navigator)) return;
   navigator.serviceWorker.register('./service-worker.js',{updateViaCache:'none'}).then(reg=>{
@@ -23,7 +23,7 @@ function registerSW(){
     setInterval(check,30*60e3);
   }).catch(()=>{});
 }
-(async function(){
+window.APPREADY=(async function(){
   await loadState();
   applyFreezes();
   Speech.setPref(State.settings.voiceName);
@@ -31,5 +31,7 @@ function registerSW(){
   window.HZREADY=fetch('./hanzi-data.json').then(r=>r.ok?r.json():null).then(d=>{ window.HZDATA=d||{}; return window.HZDATA; }).catch(()=>{ window.HZDATA={}; return window.HZDATA; });
   registerSW();
   if(!Resume.restore()) go('path');      // вернуться туда, где был (урок, карточки, экран), если свернул приложение
+  // После Resume: старый снимок не должен отменить разовую отметку пользователя.
+  if(applyStudyUpdateV30()){await save('meta');render();Resume.save();}
   Splash.hide();
 })().catch(()=>Splash.fail());

@@ -1,4 +1,4 @@
-// Seven actual study days, only introduced items, genuine recall and cumulative history.
+// Five actual study days, user-reported writing credit, genuine recall and preserved history.
 import {load} from './env.mjs';
 const A=await load();const {T,ev,ok,doc,click}=A;
 ev("window.__studyDate='2026-11-01';todayStr=()=>window.__studyDate");
@@ -35,31 +35,15 @@ await T('two-retrieval-directions-no-auto-grading-and-two-days',()=>{
  ok(ev('JSON.stringify(State.cards)===window.__base'),'recall modified legacy knowledge');
  ok(ev("studyQueue('today','').length")===0,'completed cards still due today');
  next();ev("studyState().session=null;startStudyCards('today')");complete();
- ok(ev("studyStatus('你').day")===6&&ev("studyStatus('你').stage")==='wait','global review opened same day');
+ ok(ev("studyStatus('你').day")===5&&ev("studyStatus('你').stage")==='done','cycle did not end after two recall days');
 });
-await T('days-six-seven-review-all-ever-written-including-old-and-partial',()=>{
- // An older, partly written word belongs to cumulative review without being called mastered.
- learn(['好']);write(['好']);next();
- ok(ev("studyStatus('你').stage")==='global','day6 missing');
- ev("studyState().session=null;startStudyCards('today')");
- ok(ev("studyGlobalRound(false).targets.includes('好')"),'previous writing omitted from global pool');
- ok(ev("studyState().session.tasks.some(x=>x.k==='好')"),'old written word not reviewed');
- complete();ok(ev("studyStatus('你').day")===7&&ev("studyStatus('你').stage")==='wait','day7 granted on day6');
- next();ev("studyState().session=null;startStudyCards('today')");complete();
- ok(ev("studyStatus('你').stage")==='done','seven-day cycle not complete');
- ok(ev("studyStatus('好').stage")!=='done','general review granted uncompleted writing days');
- ok(ev("studyQueue('all','').includes('你')"),'finished word vanished from free cards');
-});
-await T('cumulative-review-continues-weekly-after-no-new-vocabulary',()=>{
- // The previous scenario completed two global days; an unfinished word must not force new items.
- ev("window.__studyDate=addDays(window.__studyDate,5)");
- ok(!ev('studyGlobalNeeded()'),'maintenance returned too soon');next();
- ok(ev('studyGlobalNeeded()'),'weekly review stopped after the first seven days');
- ev("studyState().session=null;startStudyCards('today')");complete();
- ok(!ev('studyGlobalNeeded()'),'second weekly day opened on same date');next();
- ok(ev('studyGlobalNeeded()'),'second weekly maintenance day missing');
- ev("studyState().session=null;startStudyCards('today')");complete();
- ok(!ev('studyGlobalNeeded()'),'completed weekly pair remained due');
+await T('no-global-days-or-weekly-maintenance-after-day-five',()=>{
+ ev("studyState().global={'2026-10-29':{completed:true,targets:['你'],answers:{'你':{hz:3,reading:3}}}};window.__history=JSON.stringify(studyState().global)");
+ for(const gap of [1,2,7,30]){ev(`window.__studyDate=addDays(window.__studyDate,${gap})`);ok(ev("studyQueue('today','').length")===0,'extra mandatory review after five-day cycle');}
+ ok(ev("studyQueue('all','').includes('你')"),'free cards disappeared');
+ ok(ev('JSON.stringify(studyState().global)===window.__history'),'old review history removed');
+ ev("go('path')");ok(doc.querySelectorAll('.study-week span').length===5,'timeline still seven days');
+ ok(!/6–7|3 \+ 2 \+ 2/.test(A.txt()),'old weekly schedule still advertised');
 });
 await T('missed-days-never-fill-unfinished-stages',()=>{
  reset();learn(['你']);write(['你']);ev("window.__studyDate='2026-11-20'");
@@ -68,12 +52,35 @@ await T('missed-days-never-fill-unfinished-stages',()=>{
  next();write(['你']);ev("window.__studyDate='2026-12-20'");
  ok(ev("studyStatus('你').stage")==='cards'&&ev("studyStatus('你').day")===4,'time skipped recall days');
 });
-await T('local-cards-also-cover-same-day-global-round-without-duplicate-demands',()=>{
- reset();learn(['你','好']);
- ev("['你','好'].forEach(k=>{for(let day=0;day<3;day++){const row=notebookRow(k,day,true);row.date='2026-10-'+(25+day);for(const sk of ['hz','py'])row[sk]={done:true,date:'2026-10-'+(25+day)};}});studyState().reviews['你']={skills:{},days:{'2026-10-28':{hz:3,reading:3},'2026-10-29':{hz:3,reading:3}}};startStudyCards('today')");
- ok(ev("studyState().session.tasks.filter(x=>x.k==='好').every(x=>x.kind==='local')"),'newly written word lost own local phase');complete();
- ok(ev('studyGlobalRound(false).completed'),'mixed local/global pool could not complete');
- ok(ev("studyStatus('好').day")===5,'global round skipped two-day consolidation');
+await T('reported-writing-credit-covers-full-lessons-only-and-opens-cards-now',()=>{
+ reset();learn(['你','r:1']);write(['你']);ev("studyToggleDifficult('你');window.__base=JSON.stringify(State.cards);window.__daily=JSON.stringify(State.meta.daily);window.__old=JSON.stringify(notebookRow('你',0,false));window.__target=studyLesson14Words();window.__outside=semWords().find(k=>!window.__target.includes(k));notebookMark(window.__outside,'hz','paper');window.__other=JSON.stringify(notebookData(window.__outside,false));applyStudyUpdateV30()");
+ const keys=ev('studyLesson14Words()');ok(keys.length>15,'incomplete lesson pool');
+ ok(ev("studyLesson14Words().every(k=>notebookStatus(k).finished&&studyStatus(k).stage==='cards'&&studyStatus(k).day===4)"),'not all reported words open first card day now');
+ ok(ev("studyQueue('today','').length")===keys.length,'cards contain unrelated words or omit lesson words');
+ ok(ev('JSON.stringify(State.cards)===window.__base'),'reported writing awarded recognition knowledge');
+ ok(ev('JSON.stringify(State.meta.daily)===window.__daily'),'reported writing awarded XP');
+ ok(ev("JSON.stringify(notebookRow('你',0,false))===window.__old"),'existing writing history overwritten');
+ ok(ev('JSON.stringify(notebookData(window.__outside,false))===window.__other'),'later lesson writing overwritten');
+ ok(ev("studyIsDifficult('你')"),'hard mark lost');
+ ok(ev("studyLesson14Words().every(k=>notebookData(k,false).credit.reviewFrom===todayStr())"),'first card day postponed');
+ ok(ev("studyLesson14Words().filter(k=>k!=='你').every(k=>notebookData(k,false).days.every(d=>d.hz.reported&&d.py.reported&&d.hz.date===todayStr()))"),'fictitious past dates stored');
+});
+await T('credit-is-once-only-and-two-card-days-still-required',()=>{
+ ev("startStudyCards('today')");complete();
+ while(ev("studyQueue('today','').length")){ev("studyState().session=null;startStudyCards('today')");complete();}
+ ok(ev("studyLesson14Words().every(k=>studyStatus(k).day===5&&studyStatus(k).stage==='wait')"),'second day completed on same date');next();
+ ev("window.__before=JSON.stringify(State.meta.memory);window.__reviews=JSON.stringify(studyState().reviews)");
+ ok(!ev('applyStudyUpdateV30()'),'one-time adjustment applied again');
+ ok(ev('JSON.stringify(State.meta.memory)===window.__before&&JSON.stringify(studyState().reviews)===window.__reviews'),'restart reset credited progress');
+ while(ev("studyQueue('today','').length")){ev("studyState().session=null;startStudyCards('today')");complete();}
+ ok(ev("studyLesson14Words().every(k=>studyStatus(k).stage==='done')"),'two card days did not finish credited words');
+ next();ok(ev("studyQueue('today','').length")===0,'third mandatory card day created');
+});
+await T('old-global-sessions-close-without-erasing-other-history',()=>{
+ reset();ev("studyState().session={tasks:[{k:'你',kind:'global'}]};studyState().sessions={old:{tasks:[{kind:'global'}]},keep:{tasks:[{kind:'local'}]}};studyState().global={'2026-10-20':{completed:true}};State.route={name:'cards',run:true};applyStudyUpdateV30()");
+ ok(ev('studyState().session')===null,'old global session still active');ok(!ev('studyState().sessions.old'),'paused global session still active');
+ ok(ev('!!studyState().sessions.keep'),'local session deleted');ok(ev("studyState().global['2026-10-20'].completed"),'global history deleted');
+ ok(ev("State.route.name==='cards'&&!State.route.run"),'restored screen still opens global session');
 });
 await T('difficult-priority-extra-retrieval-and-conservative-fsrs',()=>{
  reset();learn(['你','好']);write(['你','好']);ev("studyToggleDifficult('好');window.__before=JSON.stringify(State.cards)");
@@ -101,7 +108,7 @@ await T('notebook-single-item-no-lesson-menu-and-difficult-on-writing-pad',()=>{
  doc.querySelector('.study-difficult').click();ok(ev("studyIsDifficult('你')"),'hard mark not persisted');
 });
 await T('resume-saves-cards-index-reveal-and-difficult-marks',()=>{
- reset();learn(['你']);write(['你']);ev("studyToggleDifficult('你');startStudyCards('all');studyState().session.revealed=true;studyGrade(2);studyState().session.revealed=true;Resume.restore();Resume.save();window.__resume=localStorage.getItem('zhu-resume');State.meta.study=null;localStorage.setItem('zhu-resume',window.__resume);Resume.restore()");
+ reset();learn(['你']);write(['你']);ev("studyToggleDifficult('你');startStudyCards('all');studyState().session.revealed=true;studyGrade(2);studyState().session.revealed=true;Resume.save();window.__resume=localStorage.getItem('zhu-resume');State.meta.study=null;localStorage.setItem('zhu-resume',window.__resume);Resume.restore()");
  ok(ev('studyState().session.index')===1&&ev('studyState().session.revealed'),'lost current card on reload');ok(ev("studyIsDifficult('你')"),'lost difficult marks on resume');
 });
 await T('switching-to-difficult-and-single-word-cards-preserves-old-round',()=>{
@@ -114,14 +121,6 @@ await T('midnight-never-credits-yesterday-session-to-today',()=>{
  reset();learn(['你']);write(['你']);ev("startStudyCards('all');studyState().session.revealed=true");next();
  ok(!ev('studyGrade(3)'),'stale session graded on a different day');ok(ev('studyState().session.finished'),'stale session not closed');
 });
-await T('global-round-covers-large-history-across-short-sessions',()=>{
- reset();ev("window.__many=semWords().slice(0,12);window.__many.forEach(k=>{State.cards[k]=FSRS.review({},3,REQ);for(let day=0;day<3;day++){const row=notebookRow(k,day,true);row.date='2026-10-'+(25+day);for(const sk of ['hz','py'])row[sk]={done:true,date:'2026-10-'+(25+day)};}studyState().reviews[k]={skills:{},days:{'2026-10-28':{hz:3,reading:3},'2026-10-29':{hz:3,reading:3}}};});window.__before=JSON.stringify(State.cards);startStudyCards('all','',[window.__many[0]])");
- complete();ok(ev('Object.keys(studyGlobalRound(false).answers).length')===1,'free card did not count toward eligible global review');
- ev("studyState().session=null;startStudyCards('today')");ok(ev('studyState().session.keys.length')===10,'global portion not bounded10');complete();
- ok(!ev('studyGlobalRound(false).completed'),'one short session falsely reviewed full history');
- ev("studyState().session=null;startStudyCards('today')");ok(ev('studyState().session.keys.length')===1,'remaining old word lost or already reviewed repeated');complete();
- ok(ev('studyGlobalRound(false).completed'),'full history did not complete after all portions');ok(ev('JSON.stringify(State.cards)===window.__before'),'global history review rewrote base knowledge');
-});
 await T('main-path-includes-every-rule-and-ordered-key-once-and-stories',()=>{
  reset();const units=ev('courseClassUnits()');
  ok(units.flatMap(u=>u.nodes.filter(n=>n.type==='grammar').map(n=>n.topicId)).sort().join()===ev('grammarTopics().map(t=>t.id).sort().join()'),'grammar omitted/duplicated');
@@ -131,4 +130,4 @@ await T('main-path-includes-every-rule-and-ordered-key-once-and-stories',()=>{
  ev("{let guard=0;while(!classroomState().session.finished&&guard++<30){classroomState().session.revealed=true;classroomAnswer(true)}}");ok(ev("classroomStageDone('CL1-3','story')"),'story understanding not tracked');
  ok(ev("grammarTopic('g17-ordinal-di').rule.includes('第一个人')"),'ordinal rule missing');
 });
-A.finish('study cycle: introduced-only list,3+2+2 days, difficult cards, recall, search, resume and integrated path');
+A.finish('study cycle: introduced-only list,3+2 days and reported lesson1–4 writing credit, difficult cards, recall, search, resume and integrated path');

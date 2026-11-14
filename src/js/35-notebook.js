@@ -147,7 +147,7 @@ function notebookPracticeSlot(host,k,skill,index,editable,opts){
   host.appendChild(el('div','kind',skill==='hz'?'Иероглифы / ключи':'Пиньинь'));
   host.appendChild(el('p','notebook-slot-count',datum?.done&&!datum.attempts?.length&&!datum.paperCount?'Выполнено ранее':count+' / 10 повторений'));
   if(editable){const actions=el('div','actionrow notebook-actions');const start=el('button','btn ghost mini','Писать 10 раз');start.setAttribute('aria-label',(skill==='hz'?'Писать иероглифы':'Писать пиньинь')+' · день '+(index+1));start.onclick=()=>startNotebookPractice(k,skill,opts);const paper=el('button','btn mini','Прописал');paper.onclick=()=>{if(notebookMark(k,skill,'paper'))render();};actions.append(start,paper);host.appendChild(actions);host.appendChild(el('p','note','«Прописал» — написал десять раз в бумажной тетради.'));}
-  else if(datum?.done)host.appendChild(el('p','note',IC('check',14)+' '+(datum.source==='paper'?'В тетради':'На экране')+' · '+fmtDate(datum.date)));
+  else if(datum?.done)host.appendChild(el('p','note',IC('check',14)+' '+(datum.reported?'Прописано ранее · отметка':datum.source==='paper'?'В тетради':'На экране')+' · '+fmtDate(datum.date)));
 }
 function notebookPanel(k,opts){
   opts=opts||{};k=notebookKey(k);const panel=el('section','notebook-panel');if(!k)return panel;
@@ -189,8 +189,8 @@ function viewNotebook(s){
   }
   if(State.route.fromStudy){
     const next=el('button','btn',status.active==null?'Следующий знак':'К списку прописей');next.style.marginTop='16px';next.onclick=()=>{const pending=studyWritingPool('').find(id=>id!==k);if(pending&&status.active==null)go('notebook',{k:pending,fromStudy:true});else go('study');};v.appendChild(next);
-    if(status.finished){const phase=studyStatus(k);v.appendChild(el('p','note',phase.stage==='cards'?'Теперь два дня закрепляем это слово карточками.':phase.stage==='wait'?'Следующий учебный день — '+fmtDate(phase.availableOn)+'.':phase.stage==='global'?'Сегодня повторяем всё ранее прописанное.':'Семидневный цикл завершён. Можно повторять в карточках.'));const cards=el('button','linkbtn','Открыть карточки');cards.onclick=()=>go('cards');v.appendChild(cards);}
+    if(status.finished){const phase=studyStatus(k);v.appendChild(el('p','note',phase.stage==='cards'?'Теперь два дня закрепляем это слово карточками.':phase.stage==='wait'?'Следующий учебный день — '+fmtDate(phase.availableOn)+'.':'Пятидневный цикл завершён. Можно повторять в карточках.'));const cards=el('button','linkbtn','Открыть карточки');cards.onclick=()=>go('cards');v.appendChild(cards);}
   }
-  v.appendChild(el('p','study-tip','Отметка «Прописал» сохраняет факт письма. После трёх дней письма — два дня карточек этих слов, затем два дня повторения всего ранее прописанного. Если пропустил день, продолжай с незавершённого дня. Несколько дней не засчитываются одним нажатием.'));
+  v.appendChild(el('p','study-tip','Отметка «Прописал» сохраняет факт письма. После трёх дней письма — два дня карточек этих слов. На этом цикл завершён. Если пропустил день, продолжай с незавершённого дня. Несколько дней не засчитываются одним нажатием.'));
 }
 window.addEventListener('pagehide',()=>{for(const flush of [...NOTEBOOK_FLUSH])flush();});
