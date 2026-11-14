@@ -121,10 +121,10 @@ await T('midnight-never-credits-yesterday-session-to-today',()=>{
  reset();learn(['你']);write(['你']);ev("startStudyCards('all');studyState().session.revealed=true");next();
  ok(!ev('studyGrade(3)'),'stale session graded on a different day');ok(ev('studyState().session.finished'),'stale session not closed');
 });
-await T('main-path-includes-every-rule-and-ordered-key-once-and-stories',()=>{
+await T('main-path-includes-rules-and-stories-without-radical-lessons',()=>{
  reset();const units=ev('courseClassUnits()');
  ok(units.flatMap(u=>u.nodes.filter(n=>n.type==='grammar').map(n=>n.topicId)).sort().join()===ev('grammarTopics().map(t=>t.id).sort().join()'),'grammar omitted/duplicated');
- ok(units.flatMap(u=>u.nodes.filter(n=>n.type==='learn').flatMap(n=>n.items)).join()===ev("KEY_ORDER.map(n=>'r:'+n).join()"),'radicals not sequential/exactly once');
+ ok(units.every(u=>u.items.every(k=>!k.startsWith('r:'))&&u.nodes.every(n=>!n.id.includes(':keys:'))),'radical lessons remain in main path');
  for(const size of [3,4])for(const u of ev(`courseClassUnits(${size})`))ok(ev(`classroomPool({lessons:${JSON.stringify(u.lessons)},stage:'story'}).length`)>0,'story missing '+u.id);
  ev("startClassroom({lessons:[1,2,3],stage:'story'})");ok(!ev("classroomStageDone('CL1-3','story')"),'reading story completed knowledge');ok(click(/Понял историю/),'story has no comprehension stage');
  ev("{let guard=0;while(!classroomState().session.finished&&guard++<30){classroomState().session.revealed=true;classroomAnswer(true)}}");ok(ev("classroomStageDone('CL1-3','story')"),'story understanding not tracked');

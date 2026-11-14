@@ -74,7 +74,7 @@ await T('classroom-blocks-cover-all-lessons-in-three-or-four',()=>{
     const blocks=ev(`courseClassUnits(${width})`);
     ok(blocks.length===Math.ceil(30/width),'wrong block count');
     ok(blocks.flatMap(b=>b.lessons).join()===Array.from({length:30},(_,i)=>i+1).join(),'book lesson omitted or duplicated');
-    ok(blocks.flatMap(b=>b.radicals).join()===ev("KEY_ORDER.map(n=>'r:'+n).join()"),'numeric radical allocation changed in class blocks');
+    ok(blocks.every(b=>b.radicals.length===0&&b.items.every(k=>!k.startsWith('r:'))&&b.nodes.every(n=>!n.id.includes(':keys:'))),'radical lessons remain in main path');
     for(const b of blocks){
       ok(b.nodes.filter(n=>n.type==='classroom').map(n=>n.stage).join()==='dialogue,vocab,translation,decomp,listening,story,quiz','wrong classroom stage order');
       ok(b.nodes.every(n=>n.blockId===b.blockId&&n.lessons.join()===b.lessons.join()),'stage scope differs from block');

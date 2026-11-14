@@ -63,7 +63,7 @@ function courseUnits(){
   });
 }
 // Основной путь повторяет занятие на парах: один блок из 3–4 уроков,
-// проверяемые этапы, грамматика, ключи и истории. Знание не выводится из открытия экрана.
+// проверяемые этапы, грамматика и истории. Знание не выводится из открытия экрана.
 const CLASS_PATH_STAGES=[
   {stage:'dialogue',title:'Читаем диалог',icon:'chatW',description:'Диалоги с озвучкой и вопросами по смыслу'},
   {stage:'vocab',title:'Повторяем слова',icon:'cards',description:'Вспоминаем написание и пиньинь по переводу, затем сверяем'},
@@ -75,12 +75,11 @@ const CLASS_PATH_STAGES=[
 ];
 function courseClassUnits(size){
   const n=[3,4].includes(+size)?+size:State.meta.classroom&&+State.meta.classroom.blockSize===4?4:3;
-  const language=courseUnits(), out=[];
+  const out=[];
   for(let first=1;first<=NL;first+=n){
     const lessons=Array.from({length:Math.min(n,NL-first+1)},(_,i)=>first+i), last=lessons[lessons.length-1];
     const blockId='CL'+first+'-'+last;
     const words=uniq(lessons.flatMap(L=>lessonWords(L).concat(lessonExtras(L).flatMap(x=>x.words)).map(w=>w.key)));
-    const radicals=lessons.flatMap(L=>language[L-1].radicals);
     const chars=uniq(lessons.flatMap(L=>LESSON_CHARS[L]||[]));
     const nodes=[];
     for(const stage of CLASS_PATH_STAGES){
@@ -88,12 +87,11 @@ function courseClassUnits(size){
         items:stage.stage==='vocab'||stage.stage==='quiz'?words.slice():stage.stage==='decomp'?chars.map(ch=>'key:'+ch):[]});
       if(stage.stage==='vocab'){
         for(const topic of grammarTopics().filter(t=>lessons.includes(t.lesson)))nodes.push({id:blockId+':'+topic.id,type:'grammar',topicId:topic.id,title:topic.title,goal:topic.goal,icon:'book',L:topic.lesson,blockId,lessons:lessons.slice(),items:[]});
-        for(let j=0;j<radicals.length;j+=4){const items=radicals.slice(j,j+4);nodes.push({id:blockId+':keys:'+radNum(items[0]),type:'learn',title:'Ключи '+radNum(items[0])+'–'+radNum(items.at(-1)),icon:'部',L:first,blockId,lessons:lessons.slice(),items});}
       }
     }
     out.push({id:blockId,blockId,classroom:true,sec:'classroom',L:first,lastLesson:last,lessons,
       title:'Занятие '+(out.length+1)+' · уроки '+first+'–'+last,
-      sub:lessons.map(L=>lessonTitle(L)).join(' · '),wordItems:words,radicals,items:words.concat(radicals),nodes,color:UCOL[out.length%UCOL.length]});
+      sub:lessons.map(L=>lessonTitle(L)).join(' · '),wordItems:words,radicals:[],items:words.slice(),nodes,color:UCOL[out.length%UCOL.length]});
   }
   return out;
 }
@@ -363,7 +361,7 @@ function pathEl(){
   wrap.appendChild(el('div','section','<h3>Китайский как на парах · уроки 1–30</h3>'));
   const cs=State.meta.classroom?.session,gs=State.meta.grammar?.session;
   if(PLAY&&!PLAY.end&&playLeft()||cs&&!cs.finished||gs&&!gs.finished){const resume=el('button','btn blue',PLAY&&!PLAY.end&&playLeft()?'Продолжить урок':'Продолжить занятие');resume.onclick=()=>go(PLAY&&!PLAY.end&&playLeft()?'play':cs&&!cs.finished?'classroom':'grammar',{run:true});wrap.appendChild(resume);}
-  wrap.appendChild(el('p','note','Диалог → слова → правила и ключи → перевод → аудирование → история → квиз. Новое сразу используется в задачах; знакомое возвращается в повторениях.'));
+  wrap.appendChild(el('p','note','Диалог → слова → правила → перевод → разбор иероглифов → аудирование → история → квиз. Новое сразу используется в задачах; знакомое возвращается в повторениях.'));
   const options=el('div','chips');
   [3,4].forEach(size=>{ const current=(State.meta.classroom||{}).blockSize===4?4:3;
     const b=el('button','chip'+(current===size?' on':''),'По '+size+' урока'); b.setAttribute('aria-pressed',current===size?'true':'false');
