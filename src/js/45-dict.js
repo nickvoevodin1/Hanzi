@@ -3,31 +3,26 @@
 ==================================================================*/
 function viewDict(s){
   const v=el('div','view');
+  const heading=el('div','dict-heading');heading.appendChild(el('h1','','Поиск'));const settings=el('button','linkbtn',IC('gear',24));settings.setAttribute('aria-label','Настройки');settings.onclick=()=>go('settings');heading.appendChild(settings);v.appendChild(heading);
   const inp=el('input','search'); inp.placeholder='Иероглиф, пиньинь или перевод…'; inp.value=State.route.q||''; v.appendChild(inp);
   const res=el('div',''); v.appendChild(res);
   const run=()=>{
     const q=inp.value.trim().toLowerCase(); State.route.q=inp.value; res.innerHTML='';
     if(!q){
-      const top=el('div','rowlist');
-      [['课','Уроки 1–30','Кондрашевский, том 1: слова, иероглифы, ключи урока','lessons'],['部','Ключи','214 ключей: формы, названия, примеры','keys'],['丿','Черты','таблица 24 черт курса','strokes']].forEach(([ic,t,sub,r])=>{
-        const b=el('button','row',`<span class="ri han">${ic}</span><div class="tt"><b>${t}</b><small>${sub}</small></div><span class="chev">›</span>`); b.onclick=()=>go(r); top.appendChild(b); });
-      res.appendChild(top);
-      res.appendChild(el('p','eyebrow','HSK 3.0 — дополнительно к урокам'));
-      const list=el('div','rowlist');
-      [1,2,3,4,5,6].forEach(l=>{ const ws=WORDS.filter(w=>w.hsk===l);
-        const r=el('button','row',`<div class="n" style="color:var(--gold)">${l}</div><div class="tt"><b>HSK ${l}</b><small>${ws.length} слов</small></div><div class="cnt">${learnedCount(ws.map(w=>w.key))}/${ws.length}</div>`);
-        r.onclick=()=>go('list',{hsk:l}); list.appendChild(r); });
-      res.appendChild(list);
-      res.appendChild(el('p','note',`В базе ${WORDS.length} слов и ${Object.keys(CHARS).length} иероглифов: Кондрашевский (уроки 1–30) + HSK 1–6.`));
+      res.appendChild(el('p','note','Ищи слова и ключи по иероглифам, русскому переводу или пиньиню: nǐ hǎo, ni3 hao3 и nihao работают одинаково.'));
+      const recent=studyLearnedPool().slice(0,12),list=el('div','rowlist');
+      if(recent.length){res.appendChild(el('p','eyebrow','Из пройденного'));for(const k of recent){const info=notebookInfo(k),b=el('button','row',`<span class="ri han">${esc(info.hz)}</span><div class="tt"><b>${esc(info.ru)}</b><small>${pinyinHTML(info.py)}</small></div>`);b.onclick=()=>isRad(k)?go('radical',{n:radNum(k)}):info.w?go('card',{id:info.w.id}):go('notebook',{k,fromStudy:true});list.appendChild(b);}res.appendChild(list);}
       return;
     }
-    const qt=toneless(q);
-    const hits=WORDS.filter(w=>w.s.includes(q)||(w.d&&w.d.includes(q))||(qt&&toneless(w.p).includes(qt))||(w.ru&&w.ru.toLowerCase().includes(q))||(w.en&&w.en.join(' ').toLowerCase().includes(q)))
+    const qt=studySearchText(q);
+    const hits=WORDS.filter(w=>w.s.includes(q)||(w.d&&w.d.includes(q))||(qt&&studySearchText(w.p).includes(qt))||(w.ru&&w.ru.toLowerCase().includes(q))||(w.en&&w.en.join(' ').toLowerCase().includes(q)))
       .sort((a,b)=>((WORD_L[a.key]||99)-(WORD_L[b.key]||99))||(a.s.length-b.s.length)).slice(0,80);
-    if(!hits.length){ res.appendChild(el('div','empty','Ничего не найдено')); return; }
+    const radicalHits=KEY_ORDER.map(n=>'r:'+n).filter(k=>studyMatches(k,q));
+    if(radicalHits.length){const radicals=el('div','rowlist');radicalHits.slice(0,12).forEach(k=>{const info=notebookInfo(k),b=el('button','row',`<span class="ri han">${esc(info.hz)}</span><div class="tt"><b>${esc(info.label)} · ${esc(info.ru)}</b><small>${pinyinHTML(info.py)}</small></div>`);b.onclick=()=>go('radical',{n:radNum(k)});radicals.appendChild(b);});res.appendChild(radicals);}
+    if(!hits.length&&!radicalHits.length){ res.appendChild(el('div','empty','Ничего не найдено')); return; }
     const list=el('div','rowlist'); hits.forEach(w=>list.appendChild(witem(w))); res.appendChild(list);
   };
-  inp.oninput=run; run(); s.appendChild(v);
+  inp.oninput=()=>{run();Resume.later();}; run(); s.appendChild(v);
 }
 function viewList(s){
   const l=State.route.hsk, ws=WORDS.filter(w=>w.hsk===l).sort((a,b)=>(a.f||99999)-(b.f||99999)), keys=ws.map(w=>w.key);

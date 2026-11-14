@@ -63,13 +63,14 @@ function courseUnits(){
   });
 }
 // Основной путь повторяет занятие на парах: один блок из 3–4 уроков,
-// шесть проверяемых этапов. Его прогресс не выводится из старых словарных карточек.
+// проверяемые этапы, грамматика, ключи и истории. Знание не выводится из открытия экрана.
 const CLASS_PATH_STAGES=[
   {stage:'dialogue',title:'Читаем диалог',icon:'chatW',description:'Диалоги с озвучкой и вопросами по смыслу'},
   {stage:'vocab',title:'Повторяем слова',icon:'cards',description:'Вспоминаем написание и пиньинь по переводу, затем сверяем'},
   {stage:'translation',title:'Переводим предложения',icon:'pencilW',description:'Перевод в обе стороны: русский и китайский'},
   {stage:'decomp',title:'Разбираем иероглифы',icon:'splitW',description:'Ключ, части и смысл иероглифов выбранных уроков'},
   {stage:'listening',title:'Слушаем и переводим',icon:'headphones',description:'Учебный трек или песня с пары: слушаем, вспоминаем смысл, сверяем'},
+  {stage:'story',title:'История с выбором',icon:'book',description:'Короткая история: прочитай, пойми ситуацию и выбери ответ'},
   {stage:'quiz',title:'Квиз по иероглифам',icon:'target',description:'Короткая проверка иероглифов всех уроков блока'}
 ];
 function courseClassUnits(size){
@@ -81,8 +82,15 @@ function courseClassUnits(size){
     const words=uniq(lessons.flatMap(L=>lessonWords(L).concat(lessonExtras(L).flatMap(x=>x.words)).map(w=>w.key)));
     const radicals=lessons.flatMap(L=>language[L-1].radicals);
     const chars=uniq(lessons.flatMap(L=>LESSON_CHARS[L]||[]));
-    const nodes=CLASS_PATH_STAGES.map(stage=>({id:blockId+':'+stage.stage,type:'classroom',...stage,blockId,lessons:lessons.slice(),L:first,
-      items:stage.stage==='vocab'||stage.stage==='quiz'?words.slice():stage.stage==='decomp'?chars.map(ch=>'key:'+ch):[]}));
+    const nodes=[];
+    for(const stage of CLASS_PATH_STAGES){
+      nodes.push({id:blockId+':'+stage.stage,type:'classroom',...stage,blockId,lessons:lessons.slice(),L:first,
+        items:stage.stage==='vocab'||stage.stage==='quiz'?words.slice():stage.stage==='decomp'?chars.map(ch=>'key:'+ch):[]});
+      if(stage.stage==='vocab'){
+        for(const topic of grammarTopics().filter(t=>lessons.includes(t.lesson)))nodes.push({id:blockId+':'+topic.id,type:'grammar',topicId:topic.id,title:topic.title,goal:topic.goal,icon:'book',L:topic.lesson,blockId,lessons:lessons.slice(),items:[]});
+        for(let j=0;j<radicals.length;j+=4){const items=radicals.slice(j,j+4);nodes.push({id:blockId+':keys:'+radNum(items[0]),type:'learn',title:'Ключи '+radNum(items[0])+'–'+radNum(items.at(-1)),icon:'部',L:first,blockId,lessons:lessons.slice(),items});}
+      }
+    }
     out.push({id:blockId,blockId,classroom:true,sec:'classroom',L:first,lastLesson:last,lessons,
       title:'Занятие '+(out.length+1)+' · уроки '+first+'–'+last,
       sub:lessons.map(L=>lessonTitle(L)).join(' · '),wordItems:words,radicals,items:words.concat(radicals),nodes,color:UCOL[out.length%UCOL.length]});
@@ -123,7 +131,7 @@ function unitOpen(u,i,list){
   return i===0||!!State.meta.jumps[u.id]||u.wordItems.some(k=>!isNew(k))||u.nodes.some(n=>n.type==='grammar'&&nodeDone(n))||unitComplete(list[i-1])||courseWordsComplete(list[i-1]);
 }
 function nodeState(u,n,open){
-  if(n.type==='classroom') return nodeDone(n)?'done':'avail';
+  if(u.classroom) return nodeDone(n)?'done':'avail';
   const done=nodeDone(n);
   if(done) return nodeCracked(n)?'cracked':'done';
   if(!open) return 'locked';
@@ -233,25 +241,8 @@ function jumpEnd(s){
 // — экран
 function viewPath(s){
   applyFreezes(); renderTop();
-  const v=el('div','view'), plan=dayPlan(), d=D();
-  let mst='calm', say='';
-  if(plan.type==='away'||plan.type==='holiday') mst='sleep';
-  else if(!d.met&&new Date().getHours()>=19&&streakLen()>0) mst='sad';
-  else if(d.met) { mst='happy'; say='День засчитан — серия '+streakLen()+' '+plural(streakLen(),'день','дня','дней')+'!'; }
-  v.insertAdjacentHTML('beforeend',mascotRow(mst,say));
-  if(PLAY&&!PLAY.end&&playLeft()){ const cb=el('button','btn blue',IC('play',16)+' Продолжить урок ('+playLeft()+')'); cb.style.marginBottom='12px'; cb.onclick=()=>go('play'); v.appendChild(cb); }
-  v.appendChild(courseCard());
-  const memory=el('details','study-memory'); memory.open=memoryStats().active;
-  memory.appendChild(el('summary','','Новое + знакомое · повторение слов и ключей')); memory.appendChild(memoryCard()); v.appendChild(memory);
-  const shortcuts=el('div','study-shortcuts');
-  [['book','Грамматика и правила с пары','grammar'],['pencil','Готовлюсь к диктанту','dictation'],['brush','Пишу на экране','write']].forEach(([ic,title,route])=>{
-    const b=el('button','',IC(ic,22)+esc(title)); b.onclick=()=>route==='write'?startWrite():go(route); shortcuts.appendChild(b);
-  }); v.appendChild(shortcuts);
-  const extra=el('details','study-extra'); extra.style.marginTop='14px';
-  extra.appendChild(el('summary','','Другие тренировки на сегодня')); extra.appendChild(planCard(plan)); v.appendChild(extra);
-  const wk=weekInfo();
-  if(wk.chest==='ready'){ const ch=el('div','hero chest',`<span class="cico">${IC('chest',52)}</span><div style="flex:1"><b style="color:var(--title)">Недельный сундук!</b><div class="note" style="margin:2px 0 0">Цель недели ${wk.goal} XP выполнена</div></div>`);
-    ch.style.marginTop='12px'; const ob=el('button','btn gold mini','Открыть'); ob.onclick=()=>{ ch.classList.add('open'); const g=openChest(); Sfx.done(); confetti(); setTimeout(()=>{ toast('+'+g+' XP'); render(); },900); }; ch.appendChild(ob); v.appendChild(ch); }
+  const v=el('div','view');
+  v.appendChild(studyCycleBanner());
   v.appendChild(pathEl());
   s.appendChild(v);
   checkQuests(); checkAch();
@@ -275,7 +266,7 @@ function planCard(plan){
 function unitBanner(u,i,list,open){
   if(u.classroom){
     const progress=courseClassStageStats(u), known=u.wordItems.filter(k=>!isNew(k)).length;
-    const b=el('button','ubanner classroom-banner',`<div class="ut"><small>${esc(u.title)}</small><b>${esc(u.sub)}</b><span class="tag">${known}/${u.wordItems.length} знакомых слов</span><span class="tag">6 этапов занятия</span>${u.lessons.includes(groupL())?`<span class="tag">${IC('pin',14)} Здесь группа</span>`:''}</div><div class="crowns">${IC(progress.done===progress.total?'check':'books',25)}<b>${progress.done}/${progress.total}</b><small>этапов</small></div>`);
+    const b=el('button','ubanner classroom-banner',`<div class="ut"><small>${esc(u.title)}</small><b>${esc(u.sub)}</b><span class="tag">${known}/${u.wordItems.length} знакомых слов</span><span class="tag">${u.nodes.length} шагов занятия</span>${u.lessons.includes(groupL())?`<span class="tag">${IC('pin',14)} Здесь группа</span>`:''}</div><div class="crowns">${IC(progress.done===progress.total?'check':'books',25)}<b>${progress.done}/${progress.total}</b><small>этапов</small></div>`);
     b.style.background=u.color[0]; b.style.boxShadow='0 4px 0 '+u.color[1];
     b.onclick=()=>{ PATH_OPEN[u.id]=!unitExpanded(u,i,list); render(); }; return b;
   }
@@ -351,7 +342,7 @@ function renderNodes(host,u,open,curId){
     b.setAttribute('aria-label',n.title+(st==='locked'?' (закрыт)':st==='cracked'?' (пора повторить)':st==='done'?' (пройден)':''));
     b.onclick=e=>{ e.stopPropagation(); PATH_POP=PATH_POP===n.id?null:n.id; render(); };
     face.appendChild(b); w.appendChild(face);
-    if(n.type==='classroom') w.appendChild(el('div','lab',esc(n.title)));
+    if(u.classroom) w.appendChild(el('div','lab',esc(n.title)));
     if(st==='cracked') w.insertAdjacentHTML('beforeend',`<span class="nbadge" title="пора повторить">${IC('dumbbell',22)}</span>`);
     p.appendChild(w);
     if(PATH_POP===n.id) p.appendChild(nodePop(u,n,st,x));
@@ -370,13 +361,14 @@ function renderBoss(host,L){
 function pathEl(){
   const wrap=el('div','course-path classroom-path'), list=courseClassUnits();
   wrap.appendChild(el('div','section','<h3>Китайский как на парах · уроки 1–30</h3>'));
-  wrap.appendChild(el('p','note','Одно занятие объединяет 3–4 урока: диалог → слова → перевод → разбор → аудирование → квиз. Можно открыть нужный этап или продолжить по порядку.'));
+  const cs=State.meta.classroom?.session,gs=State.meta.grammar?.session;
+  if(PLAY&&!PLAY.end&&playLeft()||cs&&!cs.finished||gs&&!gs.finished){const resume=el('button','btn blue',PLAY&&!PLAY.end&&playLeft()?'Продолжить урок':'Продолжить занятие');resume.onclick=()=>go(PLAY&&!PLAY.end&&playLeft()?'play':cs&&!cs.finished?'classroom':'grammar',{run:true});wrap.appendChild(resume);}
+  wrap.appendChild(el('p','note','Диалог → слова → правила и ключи → перевод → аудирование → история → квиз. Новое сразу используется в задачах; знакомое возвращается в повторениях.'));
   const options=el('div','chips');
   [3,4].forEach(size=>{ const current=(State.meta.classroom||{}).blockSize===4?4:3;
     const b=el('button','chip'+(current===size?' on':''),'По '+size+' урока'); b.setAttribute('aria-pressed',current===size?'true':'false');
     b.onclick=()=>{ const m=State.meta.classroom||(State.meta.classroom={}); m.blockSize=size; delete m.activeBlockId; save('meta'); render(); }; options.appendChild(b);
   }); wrap.appendChild(options);
-  const grammar=el('button','btn ghost mini',IC('book',18)+' Грамматика отдельно'); grammar.onclick=()=>go('grammar'); wrap.appendChild(grammar);
   let curId=null;
   const active=(State.meta.classroom||{}).activeBlockId;
   const target=active?list.find(u=>u.blockId===active):list.find(u=>!unitComplete(u));
@@ -385,12 +377,6 @@ function pathEl(){
     wrap.appendChild(unitBanner(u,i,list,true));
     if(unitExpanded(u,i,list)){
       renderNodes(wrap,u,true,curId);
-      const linked=el('div','actionrow');
-      const grammarButton=el('button','btn ghost mini','Грамматика и правила'); grammarButton.onclick=()=>go('grammar',{home:true}); linked.appendChild(grammarButton);
-      const keys=el('button','btn ghost mini','Ключи '+radNum(u.radicals[0])+'–'+radNum(u.radicals[u.radicals.length-1])); keys.onclick=()=>{
-        const portion=()=>u.radicals.filter(isDue).concat(u.radicals.filter(isNew)).slice(0,4), p=portion();
-        playStart(withLearnedReview(p.length?p:u.radicals.slice(0,4),{kind:'keys'}),{title:'Ключи '+radNum(u.radicals[0])+'–'+radNum(u.radicals[u.radicals.length-1]),kind:'learn',more:()=>withLearnedReview(portion(),{kind:'keys'})});
-      }; linked.appendChild(keys); wrap.appendChild(linked);
       u.lessons.forEach(L=>renderBoss(wrap,L));
     }
   });

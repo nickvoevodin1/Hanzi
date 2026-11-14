@@ -76,7 +76,7 @@ await T('classroom-blocks-cover-all-lessons-in-three-or-four',()=>{
     ok(blocks.flatMap(b=>b.lessons).join()===Array.from({length:30},(_,i)=>i+1).join(),'book lesson omitted or duplicated');
     ok(blocks.flatMap(b=>b.radicals).join()===ev("KEY_ORDER.map(n=>'r:'+n).join()"),'numeric radical allocation changed in class blocks');
     for(const b of blocks){
-      ok(b.nodes.map(n=>n.stage).join()==='dialogue,vocab,translation,decomp,listening,quiz','wrong classroom stage order');
+      ok(b.nodes.filter(n=>n.type==='classroom').map(n=>n.stage).join()==='dialogue,vocab,translation,decomp,listening,story,quiz','wrong classroom stage order');
       ok(b.nodes.every(n=>n.blockId===b.blockId&&n.lessons.join()===b.lessons.join()),'stage scope differs from block');
     }
   }
@@ -94,10 +94,10 @@ await T('classroom-stage-launch-is-free-and-progress-is-verified',()=>{
   }
   learn(block.wordItems.concat(block.radicals));
   ok(!ev(`unitComplete(${JSON.stringify(block)})`),'old words faked all classroom stages complete');
-  ev(`openNode(${JSON.stringify(block)},${JSON.stringify(block.nodes[4])},'avail')`);
+  ev(`openNode(${JSON.stringify(block)},${JSON.stringify(block.nodes.find(n=>n.stage==='listening'))},'avail')`);
   ok(ev('window.__classLaunch.stage')==='listening'&&ev('window.__classLaunch.lessons.join()')===block.lessons.join(),'wrong listening scope');
-  ev('window.__classDone=true');
-  ok(ev(`courseClassStageStats(${JSON.stringify(block)}).done`)===6,'verified stage completion ignored');
+  ev('window.__classDone=true;window.__courseGrammarDone=true');
+  ok(ev(`courseClassStageStats(${JSON.stringify(block)}).done`)===block.nodes.length,'verified stage completion ignored');
   ev('classroomStageDone=window.__classOriginalDone; startClassroom=window.__classOriginalStart');
 });
-A.finish('course: ordered214 keys, stable old progress and six-stage classroom blocks');
+A.finish('course: ordered214 keys, stable old progress and integrated grammar, key and story classroom blocks');

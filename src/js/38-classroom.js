@@ -1,6 +1,6 @@
 /* Занятие по 3–4 урокам: диалог, слова, перевод, ключи, аудирование, квиз.
    Прогресс этапа означает проверенные задания, а не открытие экрана. */
-const CLASSROOM_STAGES=[['dialogue','Диалог'],['vocab','Повторяем слова'],['translation','Переводим предложения'],['decomp','Разбираем иероглифы'],['listening','Слушаем и переводим'],['quiz','Квиз по иероглифам']];
+const CLASSROOM_STAGES=[['dialogue','Диалог'],['vocab','Повторяем слова'],['translation','Переводим предложения'],['decomp','Разбираем иероглифы'],['listening','Слушаем и переводим'],['story','История с выбором'],['quiz','Квиз по иероглифам']];
 function classroomState(){
   const m=State.meta.classroom||(State.meta.classroom={v:1,blockSize:3,progress:{},sessions:{},materials:{},session:null});
   ['progress','sessions','materials'].forEach(k=>{if(!m[k]||typeof m[k]!=='object') m[k]={};});
@@ -32,6 +32,7 @@ function classroomBalanced(items,n){
 function classroomChoice(right,all){ return shuffle(uniq([right,...shuffle(all.filter(x=>x&&x!==right)).slice(0,3)])); }
 function classroomPool(config){
   const c=classroomConfig(config), words=classroomWords(c), lines=c.lessons.flatMap(L=>(classroomLessonData(L).dialogue||[]).map((x,i)=>({...x,L,id:'dialogue:'+L+':'+i})));
+  if(c.stage==='story')return classroomStories(c).flatMap(story=>story.questions.map((q,i)=>({id:story.id+':'+i,kind:'choice',L:story.lesson,storyId:story.id,prompt:q.prompt,answer:q.answer,choices:shuffle(q.choices.slice())})));
   if(c.stage==='vocab') return words.map(({w,L})=>({id:'vocab:'+w.key,kind:'vocab',k:w.key,L,zh:w.s,py:w.p,ru:meaning(w)}));
   if(c.stage==='decomp'){
     const seen=new Set(), out=[];
@@ -64,7 +65,7 @@ function startClassroom(config){
   const remaining=pool.filter(x=>!r.covered[x.id]), working=remaining.length?remaining:pool;
   working.sort((a,b)=>{const rank=x=>x.kind==='vocab'?(isDue(x.k)?0:isNew(x.k)?1:2):0;return rank(a)-rank(b)||(r.seen?.[a.id]||0)-(r.seen?.[b.id]||0);});
   let queue=classroomBalanced(working,['vocab','decomp'].includes(c.stage)?8:pool.length).map(x=>({...clone(x),retry:false,input:'',ink:[]}));
-  const ss={config:c,key,queue,index:0,revealed:false,phase:c.stage==='dialogue'?'intro':'questions',first:0,correct:0,started:Date.now(),finished:false};
+  const ss={config:c,key,queue,index:0,revealed:false,phase:['dialogue','story'].includes(c.stage)?'intro':'questions',first:0,correct:0,started:Date.now(),finished:false};
   m.session=ss;m.sessions[key]=ss;m.activeBlockId=c.blockId;save('meta');go('classroom',{run:true});
 }
 function classroomVocabGrade(x,ok){
@@ -100,6 +101,7 @@ function classroomSourceView(v,c){
   if(typeof renderClassSongEditor==='function')renderClassSongEditor(v,c,()=>startClassroom({...c,restart:true}));
 }
 function classroomIntroduction(v,ss){
+  if(ss.config.stage==='story')return classroomStoryIntroduction(v,ss);
   v.appendChild(el('h2','title','Читаем диалоги'));
   v.appendChild(el('p','note','Короткие авторские диалоги по темам выбранных уроков. Прочитай реплики, послушай и затем проверь понимание.'));
   ss.config.lessons.forEach(L=>{const box=el('div','hero');box.style.marginTop='12px';box.appendChild(el('div','kind','Урок '+L+' · '+lessonTitle(L)));(classroomLessonData(L).dialogue||[]).forEach(line=>{const row=el('div','grammar-example');row.innerHTML=`<div class="han" style="font-size:25px">${esc(line.speaker||'')} ${esc(line.zh)}</div><p class="note">${pinyinHTML(line.py)}<br>${esc(line.ru)}</p>`;const say=el('button','say',SPK(18)+' Послушать');say.onclick=()=>Speech.say(line.zh,undefined,line.py);row.appendChild(say);box.appendChild(row);});v.appendChild(box);});
@@ -109,13 +111,13 @@ function classroomEnd(v,ss){
   const c=ss.config,p=classroomStageProgress(c.blockId,c.stage), complete=classroomStageDone(c.blockId,c.stage);
   v.appendChild(el('h2','title','Этап занятия завершён'));
   v.appendChild(el('div','hero',`<div class="kind">${esc(c.title)}</div><h2>С первого раза ${ss.correct} из ${ss.first}</h2><p class="note">Проверено на этапе: ${p.done} из ${p.total}. ${complete?'Все задания этапа проверены.':'Остальная часть сохранена — продолжай короткими порциями.'}</p>`));
-  const index=CLASSROOM_STAGES.findIndex(x=>x[0]===c.stage), next=CLASSROOM_STAGES[index+1];
+  const unit=courseClassUnits().find(u=>u.blockId===c.blockId),index=unit?.nodes.findIndex(n=>n.type==='classroom'&&n.stage===c.stage),next=unit&&unit.nodes[index+1];
   if(!complete){const more=el('button','btn','Следующая короткая порция');more.style.marginTop='12px';more.onclick=()=>startClassroom(c);v.appendChild(more);}
-  if(next){const n=el('button','btn '+(complete?'':'ghost'),'Дальше: '+next[1]);n.style.marginTop='12px';n.onclick=()=>startClassroom({...c,stage:next[0]});v.appendChild(n);}
-  const home=el('button','btn ghost','К занятию');home.style.marginTop='12px';home.onclick=()=>go('classroom',{blockId:c.blockId,lessons:c.lessons});v.appendChild(home);
+  if(next){const n=el('button','btn '+(complete?'':'ghost'),'Дальше: '+next.title);n.style.marginTop='12px';n.onclick=()=>openNode(unit,next,'avail');v.appendChild(n);}
+  const home=el('button','btn ghost','На путь');home.style.marginTop='12px';home.onclick=()=>go('path');v.appendChild(home);
 }
 function classroomRun(v,ss){
-  const pause=el('button','back','‹ Сохранить и выйти');pause.onclick=()=>go('classroom',{blockId:ss.config.blockId,lessons:ss.config.lessons});v.appendChild(pause);
+  const pause=el('button','back','‹ Сохранить и выйти');pause.onclick=()=>go('path');v.appendChild(pause);
   if(ss.finished)return classroomEnd(v,ss);if(ss.phase==='intro')return classroomIntroduction(v,ss);
   const x=ss.queue[ss.index];if(!x){ss.finished=true;save('meta');return classroomEnd(v,ss);}
   v.appendChild(el('p','eyebrow',ss.config.title+' · '+CLASSROOM_STAGES.find(t=>t[0]===ss.config.stage)[1]));
@@ -123,6 +125,7 @@ function classroomRun(v,ss){
   v.appendChild(el('p','note','Урок '+x.L+' · '+(ss.index+1)+'/'+ss.queue.length+(x.retry?' · исправление':x.spacer?' · закрепление':'')));
   if(ss.config.stage==='listening')classroomSourceView(v,ss.config);
   const q=el('div','qcard');q.style.minHeight='140px';v.appendChild(q);
+  if(ss.config.stage==='story'){const story=classroomStories(ss.config).find(story=>story.id===x.storyId);if(story){const scene=el('div','hero story-scene',`<div class="kind">${esc(story.title)}</div><p class="han" style="font-size:24px">${esc(story.zh)}</p>`);v.appendChild(scene);}}
   if(x.kind==='choice'){
     q.innerHTML=`<div class="qbig" style="font-size:22px">${esc(x.prompt)}</div>`;
     if(!ss.revealed){const choices=el('div','choices');x.choices.forEach((choice,i)=>{const b=el('button','choice',esc(choice));b.dataset.ch=String(i+1);b.onclick=()=>{x.input=choice;x.ok=choice===x.answer;ss.revealed=true;save('meta');render();};choices.appendChild(b);});v.appendChild(choices);}else classroomCheckedAnswer(v,ss,x,x.answer,x.ok);
@@ -153,4 +156,15 @@ function viewClassroom(s){
   v.appendChild(el('h1','',c.title));v.appendChild(el('p','note','Как на паре: прочитай диалог, повтори слова, переведи предложения, разбери знаки, послушай и закончи квизом. Любой этап можно открыть отдельно.'));
   CLASSROOM_STAGES.forEach(([stage,title])=>{const p=classroomStageProgress(c.blockId,stage),done=classroomStageDone(c.blockId,stage),b=el('button','row',`<span class="ri">${IC(done?'check':'book',26)}</span><div class="tt"><b>${esc(title)}</b><small>${p.done}/${p.total} проверено${done?' · этап пройден':''}</small></div>${IC('chev',18)}`);b.onclick=()=>startClassroom({...c,stage});v.appendChild(b);});
   if(typeof GRAMMAR!=='undefined'){const topics=GRAMMAR.topics.filter(t=>c.lessons.includes(t.lesson));if(topics.length){const g=el('button','btn ghost','Грамматика этого занятия');g.style.marginTop='16px';g.onclick=()=>go('grammar',{lesson:c.lessons[0]});v.appendChild(g);}}
+}
+
+function classroomStories(c){return (CLASSROOM.stories||[]).filter(story=>c.lessons.includes(story.lesson));}
+function classroomStoryIntroduction(v,ss){
+  v.appendChild(el('h1','','История с выбором'));
+  v.appendChild(el('p','note','Прочитай маленькую историю. Затем ответь на вопросы о героях и событиях.'));
+  for(const story of classroomStories(ss.config)){
+    const box=el('section','hero story-scene');box.appendChild(el('h2','',esc(story.title)));box.appendChild(el('p','han',esc(story.zh)));const audio=el('button','linkbtn',SPK(18)+' Послушать');audio.onclick=()=>Speech.say(story.zh,undefined,story.py);box.appendChild(audio);
+    const hint=el('button','linkbtn','Пиньинь и перевод');hint.onclick=()=>{hint.replaceWith(el('p','note',pinyinHTML(story.py)+'<br>'+esc(story.ru)));};box.appendChild(hint);v.appendChild(box);
+  }
+  const next=el('button','btn','Понял историю — проверить');next.onclick=()=>{ss.phase='questions';save('meta');render();};v.appendChild(next);
 }

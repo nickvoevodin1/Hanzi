@@ -74,11 +74,11 @@ await T('radical-forms-characters-and-word-pools',()=>{
 await T('hide-sample-also-hides-selected-word-label',()=>{
   reset();ev("State.route={name:'notebook',k:'你',lesson:1,sample:false}; document.getElementById('screen').replaceChildren(); viewNotebook(document.getElementById('screen'))");
   ok(!doc.querySelector('.notebook-header .han'),'hidden full-view sample leaked');
-  const select=doc.querySelector('select[aria-label="Что прописывать"]');
-  ok(!select.selectedOptions[0].textContent.includes('你'),'selected option disclosed hidden character');
+  ok(!doc.querySelector('select'),'old per-lesson selector remains');
+  ok(!doc.querySelector('.notebook-sample-text .han, .notebook-stroke-demo'),'hidden character disclosed');
 });
 await T('direct-word-opens-its-own-lesson',()=>{
   ev("go('notebook',{k:'你'})");
-  ok(doc.querySelector('[aria-label="Урок прописей"]').value==='1','direct word used class lesson instead of its own lesson');
+  ok(doc.querySelector('.notebook-sample-text .kind').textContent==='Урок 1','direct word used class lesson instead of its own lesson');
 });
 A.finish('notebook: paper button, real3day rows, persistent ink and no false mastery');

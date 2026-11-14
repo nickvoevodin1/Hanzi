@@ -8,7 +8,7 @@ const routes=["go('path')","go('practice')","go('cards')","go('decomp')","go('se
   "go('draw',{chars:['好'],title:'t'})","go('draw',{chars:['丨'],title:'t'})","go('extra',{L:16,id:'g16'})","go('extra',{L:17,id:'p17'})",
   "go('strokes')","go('card',{id:BYK['还:hái'].id})","go('card',{id:BYK['姥姥'].id})","go('card',{id:BYK['T恤'].id})"];
 for(const r of routes) await T(r,()=>{ ev(r); ok(txt().length>20,'пустой экран'); });
-await T('nav',()=>{ for(const n of ['practice','dict','progress','settings','path']){ doc.querySelector(`.nav [data-nav="${n}"]`).click(); ok(doc.querySelector('.nav .on').dataset.nav===n,'вкладка '+n); ok(ev("State.route.name")===n,'экран '+n); } });
+await T('nav',()=>{ for(const n of ['cards','dict','path']){ doc.querySelector(`.nav [data-nav="${n}"]`).click(); ok(doc.querySelector('.nav .on').dataset.nav===n,'вкладка '+n); ok(ev("State.route.name")===n,'экран '+n); } });
 await T('top-bar',()=>{ ok(doc.getElementById('dayChip').textContent.length>3,'тип дня'); ok(doc.querySelector('#stRing svg'),'кольцо XP'); ok(/\d/.test(doc.getElementById('stStreak').textContent),'серия'); });
 await T('no-export-no-theme',()=>{ ev("go('settings')"); ok(!/Экспорт|Импорт|Тема/.test(txt()),'остались экспорт/темы'); ok(!doc.querySelector('[data-theme]'),'data-theme'); });
 await T('sheet',()=>{ ev("go('card',{id:BYS['睡觉'].id})"); const h=doc.querySelector('#screen [data-c="觉"]'); ok(h,'нет кликабельного 觉');
@@ -24,8 +24,8 @@ await T('settings-exam',()=>{ ev("go('settings')"); const d=doc.querySelectorAll
   const ed=d[d.length-1]; ed.value='2026-12-15'; inl[1].value='19, 20, 21'; click(/Добавить контрольную/);
   const e=ev("State.settings.semester.exams"); ok(e.length===1&&e[0].lessons.join()==='19,20,21'&&e[0].date==='2026-12-15','контрольная: '+JSON.stringify(e));
   ev("State.settings.semester.exams=[]"); });
-await T('path-home',()=>{ ev("go('path')"); const t=txt(); ok(!doc.querySelector('.sem'),'карточка семестра убрана'); ok(!/Отстаёшь от группы|Я сегодня уезжаю/.test(t),'нет удалённого блока'); ok(/Урок дня/.test(t)&&/Повторения/.test(t),'план дня');
-  ok(/Китайский как на парах · уроки 1–30/.test(t)&&/Грамматика отдельно/.test(t),'единый путь курса'); ok(doc.querySelector('.pnode.cur'),'нет текущего узла'); });
+await T('path-home',()=>{ ev("go('path')"); const t=txt(); ok(!doc.querySelector('.sem'),'карточка семестра убрана'); ok(!/Отстаёшь от группы|Я сегодня уезжаю/.test(t),'нет удалённого блока'); ok(doc.querySelector('.study-cycle-banner'),'нет входа в цикл прописей'); ok(!doc.querySelector('.study-shortcuts, .study-extra, .study-memory'),'остались лишние меню');
+  ok(/Китайский как на парах · уроки 1–30/.test(t)&&/История с выбором/.test(t),'единый путь курса'); ok(doc.querySelector('.pnode.cur'),'нет текущего узла'); });
 await T('dict-search',()=>{ ev("go('dict')"); const i=doc.querySelector('.search'); i.value='shuijiao'; i.dispatchEvent(new A.w.Event('input'));
   ok(/睡觉/.test(txt()),'поиск по пиньиню'); i.value='кровать'; i.dispatchEvent(new A.w.Event('input')); ok(/床/.test(txt()),'поиск по-русски'); });
 await T('extra-in-lessons',()=>{ ev("go('lessons')"); ok(/Список группы · уроки 1–16/.test(txt()),'нет строки списка группы'); ok(click(/Список группы/),'не открыть'); ok(ev("State.route.name")==='extra','экран'); ok(/姥姥/.test(txt()),'слова'); });

@@ -21,7 +21,9 @@ for(const t of topics){
 assert.equal(new Set(topics.map(t=>t.lesson)).size,30,'every lesson must have a verified topic or labeled practice bridge');
 assert(topics.filter(t=>t.lesson===1).every(t=>t.kind==='bridge'),'phonetic lesson1 misrepresented as formal grammar');
 const content=JSON.stringify(topics);
-for(const term of ['也','都','不太好','哪','谁','什么','在','去','来','的','地','得','一下','跟','和','给','从','生日','以后','多少','吗','呢','了']) assert(content.includes(term),'missing class-note model '+term);
+for(const term of ['也','都','不太好','哪','谁','什么','在','去','来','的','地','得','一下','跟','和','给','从','生日','以后','多少','吗','呢','了','第']) assert(content.includes(term),'missing class-note model '+term);
 const classroom=read('classroom');assert.equal(Object.keys(classroom.lessons).length,30);
 for(let L=1;L<=30;L++){const t=classroom.lessons[L];assert(t.origin==='original'&&t.dialogue.length>=2&&t.dialogue.every(e=>e.zh&&e.py&&e.ru),'dialogue '+L);assert(t.listening.segments.length>=2&&t.listening.segments.every(e=>e.zh&&e.py&&e.ru),'listening '+L);}
+assert.equal(classroom.stories.length,10);
+for(const story of classroom.stories){assert(story.origin==='original'&&story.zh&&story.py&&story.ru&&story.questions.length>=2,'incomplete story '+story.id);for(const q of story.questions)assert(new Set(q.choices).size===q.choices.length&&q.choices.includes(q.answer),'ambiguous story answer '+story.id);}
 console.log('PASS grammar data: '+topics.length+' topics, '+exercises.size+' exercises,30 lessons and original classroom materials');

@@ -76,4 +76,4 @@ await T('changing-song-restarts-questions-for-new-translated-fragment',()=>{
  ok(ev('classroomState().session!==window.__oldClassSession'),'song edit merely resumed old exercises');
  ok(ev("classroomState().session.queue.map(x=>x.zh).join('')")==='甲。乙。丙。','new song not used');
 });
-A.finish('classroom: six verified stages, coverage, conservative vocabulary, delayed correction and resume');
+A.finish('classroom: verified classroom stages, coverage, conservative vocabulary, delayed correction and resume');

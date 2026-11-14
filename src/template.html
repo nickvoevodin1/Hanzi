@@ -647,6 +647,12 @@ body.notebook-focus #app{max-width:none;padding-bottom:0}body.notebook-focus #sc
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
+/* Цикл 3 + 2 + 2: один вход с главной, отдельные карточки. */
+.study-cycle-banner h2{font-size:24px;line-height:1.2;margin:10px 0}.study-cycle-banner{border-color:var(--primary-line);background:linear-gradient(135deg,#fffaf0,#fff)}
+.study-week{display:flex;gap:8px;margin:16px 0}.study-week span{flex:1;text-align:center;border-radius:12px;padding:8px 0;font-weight:900;border:2px solid var(--line)}.study-week .writing{background:#fff1d7;color:#a65e00;border-color:#ffce83}.study-week .recall{background:#eaf7ff;color:#1681ac;border-color:#9bddfa}.study-week .total{background:#eff9df;color:#547b0a;border-color:#c7e99d}
+.study-item .ri{font-size:30px;min-width:64px;max-width:100px;overflow-wrap:anywhere;line-height:1.35}.study-item .tt{min-width:0}.study-item .py{margin-top:4px}.study-item small{white-space:normal}.study-difficult[aria-pressed="true"]{color:#ba6800;background:#fff1d7;border-radius:10px}.study-difficult{display:inline-flex;align-items:center;gap:6px;padding:8px 4px;font-size:14px}
+.study-flashcard{margin-top:18px;text-align:center;min-height:300px;display:flex;flex-direction:column;align-items:center;gap:14px}.study-flashcard h2{font-size:28px;overflow-wrap:anywhere}.study-flashcard h2.han,.study-answer{font-size:52px;line-height:1.35}.study-flashcard .btn{width:100%}.study-grades{display:grid;grid-template-columns:1fr;gap:10px;width:100%}.study-progress{height:10px;border-radius:8px;overflow:hidden;background:var(--line)}.study-progress i{height:100%;display:block;background:var(--primary)}.study-list-view h2{font-size:19px;margin:22px 0 10px}.study-list-view .search,.study-cards-view .search{margin:14px 0}.dict-heading{display:flex;align-items:center;justify-content:space-between}.notebook-practice-target .study-difficult{font-size:12px;padding:4px}.story-scene{padding:14px 0;border-bottom:1px solid var(--line)}
+@media(min-width:420px){.study-grades{grid-template-columns:repeat(3,1fr)}.study-grades .btn{font-size:12px;padding-left:4px;padding-right:4px}}
 </style>
 </head>
 <body>
@@ -675,10 +681,8 @@ body.notebook-focus #app{max-width:none;padding-bottom:0}body.notebook-focus #sc
 </div>
 <nav class="nav" id="nav">
   <button data-nav="path" class="on"><span class="ic" data-ic="home"></span>Путь</button>
-  <button data-nav="practice"><span class="ic" data-ic="dumbbell"></span>Повторение</button>
-  <button data-nav="dict"><span class="ic" data-ic="book"></span>Словарь</button>
-  <button data-nav="progress"><span class="ic" data-ic="trophy"></span>Прогресс</button>
-  <button data-nav="settings"><span class="ic" data-ic="gear"></span>Настройки</button>
+  <button data-nav="cards"><span class="ic" data-ic="cards"></span>Карточки</button>
+  <button data-nav="dict"><span class="ic" data-ic="book"></span>Поиск</button>
 </nav>
 <div class="fb" id="fb" hidden><div class="in" id="fbin"></div></div>
 <div class="combopop" id="combopop"></div>
