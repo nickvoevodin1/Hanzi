@@ -49,7 +49,7 @@ function viewKnownCheck(s){
       const reveal=el('button','btn','Проверить ответ');reveal.onclick=knownCheckReveal;card.appendChild(reveal);const giveUp=el('button','linkbtn','Не помню — показать');giveUp.onclick=()=>{x.gaveUp=true;x.ok=false;ss.revealed=true;save('meta');render();};card.appendChild(giveUp);
     }else{
       card.appendChild(el('p',x.skill==='write'?'han':'py',x.skill==='write'?esc(info.hz):x.skill==='meaning'?esc(info.ru):pinyinHTML(info.py)));
-      if(x.skill==='pinyin'){card.appendChild(el('p','note',x.ok?'Пиньинь и тоны верны':'Нужно повторить. Твой ответ: '+x.input));const next=el('button','btn','Дальше');next.onclick=()=>knownCheckGrade(x.ok);card.appendChild(next);}
+      if(x.skill==='pinyin'){card.appendChild(el('p','note',x.ok?'Пиньинь и тоны верны':'Нужно повторить. Твой ответ: '+esc(x.input)));const next=el('button','btn','Дальше');next.onclick=()=>knownCheckGrade(x.ok);card.appendChild(next);}
       else{if(x.skill==='write'){const demo=el('div');card.appendChild(demo);notebookStrokeDemo(demo,info);}card.appendChild(el('p','note',x.skill==='write'?'Сверь форму и порядок черт. Оцени свою запись до подсказки.':'Сверь смысл своего ответа с переводом.'));for(const [ok,title]of[[false,'Не вспомнил / ошибся'],[true,'Вспомнил верно']]){const button=el('button','btn '+(ok?'':'ghost'),title);button.style.marginTop='10px';button.disabled=ok&&!!x.gaveUp;button.onclick=()=>knownCheckGrade(ok);card.appendChild(button);}}
     }return;
   }
