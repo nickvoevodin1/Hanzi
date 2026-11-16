@@ -13,7 +13,7 @@ await T('read-only-home-and-no-unseen-enrolment',()=>{
  ok(ev('JSON.stringify(State.cards)===window.__cards'),'home altered knowledge');
  ok(ev('JSON.stringify(State.meta.memory)===window.__meta'),'opening home enrolled notebook entries');
  ok(doc.querySelectorAll('#screen > .view > *').length===2,'extra menus before course path');
- ok(doc.querySelectorAll('.nav button').length===3,'old navigation menus remain');
+ ok(doc.querySelectorAll('.nav button').length===4,'old navigation menus remain');
  ev("go('study')");ok(doc.querySelectorAll('.study-item').length===2,'introduced items absent from aggregate list');
 });
 await T('writing-and-pinyin-three-calendar-days',()=>{
@@ -160,6 +160,18 @@ await T('all-lessons-contain-only-main-textbook-words',()=>{
  ok(ev('courseClassUnits().every(u=>u.wordItems.every(k=>window.__core.includes(k)))'),'extras remain in path');
  ok(!ev('studyLearnedPool().includes(window.__extra)||studyWrittenPool().includes(window.__extra)'),'old extra writing reappears in queue');
  ev('applyCoreCurriculumV35()');ok(ev('JSON.stringify(State.cards)===window.__old'),'extra-word history deleted');
+});
+await T('dedicated-exam-tab-selected-lessons-and-dictation',()=>{
+ reset();ev("go('exam');examState().lessons=[];go('exam')");
+ ok(doc.querySelector('.nav [data-nav="exam"].on'),'exam tab not active');
+ for(const L of [5,18]){const input=doc.querySelector('input[aria-label="Урок '+L+'"]');input.checked=true;input.dispatchEvent(new A.w.Event('change'));}
+ ok(ev("examState().lessons.join()") ==='5,18','lesson choice not saved');
+ ok(click(/Тренировать диктант/),'dictation cannot start');
+ ok(ev("dictationStore().active.config.lessons.join()") ==='5,18','wrong dictation scope');
+ ok(ev("dictationStore().active.items.every(x=>[5,18].some(L=>LESSONS[L].o.includes(x.id)))"),'dictation includes extras');
+ ev("go('exam')");ok(click(/Пробная контрольная/),'mock cannot open');
+ ok(ev("MOCK.lessons.join()") ==='5,18','mock lost selected lessons');
+ ev("window.__mock=mockGen([5,18])");ok(ev("window.__mock.words.every(k=>[5,18].some(L=>LESSONS[L].o.includes(k)))"),'mock includes words outside chosen lessons');
 });
 await T('main-path-includes-rules-and-stories-without-radical-lessons',()=>{
  reset();const units=ev('courseClassUnits()');

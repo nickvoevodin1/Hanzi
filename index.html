@@ -682,6 +682,7 @@ body.notebook-focus #app{max-width:none;padding-bottom:0}body.notebook-focus #sc
 <nav class="nav" id="nav">
   <button data-nav="path" class="on"><span class="ic" data-ic="home"></span>Путь</button>
   <button data-nav="cards"><span class="ic" data-ic="cards"></span>Карточки</button>
+  <button data-nav="exam"><span class="ic" data-ic="pencil"></span>Контрольная</button>
   <button data-nav="dict"><span class="ic" data-ic="book"></span>Поиск</button>
 </nav>
 <div class="fb" id="fb" hidden><div class="in" id="fbin"></div></div>
@@ -1691,7 +1692,7 @@ function reportDecomp(ch){
   РОУТЕР И НАВИГАЦИЯ: Путь · Карточки · Поиск; старые маршруты для продолжения сохранены
 ==================================================================*/
 const TAB_OF={path:'path',play:'path',practice:'practice',cards:'cards',study:'path',session:'practice',decomp:'practice',sent:'practice',addsent:'practice',
-  classroom:'path',notebook:'practice',memory:'practice',dictation:'practice',grammar:'practice',mock:'practice',tests:'practice',test:'practice',keys:'practice',radical:'practice',reports:'practice',
+  classroom:'path',notebook:'practice',memory:'practice',exam:'exam',dictation:'exam',grammar:'practice',mock:'exam',tests:'practice',test:'practice',keys:'practice',radical:'practice',reports:'practice',
   dict:'dict',list:'dict',lessons:'dict',lesson:'dict',extra:'dict',strokes:'dict',progress:'progress',settings:'settings'};
 function go(name,params){
   State.route={name,...params}; if(TAB_OF[name]) State.tab=TAB_OF[name];
@@ -1703,7 +1704,7 @@ function render(){
   document.body.classList.toggle('notebook-focus',State.route.name==='notebook'&&!!State.route.practice);
   document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.nav===State.tab));
   renderTop();
-  const V={path:viewPath,classroom:viewClassroom,notebook:viewNotebook,play:viewPlay,practice:viewPractice,memory:viewMemory,dictation:viewDictation,grammar:viewGrammar,cards:viewStudyCards,study:viewStudy,decomp:viewDecomp,sent:viewSent,addsent:viewAddSent,mock:viewMock,reports:viewReports,
+  const V={path:viewPath,exam:viewExam,classroom:viewClassroom,notebook:viewNotebook,play:viewPlay,practice:viewPractice,memory:viewMemory,dictation:viewDictation,grammar:viewGrammar,cards:viewStudyCards,study:viewStudy,decomp:viewDecomp,sent:viewSent,addsent:viewAddSent,mock:viewMock,reports:viewReports,
     lessons:viewLessons,lesson:viewLesson,extra:viewExtra,strokes:viewStrokes,card:viewCard,session:viewSession,draw:viewDraw,
     tests:viewTests,test:viewTest,keys:viewKeys,radical:viewRadical,dict:viewDict,list:viewList,progress:viewProgress,settings:viewSettings};
   const s=$('#screen'); s.innerHTML=''; (V[State.route.name]||viewPath)(s);
@@ -1739,7 +1740,7 @@ const Resume=(()=>{
   function snap(){
     return {v:1,ts:Date.now(),route:State.route,tab:State.tab,y:Math.round(window.scrollY||0),
       play:PLAY,session:SESSION,dec:DEC,sent:SENT,mock:MOCK,test:T,
-      study:['memory','dictation','grammar','classroom','notebook','cards','study'].includes(State.route.name)?{memory:State.meta.memory,dictation:State.meta.dictation,grammar:State.meta.grammar,classroom:State.meta.classroom,study:State.meta.study}:undefined};
+      study:['memory','dictation','grammar','classroom','notebook','cards','study','exam'].includes(State.route.name)?{memory:State.meta.memory,dictation:State.meta.dictation,grammar:State.meta.grammar,classroom:State.meta.classroom,study:State.meta.study,exam:State.meta.exam}:undefined};
   }
   function save(){
     if(!enabled) return;
@@ -1760,12 +1761,13 @@ const Resume=(()=>{
       const name=s.route.name;
       // Последний штрих/ввод мог ещё ждать асинхронной записи в IndexedDB.
       // pagehide снимает актуальное состояние синхронно вместе с маршрутом.
-      if(s.study&&['memory','dictation','grammar','classroom','notebook','cards','study'].includes(name)){
+      if(s.study&&['memory','dictation','grammar','classroom','notebook','cards','study','exam'].includes(name)){
         if(s.study.memory) State.meta.memory=s.study.memory;
         if(s.study.dictation) State.meta.dictation=s.study.dictation;
         if(s.study.grammar) State.meta.grammar=s.study.grammar;
         if(s.study.classroom) State.meta.classroom=s.study.classroom;
         if(s.study.study) State.meta.study=s.study.study;
+        if(s.study.exam) State.meta.exam=s.study.exam;
         saveStateStudy();
       }
       if(name==='play'&&!PLAY || name==='session'&&!SESSION) return false;
@@ -5456,10 +5458,10 @@ function viewAddSent(s){
 let MOCK=null, mockTimer=null;
 function mockGen(lessons){
   const set=new Set(lessons);
-  const ws=COURSE.filter(k=>set.has(WORD_L[k])).map(k=>BYK[k]).filter(w=>hanOf(w.s).length&&hanOf(w.s).every(c=>ET[c]));
+  const ws=uniq(lessons.flatMap(L=>lessonWords(L).map(w=>w.key))).map(k=>BYK[k]).filter(w=>hanOf(w.s).length&&hanOf(w.s).every(c=>ET[c]));
   const pick=shuffle(ws.filter(w=>hanOf(w.s).length<=2)).concat(shuffle(ws.filter(w=>hanOf(w.s).length>2)));
   const err=State.meta.sentErr;
-  const ss=shuffle(sentBank().filter(x=>sentLessons(x).some(l=>set.has(l)))).sort((a,b)=>(err[b.id]||0)-(err[a.id]||0));
+  const ss=shuffle(sentBank().filter(x=>sentLessons(x).some(l=>set.has(l))&&hanOf(x.zh).every(ch=>CHAR_L[ch]&&CHAR_L[ch]<=Math.max(...lessons)))).sort((a,b)=>(err[b.id]||0)-(err[a.id]||0));
   return {words:pick.slice(0,5).map(w=>w.key),ruzh:ss.slice(0,5),zhru:ss.slice(5,10)};
 }
 function gradeOf(pct){ const sc=State.settings.scale||[90,75,60]; return pct>=sc[0]?'5':pct>=sc[1]?'4':pct>=sc[2]?'3':'2'; }
@@ -5471,9 +5473,9 @@ function viewMock(s){
   if(State.route.setup){ MOCK={phase:'setup',...State.route.setup,lessons:State.route.setup.lessons.slice()}; delete State.route.setup; }
   if(!MOCK||MOCK.phase==='setup'){
     if(!MOCK){ const ne=nextExam(); MOCK={phase:'setup',lessons:lessonFilter(ne&&(ne.lessons||[]).length?'exam':'group'),title:ne?(ne.title||'Контрольная'):'Пробная контрольная'}; }
-    const back=el('button','back','‹ Назад'); back.onclick=()=>{ MOCK=null; go('practice'); }; v.appendChild(back);
+    const back=el('button','back','‹ Назад'); back.onclick=()=>{ MOCK=null; go('exam'); }; v.appendChild(back);
     v.appendChild(el('h2','title',esc(MOCK.title||'Пробная контрольная')));
-    v.appendChild(el('p','note','Как настоящая: 1) 5 слов — разбор каждого иероглифа: тип, ключ, фонетик (как в «Пособии по иероглифике»), пиньинь и перевод; 2) 5 предложений RU→中; 3) 5 предложений 中→RU. Пишешь на бумаге, потом сверяешь и честно отмечаешь «верно / частично / неверно».'));
+    v.appendChild(el('p','note','Как настоящая: 1) до 5 слов — разбор каждого иероглифа: тип, ключ, фонетик (как в «Пособии по иероглифике»), пиньинь и перевод; 2) до 5 предложений RU→中; 3) до 5 предложений 中→RU. Пишешь на бумаге, потом сверяешь и честно отмечаешь «верно / частично / неверно».'));
     v.appendChild(el('p','eyebrow','Уроки'));
     lessonChips(v,MOCK.lessons,render);
     const tr=el('div','setrow'); tr.style.cssText='padding:12px 0;border:0'; tr.innerHTML='<div class="lab"><b>Таймер, минут</b><small>настраивается</small></div>';
@@ -5502,7 +5504,7 @@ function viewMock(s){
     v.insertAdjacentHTML('beforeend',h);
     const b=el('button','btn','Сдать на проверку'); b.style.marginTop='16px'; b.onclick=()=>{ clearInterval(mockTimer); MOCK.phase='check'; MOCK.used=Math.round((Date.now()-MOCK.start)/1000); render(); };
     v.appendChild(b);
-    const q=el('button','btn ghost','Прервать'); q.style.marginTop='12px'; q.onclick=()=>{ clearInterval(mockTimer); MOCK=null; go('practice'); }; v.appendChild(q);
+    const q=el('button','btn ghost','Прервать'); q.style.marginTop='12px'; q.onclick=()=>{ clearInterval(mockTimer); MOCK=null; go('exam'); }; v.appendChild(q);
     s.appendChild(v); return;
   }
   if(MOCK.phase==='check'){
@@ -5739,7 +5741,7 @@ function viewDictation(s){
   const v=el('div','view'); s.appendChild(v);
   const st=dictationStore(), a=st.active;
   if(State.route.run&&a) return a.finished?dictationEnd(v,a):dictationRun(v,a);
-  const back=el('button','back','‹ Повторение'); back.onclick=()=>go('practice'); v.appendChild(back);
+  const back=el('button','back','‹ Контрольная и диктант'); back.onclick=()=>go('exam'); v.appendChild(back);
   v.appendChild(el('h2','title','Готовлюсь к диктанту'));
   v.appendChild(el('p','note','Небольшими порциями: вспомни написание по переводу, затем пиньинь с тонами и значение по иероглифам. Без вариантов ответа. Ошибки потренируем ещё раз.'));
   if(a&&!a.finished){
@@ -5872,6 +5874,28 @@ function dictationInk(host,x,readOnly){
   const clear=el('button','btn ghost mini',IC('undo',16)+' Очистить поле'); clear.onclick=()=>{ x.ink=[]; ctx.clearRect(0,0,canvas.width,canvas.height); save('meta'); }; host.appendChild(clear);
 }
 
+/* Подготовка по выбранным основным спискам учебника. */
+function examState(){return State.meta.exam||(State.meta.exam={lessons:[groupL()],count:8,audio:false});}
+function viewExam(s){
+  const v=el('div','view');s.appendChild(v);const m=examState();
+  v.appendChild(el('h1','','Контрольная и диктант'));
+  v.appendChild(el('p','note','Выбери нужные уроки. В заданиях — основные слова учебника, без дополнительного раздела. Результат отмечаешь после самостоятельного ответа.'));
+  const chips=el('div','chips');
+  for(let L=1;L<=NL;L++){const label=el('label','chip'),input=el('input');input.type='checkbox';input.checked=m.lessons.includes(L);input.setAttribute('aria-label','Урок '+L);input.onchange=()=>{m.lessons=input.checked?uniq(m.lessons.concat(L)).sort((a,b)=>a-b):m.lessons.filter(x=>x!==L);save('meta');update();};label.append(input,document.createTextNode(' Урок '+L));chips.appendChild(label);}v.appendChild(chips);
+  const info=el('p','note');v.appendChild(info);
+  const amount=el('select');amount.setAttribute('aria-label','Слов в диктанте');for(const [n,title]of[[4,'4 слова'],[8,'8 слов'],[16,'16 слов'],[214,'Все слова выбранных уроков']]){const o=el('option','',title);o.value=String(n);o.selected=n===m.count;amount.appendChild(o);}amount.onchange=()=>{m.count=+amount.value;save('meta');};v.appendChild(amount);
+  const audio=el('label','setrow'),toggle=el('input');toggle.type='checkbox';toggle.checked=m.audio;toggle.onchange=()=>{m.audio=toggle.checked;save('meta');};audio.append(toggle,document.createTextNode(' Диктант на слух'));v.appendChild(audio);
+  const dictation=el('button','btn',IC('pencil',20)+' Тренировать диктант');dictation.style.marginTop='12px';dictation.onclick=()=>dictationStart({kind:'lessons',lessons:m.lessons.slice(),count:m.count,audio:m.audio});v.appendChild(dictation);
+  v.appendChild(el('p','note','Написание, пиньинь с тонами и перевод. Ошибки возвращаются на повторение.'));
+  const mock=el('button','btn ghost',IC('trophy',20)+' Пробная контрольная');mock.onclick=()=>go('mock',{setup:{lessons:m.lessons.slice(),title:'Контрольная · уроки '+m.lessons.join(', ')}});v.appendChild(mock);
+  v.appendChild(el('p','note','Разбор иероглифов по ключам, пиньинь и перевод слов, перевод предложений в обе стороны. Таймер выбирается перед началом.'));
+  const d=State.meta.dictation?.active;
+  if(d&&!d.finished){const b=el('button','btn blue','Продолжить диктант');b.onclick=()=>go('dictation',{run:true});v.appendChild(b);}
+  if(MOCK&&['paper','check'].includes(MOCK.phase)){const b=el('button','btn blue','Продолжить контрольную');b.onclick=()=>go('mock');v.appendChild(b);}
+  function update(){const items=dictationItems({kind:'lessons',lessons:m.lessons});info.textContent=m.lessons.length?'Уроки '+m.lessons.join(', ')+' · '+items.length+' основных слов':'Выбери хотя бы один урок';dictation.disabled=mock.disabled=!m.lessons.length;}
+  update();
+}
+
 /*==================================================================
   СТАРТ
 ==================================================================*/
@@ -5888,7 +5912,7 @@ const Splash={
 };
 // Обновления: проверка при запуске, при каждом возвращении в приложение и раз в 30 мин; когда новая версия
 // встала, service worker сам перезагружает окно (место в уроке сохраняет Resume на pagehide).
-const APP_VER='v35';
+const APP_VER='v36';
 function registerSW(){
   if(!('serviceWorker' in navigator)) return;
   navigator.serviceWorker.register('./service-worker.js',{updateViaCache:'none'}).then(reg=>{

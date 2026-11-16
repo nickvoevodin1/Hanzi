@@ -258,10 +258,10 @@ function viewAddSent(s){
 let MOCK=null, mockTimer=null;
 function mockGen(lessons){
   const set=new Set(lessons);
-  const ws=COURSE.filter(k=>set.has(WORD_L[k])).map(k=>BYK[k]).filter(w=>hanOf(w.s).length&&hanOf(w.s).every(c=>ET[c]));
+  const ws=uniq(lessons.flatMap(L=>lessonWords(L).map(w=>w.key))).map(k=>BYK[k]).filter(w=>hanOf(w.s).length&&hanOf(w.s).every(c=>ET[c]));
   const pick=shuffle(ws.filter(w=>hanOf(w.s).length<=2)).concat(shuffle(ws.filter(w=>hanOf(w.s).length>2)));
   const err=State.meta.sentErr;
-  const ss=shuffle(sentBank().filter(x=>sentLessons(x).some(l=>set.has(l)))).sort((a,b)=>(err[b.id]||0)-(err[a.id]||0));
+  const ss=shuffle(sentBank().filter(x=>sentLessons(x).some(l=>set.has(l))&&hanOf(x.zh).every(ch=>CHAR_L[ch]&&CHAR_L[ch]<=Math.max(...lessons)))).sort((a,b)=>(err[b.id]||0)-(err[a.id]||0));
   return {words:pick.slice(0,5).map(w=>w.key),ruzh:ss.slice(0,5),zhru:ss.slice(5,10)};
 }
 function gradeOf(pct){ const sc=State.settings.scale||[90,75,60]; return pct>=sc[0]?'5':pct>=sc[1]?'4':pct>=sc[2]?'3':'2'; }
@@ -273,9 +273,9 @@ function viewMock(s){
   if(State.route.setup){ MOCK={phase:'setup',...State.route.setup,lessons:State.route.setup.lessons.slice()}; delete State.route.setup; }
   if(!MOCK||MOCK.phase==='setup'){
     if(!MOCK){ const ne=nextExam(); MOCK={phase:'setup',lessons:lessonFilter(ne&&(ne.lessons||[]).length?'exam':'group'),title:ne?(ne.title||'Контрольная'):'Пробная контрольная'}; }
-    const back=el('button','back','‹ Назад'); back.onclick=()=>{ MOCK=null; go('practice'); }; v.appendChild(back);
+    const back=el('button','back','‹ Назад'); back.onclick=()=>{ MOCK=null; go('exam'); }; v.appendChild(back);
     v.appendChild(el('h2','title',esc(MOCK.title||'Пробная контрольная')));
-    v.appendChild(el('p','note','Как настоящая: 1) 5 слов — разбор каждого иероглифа: тип, ключ, фонетик (как в «Пособии по иероглифике»), пиньинь и перевод; 2) 5 предложений RU→中; 3) 5 предложений 中→RU. Пишешь на бумаге, потом сверяешь и честно отмечаешь «верно / частично / неверно».'));
+    v.appendChild(el('p','note','Как настоящая: 1) до 5 слов — разбор каждого иероглифа: тип, ключ, фонетик (как в «Пособии по иероглифике»), пиньинь и перевод; 2) до 5 предложений RU→中; 3) до 5 предложений 中→RU. Пишешь на бумаге, потом сверяешь и честно отмечаешь «верно / частично / неверно».'));
     v.appendChild(el('p','eyebrow','Уроки'));
     lessonChips(v,MOCK.lessons,render);
     const tr=el('div','setrow'); tr.style.cssText='padding:12px 0;border:0'; tr.innerHTML='<div class="lab"><b>Таймер, минут</b><small>настраивается</small></div>';
@@ -304,7 +304,7 @@ function viewMock(s){
     v.insertAdjacentHTML('beforeend',h);
     const b=el('button','btn','Сдать на проверку'); b.style.marginTop='16px'; b.onclick=()=>{ clearInterval(mockTimer); MOCK.phase='check'; MOCK.used=Math.round((Date.now()-MOCK.start)/1000); render(); };
     v.appendChild(b);
-    const q=el('button','btn ghost','Прервать'); q.style.marginTop='12px'; q.onclick=()=>{ clearInterval(mockTimer); MOCK=null; go('practice'); }; v.appendChild(q);
+    const q=el('button','btn ghost','Прервать'); q.style.marginTop='12px'; q.onclick=()=>{ clearInterval(mockTimer); MOCK=null; go('exam'); }; v.appendChild(q);
     s.appendChild(v); return;
   }
   if(MOCK.phase==='check'){

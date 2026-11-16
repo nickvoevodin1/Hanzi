@@ -100,7 +100,7 @@ function viewDictation(s){
   const v=el('div','view'); s.appendChild(v);
   const st=dictationStore(), a=st.active;
   if(State.route.run&&a) return a.finished?dictationEnd(v,a):dictationRun(v,a);
-  const back=el('button','back','‹ Повторение'); back.onclick=()=>go('practice'); v.appendChild(back);
+  const back=el('button','back','‹ Контрольная и диктант'); back.onclick=()=>go('exam'); v.appendChild(back);
   v.appendChild(el('h2','title','Готовлюсь к диктанту'));
   v.appendChild(el('p','note','Небольшими порциями: вспомни написание по переводу, затем пиньинь с тонами и значение по иероглифам. Без вариантов ответа. Ошибки потренируем ещё раз.'));
   if(a&&!a.finished){

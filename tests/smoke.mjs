@@ -8,7 +8,7 @@ const routes=["go('path')","go('practice')","go('cards')","go('decomp')","go('se
   "go('draw',{chars:['好'],title:'t'})","go('draw',{chars:['丨'],title:'t'})","go('extra',{L:16,id:'g16'})","go('extra',{L:17,id:'p17'})",
   "go('strokes')","go('card',{id:BYK['还:hái'].id})","go('card',{id:BYK['姥姥'].id})","go('card',{id:BYK['T恤'].id})"];
 for(const r of routes) await T(r,()=>{ ev(r); ok(txt().length>20,'пустой экран'); });
-await T('nav',()=>{ for(const n of ['cards','dict','path']){ doc.querySelector(`.nav [data-nav="${n}"]`).click(); ok(doc.querySelector('.nav .on').dataset.nav===n,'вкладка '+n); ok(ev("State.route.name")===n,'экран '+n); } });
+await T('nav',()=>{ for(const n of ['cards','exam','dict','path']){ doc.querySelector(`.nav [data-nav="${n}"]`).click(); ok(doc.querySelector('.nav .on').dataset.nav===n,'вкладка '+n); ok(ev("State.route.name")===n,'экран '+n); } });
 await T('top-bar',()=>{ ok(doc.getElementById('dayChip').textContent.length>3,'тип дня'); ok(doc.querySelector('#stRing svg'),'кольцо XP'); ok(/\d/.test(doc.getElementById('stStreak').textContent),'серия'); });
 await T('no-export-no-theme',()=>{ ev("go('settings')"); ok(!/Экспорт|Импорт|Тема/.test(txt()),'остались экспорт/темы'); ok(!doc.querySelector('[data-theme]'),'data-theme'); });
 await T('sheet',()=>{ ev("go('card',{id:BYS['睡觉'].id})"); const h=doc.querySelector('#screen [data-c="觉"]'); ok(h,'нет кликабельного 觉');
