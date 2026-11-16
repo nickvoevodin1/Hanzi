@@ -121,6 +121,20 @@ await T('midnight-never-credits-yesterday-session-to-today',()=>{
  reset();learn(['你']);write(['你']);ev("startStudyCards('all');studyState().session.revealed=true");next();
  ok(!ev('studyGrade(3)'),'stale session graded on a different day');ok(ev('studyState().session.finished'),'stale session not closed');
 });
+await T('multiple-lesson-selection-and-auto-next-after-both-paper-marks',()=>{
+ reset();ev("go('study')");
+ for(const L of [5,18]){const input=doc.querySelector('input[aria-label="Урок '+L+'"]');input.checked=true;input.dispatchEvent(new A.w.Event('change'));}
+ ok(ev("studyState().notebookLessons.join()") ==='5,18','cannot combine old and new lessons');
+ ok(ev("studyNotebookPool().join()")===ev("uniq(notebookPool('words',5).concat(notebookPool('words',18))).join()"),'selected lesson vocabulary incomplete');
+ ev("window.__queue=studyNotebookPool();window.__first=window.__queue[0];window.__next=window.__queue[1];go('notebook',{k:window.__first,queue:window.__queue})");
+ let buttons=[...doc.querySelectorAll('.notebook-day[data-notebook-day="1"] button')].filter(b=>b.textContent==='Прописал');buttons[0].click();
+ ok(ev('State.route.k===window.__first'),'advanced before pinyin');
+ buttons=[...doc.querySelectorAll('.notebook-day[data-notebook-day="1"] button')].filter(b=>b.textContent==='Прописал');buttons[0].click();
+ ok(ev('State.route.k===window.__next'),'did not auto advance after both marks');
+ ok(ev('notebookStatus(window.__first).complete')===1,'paper day not saved');
+ ok(ev('Object.keys(State.cards).length')===0,'lesson selection granted knowledge');
+ ev("go('study')");ok(doc.querySelector('input[aria-label="Урок 18"]').checked,'lesson selection not retained');
+});
 await T('main-path-includes-rules-and-stories-without-radical-lessons',()=>{
  reset();const units=ev('courseClassUnits()');
  ok(units.flatMap(u=>u.nodes.filter(n=>n.type==='grammar').map(n=>n.topicId)).sort().join()===ev('grammarTopics().map(t=>t.id).sort().join()'),'grammar omitted/duplicated');

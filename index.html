@@ -3401,7 +3401,7 @@ function notebookAfterAttempt(k,skill,index){
   if(notebookCount(k,skill,index)<10){render();return;}
   const other=skill==='hz'?'py':'hz';
   if(notebookCount(k,other,index)<10){go('notebook',{...State.route,skill:other});return;}
-  notebookReturn();
+  if(State.route.backRoute?.queue)notebookAdvance(k,State.route.backRoute.queue);else notebookReturn();
 }
 function notebookPracticeView(v,k){
   const status=notebookStatus(k),index=status.active;
@@ -3430,7 +3430,7 @@ function notebookPracticeSlot(host,k,skill,index,editable,opts){
   host.dataset.skill=skill;host.dataset.day=String(index+1);
   host.appendChild(el('div','kind',skill==='hz'?'Иероглифы / ключи':'Пиньинь'));
   host.appendChild(el('p','notebook-slot-count',datum?.done&&!datum.attempts?.length&&!datum.paperCount?'Выполнено ранее':count+' / 10 повторений'));
-  if(editable){const actions=el('div','actionrow notebook-actions');const start=el('button','btn ghost mini','Писать 10 раз');start.setAttribute('aria-label',(skill==='hz'?'Писать иероглифы':'Писать пиньинь')+' · день '+(index+1));start.onclick=()=>startNotebookPractice(k,skill,opts);const paper=el('button','btn mini','Прописал');paper.onclick=()=>{if(notebookMark(k,skill,'paper'))render();};actions.append(start,paper);host.appendChild(actions);host.appendChild(el('p','note','«Прописал» — написал десять раз в бумажной тетради.'));}
+  if(editable){const actions=el('div','actionrow notebook-actions');const start=el('button','btn ghost mini','Писать 10 раз');start.setAttribute('aria-label',(skill==='hz'?'Писать иероглифы':'Писать пиньинь')+' · день '+(index+1));start.onclick=()=>startNotebookPractice(k,skill,opts);const paper=el('button','btn mini','Прописал');paper.onclick=()=>{if(notebookMark(k,skill,'paper')){if(notebookCompletedDay(notebookRow(k,index,false)))notebookAdvance(k,State.route.queue);else render();}};actions.append(start,paper);host.appendChild(actions);host.appendChild(el('p','note','«Прописал» — написал десять раз в бумажной тетради.'));}
   else if(datum?.done)host.appendChild(el('p','note',IC('check',14)+' '+(datum.reported?'Прописано ранее · отметка':datum.source==='paper'?'В тетради':'На экране')+' · '+fmtDate(datum.date)));
 }
 function notebookPanel(k,opts){
@@ -3461,7 +3461,7 @@ function viewNotebook(s){
   const content=el('div','notebook-sample-text');
   if(show)content.innerHTML=`<div class="kind">${esc(info.label)}</div><div class="han" style="font-size:48px">${esc(info.hz)}</div><div class="py">${pinyinHTML(info.py)}</div><div class="tr">${esc(info.ru)}</div>`;
   else content.innerHTML=`<div class="kind">${esc(info.label)}</div><div class="tr">${esc(info.ru)}</div><p class="note">Сегодня попробуй написать по памяти. Образец можно открыть после попытки.</p>`;
-  const toggle=el('button','linkbtn',show?'Закрыть образец':'Сверить образец');toggle.onclick=()=>go('notebook',{k,sample:!show,fromStudy:true});content.appendChild(toggle);content.appendChild(studyDifficultButton(k));sample.appendChild(content);v.appendChild(sample);
+  const toggle=el('button','linkbtn',show?'Закрыть образец':'Сверить образец');toggle.onclick=()=>go('notebook',{...State.route,k,sample:!show,fromStudy:true});content.appendChild(toggle);content.appendChild(studyDifficultButton(k));sample.appendChild(content);v.appendChild(sample);
   if(show){const demo=el('div');sample.appendChild(demo);notebookStrokeDemo(demo,info);}
   for(let index=0;index<3;index++){
     const section=el('section','hero notebook-day');section.style.marginTop='14px';section.dataset.notebookDay=String(index+1);
@@ -3472,7 +3472,7 @@ function viewNotebook(s){
     v.appendChild(section);
   }
   if(State.route.fromStudy){
-    const next=el('button','btn',status.active==null?'Следующий знак':'К списку прописей');next.style.marginTop='16px';next.onclick=()=>{const pending=studyWritingPool('').find(id=>id!==k);if(pending&&status.active==null)go('notebook',{k:pending,fromStudy:true});else go('study');};v.appendChild(next);
+    const next=el('button','btn',status.active==null?'Следующий знак':'К списку прописей');next.style.marginTop='16px';next.onclick=()=>{if(status.active==null)notebookAdvance(k,State.route.queue);else go('study');};v.appendChild(next);
     if(status.finished){const phase=studyStatus(k);v.appendChild(el('p','note',phase.stage==='cards'?'Теперь два дня закрепляем это слово карточками.':phase.stage==='wait'?'Следующий учебный день — '+fmtDate(phase.availableOn)+'.':'Пятидневный цикл завершён. Можно повторять в карточках.'));const cards=el('button','linkbtn','Открыть карточки');cards.onclick=()=>go('cards');v.appendChild(cards);}
   }
   v.appendChild(el('p','study-tip','Отметка «Прописал» сохраняет факт письма. После трёх дней письма — два дня карточек этих слов. На этом цикл завершён. Если пропустил день, продолжай с незавершённого дня. Несколько дней не засчитываются одним нажатием.'));
@@ -3576,7 +3576,7 @@ function studyCycleBanner(){
   const days=el('div','study-week');for(let n=1;n<=5;n++)days.appendChild(el('span',n<=3?'writing':'recall',String(n)));c.appendChild(days);
   const b=el('button','btn',IC(cards.length?'cards':'brush',20)+' '+(cards.length?'Карточки на сегодня · '+cards.length:writing.length?'Прописи на сегодня · '+writing.length:'Мои прописи'));
   b.onclick=()=>go(cards.length?'cards':'study');c.appendChild(b);
-  if(writing.length&&cards.length){const next=el('button','linkbtn','Мои прописи · '+writing.length);next.onclick=()=>go('study');c.appendChild(next);}
+  if(cards.length){const next=el('button','linkbtn','Выбрать уроки для прописей');next.onclick=()=>go('study');c.appendChild(next);}
   return c;
 }
 function studySearch(host,value,oninput){
@@ -3587,17 +3587,33 @@ function studyListRow(k,action){
   const row=el('button','row study-item',`<span class="ri han">${esc(info.hz)}</span><div class="tt"><b>${esc(info.ru)}</b><small class="py">${pinyinHTML(info.py)}</small><small>${status.stage==='wait'?fmtDate(status.availableOn):labels[status.stage]+(status.stage==='done'?'':status.day)}${studyIsDifficult(k)?' · сложный':''}</small></div>${IC('chev',18)}`);
   row.onclick=()=>action(k);return row;
 }
+function studyNotebookPool(){
+  const lessons=State.meta.study?.notebookLessons||[];
+  return lessons.length?uniq(lessons.flatMap(L=>notebookPool('words',L))):studyLearnedPool();
+}
+function notebookAdvance(k,queue){
+  const pool=queue||studyNotebookPool(),at=pool.indexOf(k),ordered=pool.slice(at+1).concat(pool.slice(0,at<0?0:at));
+  const next=ordered.find(id=>id!==k&&notebookStatus(id).active!=null);
+  if(next){go('notebook',{k:next,queue:pool,fromStudy:true});return true;}
+  if(State.route.practice)notebookReturn();else render();
+  toast('На сегодня выбранные слова прописаны');return false;
+}
 function viewStudy(s){
   const v=el('div','view study-list-view');s.appendChild(v);
   const back=el('button','back','‹ На путь');back.onclick=()=>go('path');v.appendChild(back);
   v.appendChild(el('h1','','Мои прописи'));
-  v.appendChild(el('p','note','Слова и ключи из пройденного. Три дня по 10 написаний и 10 пиньиня, затем карточки. Пропущенный день можно продолжить позже.'));
+  v.appendChild(el('p','note','Выбери один или несколько уроков, например новый и старый. Без фильтра — уже пройденное. Три дня по 10 написаний и 10 пиньиня, затем карточки. Пропущенный день можно продолжить позже.'));
+  const chooser=el('details','hero notebook-lesson-picker');chooser.appendChild(el('summary','','Выбрать уроки'));
+  const selected=State.meta.study?.notebookLessons||[];
+  const reset=el('button','linkbtn','Всё пройденное');reset.onclick=()=>{studyState().notebookLessons=[];save('meta');go('study');};chooser.appendChild(reset);
+  const choices=el('div','chips');
+  for(let L=1;L<=NL;L++){const label=el('label','chip'),input=el('input');input.type='checkbox';input.value=String(L);input.checked=selected.includes(L);input.setAttribute('aria-label','Урок '+L);input.onchange=()=>{studyState().notebookLessons=[...choices.querySelectorAll('input:checked')].map(x=>+x.value);save('meta');draw();};label.append(input,document.createTextNode(' Урок '+L));choices.appendChild(label);}chooser.appendChild(choices);v.appendChild(chooser);
   const result=el('div');studySearch(v,State.route.q,q=>{State.route.q=q;draw();Resume.later();});v.appendChild(result);
   function draw(){
-    result.replaceChildren();const q=State.route.q||'',pool=studyLearnedPool().filter(k=>studyMatches(k,q));
+    result.replaceChildren();const q=State.route.q||'',pool=studyNotebookPool().filter(k=>studyMatches(k,q));
     const groups=[['Сегодня пишем',pool.filter(k=>studyStatus(k).stage==='writing')],['Сегодня готово · расписание и история',pool.filter(k=>studyStatus(k).stage!=='writing')]];
     if(!pool.length){result.appendChild(el('p','empty',q?'Ничего не найдено.':'Сначала познакомься со словами или ключами на пути. Здесь появится только пройденное.'));return;}
-    for(const [title,keys]of groups){if(!keys.length)continue;result.appendChild(el('h2','title',title+' · '+keys.length));const list=el('div','rowlist');keys.forEach(k=>list.appendChild(studyListRow(k,k=>go('notebook',{k,fromStudy:true}))));result.appendChild(list);}
+    for(const [title,keys]of groups){if(!keys.length)continue;result.appendChild(el('h2','title',title+' · '+keys.length));const list=el('div','rowlist');keys.forEach(k=>list.appendChild(studyListRow(k,k=>go('notebook',{k,queue:pool,fromStudy:true}))));result.appendChild(list);}
   }draw();
 }
 function startStudyCards(mode,q,selected){
@@ -5810,7 +5826,7 @@ const Splash={
 };
 // Обновления: проверка при запуске, при каждом возвращении в приложение и раз в 30 мин; когда новая версия
 // встала, service worker сам перезагружает окно (место в уроке сохраняет Resume на pagehide).
-const APP_VER='v31';
+const APP_VER='v32';
 function registerSW(){
   if(!('serviceWorker' in navigator)) return;
   navigator.serviceWorker.register('./service-worker.js',{updateViaCache:'none'}).then(reg=>{

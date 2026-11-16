@@ -54,7 +54,7 @@ function studyCycleBanner(){
   const days=el('div','study-week');for(let n=1;n<=5;n++)days.appendChild(el('span',n<=3?'writing':'recall',String(n)));c.appendChild(days);
   const b=el('button','btn',IC(cards.length?'cards':'brush',20)+' '+(cards.length?'Карточки на сегодня · '+cards.length:writing.length?'Прописи на сегодня · '+writing.length:'Мои прописи'));
   b.onclick=()=>go(cards.length?'cards':'study');c.appendChild(b);
-  if(writing.length&&cards.length){const next=el('button','linkbtn','Мои прописи · '+writing.length);next.onclick=()=>go('study');c.appendChild(next);}
+  if(cards.length){const next=el('button','linkbtn','Выбрать уроки для прописей');next.onclick=()=>go('study');c.appendChild(next);}
   return c;
 }
 function studySearch(host,value,oninput){
@@ -65,17 +65,33 @@ function studyListRow(k,action){
   const row=el('button','row study-item',`<span class="ri han">${esc(info.hz)}</span><div class="tt"><b>${esc(info.ru)}</b><small class="py">${pinyinHTML(info.py)}</small><small>${status.stage==='wait'?fmtDate(status.availableOn):labels[status.stage]+(status.stage==='done'?'':status.day)}${studyIsDifficult(k)?' · сложный':''}</small></div>${IC('chev',18)}`);
   row.onclick=()=>action(k);return row;
 }
+function studyNotebookPool(){
+  const lessons=State.meta.study?.notebookLessons||[];
+  return lessons.length?uniq(lessons.flatMap(L=>notebookPool('words',L))):studyLearnedPool();
+}
+function notebookAdvance(k,queue){
+  const pool=queue||studyNotebookPool(),at=pool.indexOf(k),ordered=pool.slice(at+1).concat(pool.slice(0,at<0?0:at));
+  const next=ordered.find(id=>id!==k&&notebookStatus(id).active!=null);
+  if(next){go('notebook',{k:next,queue:pool,fromStudy:true});return true;}
+  if(State.route.practice)notebookReturn();else render();
+  toast('На сегодня выбранные слова прописаны');return false;
+}
 function viewStudy(s){
   const v=el('div','view study-list-view');s.appendChild(v);
   const back=el('button','back','‹ На путь');back.onclick=()=>go('path');v.appendChild(back);
   v.appendChild(el('h1','','Мои прописи'));
-  v.appendChild(el('p','note','Слова и ключи из пройденного. Три дня по 10 написаний и 10 пиньиня, затем карточки. Пропущенный день можно продолжить позже.'));
+  v.appendChild(el('p','note','Выбери один или несколько уроков, например новый и старый. Без фильтра — уже пройденное. Три дня по 10 написаний и 10 пиньиня, затем карточки. Пропущенный день можно продолжить позже.'));
+  const chooser=el('details','hero notebook-lesson-picker');chooser.appendChild(el('summary','','Выбрать уроки'));
+  const selected=State.meta.study?.notebookLessons||[];
+  const reset=el('button','linkbtn','Всё пройденное');reset.onclick=()=>{studyState().notebookLessons=[];save('meta');go('study');};chooser.appendChild(reset);
+  const choices=el('div','chips');
+  for(let L=1;L<=NL;L++){const label=el('label','chip'),input=el('input');input.type='checkbox';input.value=String(L);input.checked=selected.includes(L);input.setAttribute('aria-label','Урок '+L);input.onchange=()=>{studyState().notebookLessons=[...choices.querySelectorAll('input:checked')].map(x=>+x.value);save('meta');draw();};label.append(input,document.createTextNode(' Урок '+L));choices.appendChild(label);}chooser.appendChild(choices);v.appendChild(chooser);
   const result=el('div');studySearch(v,State.route.q,q=>{State.route.q=q;draw();Resume.later();});v.appendChild(result);
   function draw(){
-    result.replaceChildren();const q=State.route.q||'',pool=studyLearnedPool().filter(k=>studyMatches(k,q));
+    result.replaceChildren();const q=State.route.q||'',pool=studyNotebookPool().filter(k=>studyMatches(k,q));
     const groups=[['Сегодня пишем',pool.filter(k=>studyStatus(k).stage==='writing')],['Сегодня готово · расписание и история',pool.filter(k=>studyStatus(k).stage!=='writing')]];
     if(!pool.length){result.appendChild(el('p','empty',q?'Ничего не найдено.':'Сначала познакомься со словами или ключами на пути. Здесь появится только пройденное.'));return;}
-    for(const [title,keys]of groups){if(!keys.length)continue;result.appendChild(el('h2','title',title+' · '+keys.length));const list=el('div','rowlist');keys.forEach(k=>list.appendChild(studyListRow(k,k=>go('notebook',{k,fromStudy:true}))));result.appendChild(list);}
+    for(const [title,keys]of groups){if(!keys.length)continue;result.appendChild(el('h2','title',title+' · '+keys.length));const list=el('div','rowlist');keys.forEach(k=>list.appendChild(studyListRow(k,k=>go('notebook',{k,queue:pool,fromStudy:true}))));result.appendChild(list);}
   }draw();
 }
 function startStudyCards(mode,q,selected){
