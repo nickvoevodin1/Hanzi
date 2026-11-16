@@ -4,6 +4,44 @@ function studyState(){
   for(const key of ['difficult','reviews','global','sessions'])if(!m[key]||typeof m[key]!=='object')m[key]={};
   return m;
 }
+function studyKnownChars(){
+  const marks=State.meta.study?.known||{},chars=new Set();
+  for(const k of Object.keys(marks))if(marks[k]&&!isRad(k))for(const ch of hanOf(BYK[k]?.s||k.replace(/^c:/,'')))chars.add(ch);
+  return chars;
+}
+function studyKnown(k){
+  const marks=State.meta.study?.known||{};if(marks[k])return true;if(isRad(k))return false;
+  const chars=hanOf(BYK[k]?.s||k.replace(/^c:/,'')),known=studyKnownChars();return chars.length>0&&chars.every(ch=>known.has(ch));
+}
+function studyKnownButton(k,onchange){
+  const b=el('button','linkbtn');const update=()=>{b.textContent=studyKnown(k)?'Уже знаю · отмечено':'Уже знаю';b.setAttribute('aria-pressed',String(studyKnown(k)));};
+  b.onclick=()=>{const m=studyState();m.known=m.known||{};
+    if(studyKnown(k)){
+      if(isRad(k))delete m.known[k];
+      else{const removed=new Set(hanOf(BYK[k]?.s||k.replace(/^c:/,'')));
+        for(const id of Object.keys(m.known))if(!isRad(id)){const chars=hanOf(BYK[id]?.s||id.replace(/^c:/,''));if(chars.some(ch=>removed.has(ch))){delete m.known[id];for(const ch of chars)if(!removed.has(ch))m.known['c:'+ch]=todayStr();}}
+      }
+    }else m.known[k]=todayStr();
+    save('meta');update();if(onchange)onchange();};update();return b;
+}
+function studyRememberedCounts(){
+  const chars=studyKnownChars(),keys=new Set();
+  const pool=uniq(Object.keys(State.meta.study?.known||{}).concat(Object.keys(State.cards),studyLearnedPool()));
+  for(const k of pool){if(!studyKnown(k)&&isNew(k)&&(!notebookKey(k)||studyStatus(k).stage!=='done'))continue;
+    if(isRad(k)){keys.add(k);continue;}if(BYK[k]||k.startsWith('c:'))for(const ch of hanOf(BYK[k]?.s||k.slice(2)))chars.add(ch);
+  }
+  return {chars:chars.size,keys:keys.size};
+}
+function studyRadicalBatch(){
+  const m=studyState(),count=Math.max(0,Math.min(30,Number.isInteger(m.notebookRadicalCount)?m.notebookRadicalCount:5));
+  let batch=m.radicalBatch;
+  if(!batch||batch.day!==todayStr()||batch.count!==count)batch={day:todayStr(),count,keys:[]};
+  const keys=batch.keys.filter(k=>!studyKnown(k)).slice(0,count);
+  const candidates=KEY_ORDER.map(n=>'r:'+n).filter(k=>!studyKnown(k)&&!notebookStatus(k).finished&&!keys.includes(k));
+  keys.push(...candidates.slice(0,Math.max(0,count-keys.length)));
+  if(JSON.stringify(m.radicalBatch)!==JSON.stringify({...batch,keys})){m.radicalBatch={...batch,keys};save('meta');}
+  return keys;
+}
 function studySearchText(s){return toneless(String(s||'').toLowerCase().replace(/u:/g,'v')).replace(/[0-5]/g,'');}
 function studyMatches(k,q){
   q=String(q||'').trim().toLowerCase();if(!q)return true;
@@ -47,10 +85,11 @@ function studyQueue(mode,q){
   const reviews=State.meta.study?.reviews||{};
   return pool.filter(k=>studyMatches(k,q)).sort((a,b)=>Number(studyIsDifficult(b))-Number(studyIsDifficult(a))||Number(reviews[b]?.lastGrade===1)-Number(reviews[a]?.lastGrade===1)||(reviews[a]?.lastAt||0)-(reviews[b]?.lastAt||0));
 }
-function studyWritingPool(q){return studyLearnedPool().filter(k=>studyStatus(k).stage==='writing'&&studyMatches(k,q));}
+function studyWritingPool(q){return studyLearnedPool().filter(k=>!studyKnown(k)&&studyStatus(k).stage==='writing'&&studyMatches(k,q));}
 function studyCycleBanner(){
   const c=el('section','hero study-cycle-banner'),writing=studyWritingPool(''),cards=studyQueue('today','');
   c.innerHTML='<div class="kind">Твой цикл памяти · 3 + 2</div><h2>Пишем. Вспоминаем. Закрепляем.</h2><p class="note">1–3-й дни: иероглифы ×10 и пиньинь ×10. 4–5-й: карточки этих слов. После пятого дня цикл завершён.</p>';
+  const counts=studyRememberedCounts();c.appendChild(el('p','study-counts',`Запомнил: <b>${counts.chars}</b> ${plural(counts.chars,'иероглиф','иероглифа','иероглифов')} · <b>${counts.keys}</b> ${plural(counts.keys,'ключ','ключа','ключей')} из 214`));
   const days=el('div','study-week');for(let n=1;n<=5;n++)days.appendChild(el('span',n<=3?'writing':'recall',String(n)));c.appendChild(days);
   const b=el('button','btn',IC(cards.length?'cards':'brush',20)+' '+(cards.length?'Карточки на сегодня · '+cards.length:writing.length?'Прописи на сегодня · '+writing.length:'Мои прописи'));
   b.onclick=()=>go(cards.length?'cards':'study');c.appendChild(b);
@@ -67,11 +106,12 @@ function studyListRow(k,action){
 }
 function studyNotebookPool(){
   const lessons=State.meta.study?.notebookLessons||[];
-  return lessons.length?uniq(lessons.flatMap(L=>notebookPool('words',L))):studyLearnedPool();
+  const words=(lessons.length?uniq(lessons.flatMap(L=>notebookPool('words',L))):studyLearnedPool()).filter(k=>!isRad(k)&&!studyKnown(k));
+  return words.concat(studyRadicalBatch());
 }
 function notebookAdvance(k,queue){
   const pool=queue||studyNotebookPool(),at=pool.indexOf(k),ordered=pool.slice(at+1).concat(pool.slice(0,at<0?0:at));
-  const next=ordered.find(id=>id!==k&&notebookStatus(id).active!=null);
+  const next=ordered.find(id=>id!==k&&!studyKnown(id)&&notebookStatus(id).active!=null);
   if(next){go('notebook',{k:next,queue:pool,fromStudy:true});return true;}
   if(State.route.practice)notebookReturn();else render();
   toast('На сегодня выбранные слова прописаны');return false;
@@ -80,7 +120,7 @@ function viewStudy(s){
   const v=el('div','view study-list-view');s.appendChild(v);
   const back=el('button','back','‹ На путь');back.onclick=()=>go('path');v.appendChild(back);
   v.appendChild(el('h1','','Мои прописи'));
-  v.appendChild(el('p','note','Выбери один или несколько уроков, например новый и старый. Без фильтра — уже пройденное. Три дня по 10 написаний и 10 пиньиня, затем карточки. Пропущенный день можно продолжить позже.'));
+  v.appendChild(el('p','note','Выбери один или несколько уроков. После слов идут ключи по порядку; размер порции — в настройках. Без фильтра — уже пройденное. Три дня по 10 написаний и 10 пиньиня, затем карточки. Пропущенный день можно продолжить позже.'));
   const chooser=el('details','hero notebook-lesson-picker');chooser.appendChild(el('summary','','Выбрать уроки'));
   const selected=State.meta.study?.notebookLessons||[];
   const reset=el('button','linkbtn','Всё пройденное');reset.onclick=()=>{studyState().notebookLessons=[];save('meta');go('study');};chooser.appendChild(reset);

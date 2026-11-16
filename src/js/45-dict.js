@@ -11,16 +11,18 @@ function viewDict(s){
     if(!q){
       res.appendChild(el('p','note','Ищи слова и ключи по иероглифам, русскому переводу или пиньиню: nǐ hǎo, ni3 hao3 и nihao работают одинаково.'));
       const recent=studyLearnedPool().slice(0,12),list=el('div','rowlist');
-      if(recent.length){res.appendChild(el('p','eyebrow','Из пройденного'));for(const k of recent){const info=notebookInfo(k),b=el('button','row',`<span class="ri han">${esc(info.hz)}</span><div class="tt"><b>${esc(info.ru)}</b><small>${pinyinHTML(info.py)}</small></div>`);b.onclick=()=>isRad(k)?go('radical',{n:radNum(k)}):info.w?go('card',{id:info.w.id}):go('notebook',{k,fromStudy:true});list.appendChild(b);}res.appendChild(list);}
+      if(recent.length){res.appendChild(el('p','eyebrow','Из пройденного'));for(const k of recent){const info=notebookInfo(k),b=el('button','row',`<span class="ri han">${esc(info.hz)}</span><div class="tt"><b>${esc(info.ru)}</b><small>${pinyinHTML(info.py)}</small></div>`);b.onclick=()=>isRad(k)?go('radical',{n:radNum(k)}):info.w?go('card',{id:info.w.id}):go('notebook',{k,fromStudy:true});list.appendChild(b);list.appendChild(studyKnownButton(k,run));}res.appendChild(list);}
       return;
     }
     const qt=studySearchText(q);
     const hits=WORDS.filter(w=>w.s.includes(q)||(w.d&&w.d.includes(q))||(qt&&studySearchText(w.p).includes(qt))||(w.ru&&w.ru.toLowerCase().includes(q))||(w.en&&w.en.join(' ').toLowerCase().includes(q)))
       .sort((a,b)=>((WORD_L[a.key]||99)-(WORD_L[b.key]||99))||(a.s.length-b.s.length)).slice(0,80);
     const radicalHits=KEY_ORDER.map(n=>'r:'+n).filter(k=>studyMatches(k,q));
-    if(radicalHits.length){const radicals=el('div','rowlist');radicalHits.slice(0,12).forEach(k=>{const info=notebookInfo(k),b=el('button','row',`<span class="ri han">${esc(info.hz)}</span><div class="tt"><b>${esc(info.label)} · ${esc(info.ru)}</b><small>${pinyinHTML(info.py)}</small></div>`);b.onclick=()=>go('radical',{n:radNum(k)});radicals.appendChild(b);});res.appendChild(radicals);}
-    if(!hits.length&&!radicalHits.length){ res.appendChild(el('div','empty','Ничего не найдено')); return; }
-    const list=el('div','rowlist'); hits.forEach(w=>list.appendChild(witem(w))); res.appendChild(list);
+    if(radicalHits.length){const radicals=el('div','rowlist');radicalHits.slice(0,12).forEach(k=>{const info=notebookInfo(k),b=el('button','row',`<span class="ri han">${esc(info.hz)}</span><div class="tt"><b>${esc(info.label)} · ${esc(info.ru)}</b><small>${pinyinHTML(info.py)}</small></div>`);b.onclick=()=>go('radical',{n:radNum(k)});radicals.appendChild(b);radicals.appendChild(studyKnownButton(k,run));});res.appendChild(radicals);}
+    const charHits=Object.keys(CHARS).filter(ch=>ch.includes(q)||(qt&&studySearchText(charPy(ch)).includes(qt))||charRu(ch).toLowerCase().includes(q)).slice(0,20);
+    if(charHits.length){res.appendChild(el('p','eyebrow','Отдельные иероглифы'));const chars=el('div','rowlist');for(const ch of charHits){const row=el('div','row',`<span class="ri han">${esc(ch)}</span><div class="tt"><b>${esc(charRu(ch))}</b><small>${pinyinHTML(charPy(ch))}</small></div>`);row.appendChild(studyKnownButton('c:'+ch,run));chars.appendChild(row);}res.appendChild(chars);}
+    if(!hits.length&&!radicalHits.length&&!charHits.length){ res.appendChild(el('div','empty','Ничего не найдено')); return; }
+    const list=el('div','rowlist'); hits.forEach(w=>{list.appendChild(witem(w));list.appendChild(studyKnownButton(w.key,run));}); res.appendChild(list);
   };
   inp.oninput=()=>{run();Resume.later();}; run(); s.appendChild(v);
 }

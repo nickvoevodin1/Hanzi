@@ -2,7 +2,7 @@
 import {load} from './env.mjs';
 const A=await load();const {T,ev,ok,doc,click}=A;
 ev("window.__studyDate='2026-11-01';todayStr=()=>window.__studyDate");
-const reset=()=>ev("State.meta=freshMeta();State.cards={};PLAY=null;SESSION=null;window.__studyDate='2026-11-01';State.route={name:'path'}");
+const reset=()=>ev("State.meta=freshMeta();State.cards={};PLAY=null;SESSION=null;window.__studyDate='2026-11-01';State.route={name:'path'};studyState().notebookRadicalCount=0");
 const next=()=>ev("window.__studyDate=addDays(window.__studyDate,1)");
 const learn=keys=>ev(`${JSON.stringify(keys)}.forEach(k=>State.cards[k]=FSRS.review({},3,REQ))`);
 const write=keys=>ev(`${JSON.stringify(keys)}.forEach(k=>{notebookMark(k,'hz','paper');notebookMark(k,'py','paper')})`);
@@ -14,7 +14,7 @@ await T('read-only-home-and-no-unseen-enrolment',()=>{
  ok(ev('JSON.stringify(State.meta.memory)===window.__meta'),'opening home enrolled notebook entries');
  ok(doc.querySelectorAll('#screen > .view > *').length===2,'extra menus before course path');
  ok(doc.querySelectorAll('.nav button').length===3,'old navigation menus remain');
- ev("go('study')");ok(doc.querySelectorAll('.study-item').length===3,'introduced items absent from aggregate list');
+ ev("go('study')");ok(doc.querySelectorAll('.study-item').length===2,'introduced items absent from aggregate list');
 });
 await T('writing-and-pinyin-three-calendar-days',()=>{
  reset();learn(['你','r:1']);write(['你','r:1']);
@@ -125,7 +125,7 @@ await T('multiple-lesson-selection-and-auto-next-after-both-paper-marks',()=>{
  reset();ev("go('study')");
  for(const L of [5,18]){const input=doc.querySelector('input[aria-label="Урок '+L+'"]');input.checked=true;input.dispatchEvent(new A.w.Event('change'));}
  ok(ev("studyState().notebookLessons.join()") ==='5,18','cannot combine old and new lessons');
- ok(ev("studyNotebookPool().join()")===ev("uniq(notebookPool('words',5).concat(notebookPool('words',18))).join()"),'selected lesson vocabulary incomplete');
+ ok(ev("studyNotebookPool().filter(k=>!isRad(k)).join()")===ev("uniq(notebookPool('words',5).concat(notebookPool('words',18))).join()"),'selected lesson vocabulary incomplete');
  ev("window.__queue=studyNotebookPool();window.__first=window.__queue[0];window.__next=window.__queue[1];go('notebook',{k:window.__first,queue:window.__queue})");
  let buttons=[...doc.querySelectorAll('.notebook-day[data-notebook-day="1"] button')].filter(b=>b.textContent==='Прописал');buttons[0].click();
  ok(ev('State.route.k===window.__first'),'advanced before pinyin');
@@ -134,6 +134,24 @@ await T('multiple-lesson-selection-and-auto-next-after-both-paper-marks',()=>{
  ok(ev('notebookStatus(window.__first).complete')===1,'paper day not saved');
  ok(ev('Object.keys(State.cards).length')===0,'lesson selection granted knowledge');
  ev("go('study')");ok(doc.querySelector('input[aria-label="Урок 18"]').checked,'lesson selection not retained');
+});
+await T('radicals-follow-lesson-words-in-bounded-stable-batches',()=>{
+ reset();ev("studyState().notebookLessons=[5];studyState().notebookRadicalCount=3;window.__pool=studyNotebookPool()");
+ ok(ev("window.__pool.filter(isRad).join()") ==='r:1,r:2,r:3','wrong numeric radical batch');
+ ok(ev("window.__pool.slice(-3).every(isRad)"),'radicals before words');
+ write(['r:1']);ok(ev("studyNotebookPool().filter(isRad).join()") ==='r:1,r:2,r:3','batch slides after a completed day');
+ ev("studyState().notebookRadicalCount=1");ok(ev('studyNotebookPool().filter(isRad).length')===1,'amount setting ignored');
+ ev("studyState().notebookRadicalCount=0");ok(ev('studyNotebookPool().some(isRad)')===false,'zero does not disable radicals');
+});
+await T('known-marks-skip-writing-count-unique-characters-and-preserve-knowledge',()=>{
+ reset();ev("studyState().notebookLessons=[5];studyState().notebookRadicalCount=2;window.__base=JSON.stringify(State.cards);window.__daily=JSON.stringify(State.meta.daily);studyState().known={'c:你':todayStr(),'你好':todayStr(),'r:1':todayStr()}");
+ ok(ev("studyKnown('你')"),'individual character not recognized');
+ ok(ev("studyNotebookPool().filter(isRad).join()") ==='r:2,r:3','known radical still in writing');
+ ok(!ev("studyNotebookPool().includes('你')"),'known character still in writing');
+ const stats=ev('studyRememberedCounts()');ok(stats.chars===2&&stats.keys===1,'known marks counted with duplicates');
+ ok(ev('JSON.stringify(State.cards)===window.__base&&JSON.stringify(State.meta.daily)===window.__daily'),'known mark invented FSRS or XP');
+ ev("go('dict',{q:'你'})");ok([...doc.querySelectorAll('#screen button')].some(b=>b.textContent.includes('Уже знаю')),'search has no known toggle');
+ ev("go('path')");ok(doc.querySelector('.study-counts').textContent.includes('2'),'home counts missing');
 });
 await T('main-path-includes-rules-and-stories-without-radical-lessons',()=>{
  reset();const units=ev('courseClassUnits()');
