@@ -155,11 +155,11 @@ await T('known-marks-skip-writing-count-unique-characters-and-preserve-knowledge
 });
 await T('all-lessons-contain-only-main-textbook-words',()=>{
  reset();ev("window.__core=uniq(Object.values(LESSONS).flatMap(l=>l.o));window.__extra=uniq(Object.values(LESSONS).flatMap(l=>l.x.flatMap(x=>x.o))).find(k=>!window.__core.includes(k));State.cards[window.__extra]=FSRS.review({},3,REQ);memoryState().entries[window.__extra]={notebook:{days:[{hz:{done:true}}]}};window.__old=JSON.stringify(State.cards)");
- ok(ev('COURSE.length')===698,'wrong core curriculum size');
+ ok(ev('COURSE.length')===537,'wrong core curriculum size');
  for(let L=1;L<=30;L++)ok(ev(`lessonExtras(${L}).length===0&&notebookPool('words',${L}).every(k=>LESSONS[${L}].o.includes(k))`),'extra words remain in lesson '+L);
  ok(ev('courseClassUnits().every(u=>u.wordItems.every(k=>window.__core.includes(k)))'),'extras remain in path');
  ok(!ev('studyLearnedPool().includes(window.__extra)||studyWrittenPool().includes(window.__extra)'),'old extra writing reappears in queue');
- ev('applyCoreCurriculumV34()');ok(ev('JSON.stringify(State.cards)===window.__old'),'extra-word history deleted');
+ ev('applyCoreCurriculumV35()');ok(ev('JSON.stringify(State.cards)===window.__old'),'extra-word history deleted');
 });
 await T('main-path-includes-rules-and-stories-without-radical-lessons',()=>{
  reset();const units=ev('courseClassUnits()');

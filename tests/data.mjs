@@ -1,4 +1,5 @@
 import fs from 'fs';
+import {execFileSync} from 'node:child_process';
 // Целостность данных: слова уроков, разбор иероглифов, блоки тренировки, проверочные.
 import {load} from './env.mjs';
 const A=await load(); const {T,ev,ok}=A;
@@ -6,7 +7,20 @@ await T('rads-index',()=>ok(ev("RADS.every((r,i)=>r[0]===i+1)")&&ev("RADS.length
 await T('lesson-words',()=>{ const n=ev("Object.keys(LESSONS).length"); ok(n===30,'уроков '+n);
   ok(ev("Object.values(LESSONS).every(l=>l.o.every(k=>k in BYK)&&l.x.every(x=>x.o.every(k=>k in BYK)))"),'слово урока не найдено в словаре');
   const nc=ev("COURSE.filter(k=>!isRad(k)).length"); ok(nc===ev("new Set(Object.values(LESSONS).flatMap(l=>l.o)).size"),'слов курса '+nc);
-  ok(nc===698,'слов курса мало: '+nc); });
+  ok(nc===537,'слов курса мало: '+nc); });
+await T('textbook-main-and-additional-sections',()=>{
+ const path=new URL('../src/data/kondrashevsky_data.py',import.meta.url).pathname;
+ const expected=JSON.parse(execFileSync('python3',['-c',"import json,sys;ns={};exec(open(sys.argv[1]).read(),ns);print(json.dumps({L:[t[0] for section in ('words','names') for t in v.get(section,[])] for L,v in ns['LESSONS'].items()},ensure_ascii=False))",path],{encoding:'utf8'}));
+ for(let L=1;L<=30;L++){
+   const fix={'〇':'零','没(有)':'没有','打(电话)':'打电话','开(车)':'开车'};
+   const want=[...new Set(expected[L].map(s=>fix[s]||s.replace(/[()]/g,'')))].sort();
+   const actual=[...new Set(ev(`lessonWords(${L}).map(w=>w.s)`))].sort();
+   ok(actual.join()===want.join(),'main list differs from textbook source: lesson '+L);
+ }
+ ok(ev("LESSONS[5].textbookExtra.join()") ==='纸,报,报纸,尺子,笔','missing distinction in lesson5');
+ ok(ev("lessonWords(5).every(w=>!['纸','报','报纸','尺子','笔'].includes(w.s))"),'additional lesson5 words remain');
+ ok(ev("!lessonWords(15).some(w=>w.s==='班')&&lessonWords(20).some(w=>w.s==='班')"),'supplemental appearance replaced main later appearance');
+});
 await T('homographs',()=>{ ok(ev("BYK['还'].p")==='huán'&&ev("BYK['还:hái'].p")==='hái','还'); ok(ev("BYK['行:xíng'].k[0]")===28,'行');
   ok(ev("LESSONS[15].o.includes('还:hái')")&&ev("LESSONS[11].o.includes('还')"),'омографы в уроках'); });
 await T('textbook-pinyin',()=>{ for(const [s,p] of [['大夫','dài fu'],['多少','duō shao'],['教','jiāo'],['告诉','gào su'],['东西','dōng xi'],['一起','yì qǐ'],['得','de'],['民歌','mín gē']]) ok(ev(`BYK['${s}'].p`)===p,s+' → '+ev(`BYK['${s}'].p`)); });

@@ -14,7 +14,7 @@ const Splash={
 };
 // Обновления: проверка при запуске, при каждом возвращении в приложение и раз в 30 мин; когда новая версия
 // встала, service worker сам перезагружает окно (место в уроке сохраняет Resume на pagehide).
-const APP_VER='v34';
+const APP_VER='v35';
 function registerSW(){
   if(!('serviceWorker' in navigator)) return;
   navigator.serviceWorker.register('./service-worker.js',{updateViaCache:'none'}).then(reg=>{
@@ -32,7 +32,7 @@ window.APPREADY=(async function(){
   registerSW();
   if(!Resume.restore()) go('path');      // вернуться туда, где был (урок, карточки, экран), если свернул приложение
   // После Resume: старый снимок не должен отменить разовую отметку пользователя.
-  const writingUpdated=applyStudyUpdateV30(),curriculumUpdated=applyCoreCurriculumV34();
+  const writingUpdated=applyStudyUpdateV30(),curriculumUpdated=applyCoreCurriculumV35();
   if(writingUpdated||curriculumUpdated){await save('meta');render();Resume.save();}
   Splash.hide();
 })().catch(()=>Splash.fail());

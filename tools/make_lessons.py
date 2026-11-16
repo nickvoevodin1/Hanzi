@@ -3,7 +3,8 @@
 
 Для каждого урока 1–30:
   t   — название, sub — заголовок текста урока
-  o   — слова в порядке учебника (ключ карточки: s, у омографов — key «还:hái»)
+  o   — основные слова и имена (words + names), без дополнительного раздела extra, в порядке учебника (ключ карточки: s, у омографов — key «还:hái»)
+  textbookExtra — дополнительный раздел слов самого учебника (не входит в o)
   x   — дополнительные наборы после урока (src/data/group.json): список группы, презентации
   b   — блоки тренировки «к проверочной» из примеров предложений урока:
         u  — предложения {zh, py, ru, sy}; sy — слоги по одному на каждый иероглиф (для упражнения на тоны)
@@ -16,7 +17,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "src" / "data"
-FIX = {"没(有)": "没有", "打(电话)": "打电话", "开(车)": "开车"}
+FIX = {"〇": "零","没(有)": "没有", "打(电话)": "打电话", "开(车)": "开车"}
 PYCH = "a-zA-Zāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜüńňǹ"
 TONED = set("āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜńňǹ")
 BLOCK = 4
@@ -93,12 +94,22 @@ def main():
         vocab.setdefault(w["s"], w)
     bykey = {key(w): w for w in app["words"]}
     group = json.loads((DATA / "group.json").read_text(encoding="utf-8"))
+    first_main = {}
+    first_char = {}
+    for lesson, data in LESSONS.items():
+        for section in ('words', 'names'):
+            for t in data.get(section, []):
+                word = pick(FIX.get(t[0], t[0]), t[1])
+                if word:
+                    first_main.setdefault(key(word), lesson)
+                    for ch in han(word["s"]):
+                        first_char.setdefault(ch, lesson)
     maxlen = max(len(s) for s in vocab)
     out, stats = {}, {"units": 0, "noalign": 0, "tiles": 0}
     for L in range(1, 31):
         v = LESSONS[L]
         order = []
-        for grp in ("words", "extra", "names"):
+        for grp in ("words", "names"):
             for t in v.get(grp, []):
                 w = pick(FIX.get(t[0], t[0]), t[1])
                 if w and key(w) not in order:
@@ -107,10 +118,10 @@ def main():
         units, owners, seen = [], [], set()
         for s in order:
             w = bykey[s]
-            if not w.get("ex") or min(w["k"]) != L:
+            if not w.get("ex") or first_main.get(s) != L:
                 continue
             zh, py, ru = w["ex"]
-            if zh in seen or not han(zh):
+            if zh in seen or not han(zh) or any(first_char.get(ch, 99) > L for ch in han(zh)):
                 continue
             seen.add(zh)
             segs = segment(zh, vocab, maxlen)
@@ -148,7 +159,7 @@ def main():
         extra = [{"id": g["id"], "title": g["title"], "src": g["src"], "note": g.get("note", ""),
                   "o": [key(pick(x["s"], x.get("p", "")) or bykey[x["s"]]) for x in g["words"]]}
                  for g in group if g["after"] == L]
-        out[str(L)] = {"t": titles.get(str(L), ""), "sub": v.get("sub", ""), "o": order, "b": blocks, "x": extra}
+        out[str(L)] = {"t": titles.get(str(L), ""), "sub": v.get("sub", ""), "o": order, "b": blocks, "x": extra, "textbookExtra": [key(w) for t in v.get("extra", []) if (w := pick(FIX.get(t[0], t[0]), t[1]))]}
     (DATA / "lessons.json").write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     print("lessons.json:", stats, "блоков:", sum(len(x["b"]) for x in out.values()))
 

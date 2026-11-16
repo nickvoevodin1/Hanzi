@@ -7,7 +7,7 @@ const reset=()=>ev(`State.cards={}; State.meta=freshMeta(); SESSION=null; PLAY=n
 const pick=ok2=>{ const x=ev("PLAY.cur"); const right=x.t==='choice'?ev("meaning(BYK[PLAY.cur.k])"):ev("PLAY.cur.k&&BYK[PLAY.cur.k]?BYK[PLAY.cur.k].s:''");
   const bs=[...doc.querySelectorAll('#screen .choice')]; const b=bs.find(e=>(e.textContent.slice(1)===right)===ok2); b.click(); };
 await T('daily-order',()=>{ reset(); const q=ev("dailyQueue()"), n=ev("semRemaining()");
-  ok(n===ev("semWords().length")&&n===698,'слов семестра: '+n);
+  ok(n===ev("semWords().length")&&n===537,'слов семестра: '+n);
   ok(q.slice(0,10).join()===ev("KEY_ORDER.slice(0,10).map(n=>'r:'+n).join()"),'ключи по порядку изучения: '+q.slice(0,10));
   ok(q[10]==='你','слова — с начала курса: '+q[10]);
   ok(q.length===10+Math.ceil(n/65),'квота слов: '+(q.length-10)); });

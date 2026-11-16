@@ -32,7 +32,7 @@ await T('decomp-谢',()=>{ ok(JSON.stringify(ev("keysOf('谢')"))==='[["讠",149
   // типы по пособию: 好 идеограмма, 我 изобразительный, 一 условный знак, 是 фоноидеограмма; 天 — два словарных ключа
   ok(ev("[ET['好'][0],ET['我'][0],ET['一'][0],ET['是'][0]].join('')")==='igzp','типы по пособию');
   ok(JSON.stringify(ev("ET['天'][5][0]"))==='[37,1]'&&/в разных словарях/.test(ev("keyLine('天')")),'несколько ключей 天'); });
-await T('chars-587',()=>{ ok(K.chars.length===587,'в JSON не 587'); const bad=ev(`${JSON.stringify(K.chars.map(c=>c.c))}.filter(c=>!charPy(c)||!charRu(c)||!keysOf(c).length||!keysOf(c).every(([f,n])=>f&&n>=1&&n<=214)||!CHAR_L[c])`);
+await T('chars-587',()=>{ ok(K.chars.length===587,'в JSON не 587'); const bad=ev(`${JSON.stringify(K.chars.map(c=>c.c))}.filter(c=>!charPy(c)||!charRu(c)||!keysOf(c).length||!keysOf(c).every(([f,n])=>f&&n>=1&&n<=214))`);
   ok(!bad.length,'без пиньиня/перевода/ключей: '+bad.join('')); });
 await T('keys-deck',()=>{ ev(`State.cards={}; State.meta=freshMeta(); State.settings.semester=${sem({newWordsUntil:ev("addDays(todayStr(),60)"),holidays:{from:'2000-01-01',to:'2000-01-02',capacity:.3}})}`);
   ok(ev("KEY_ORDER.length")===214&&ev("KEY_ORDER.join()")===Array.from({length:214},(_,i)=>i+1).join(),'214 ключей по номерам Канси');

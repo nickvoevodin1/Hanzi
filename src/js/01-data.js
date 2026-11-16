@@ -49,6 +49,7 @@ function palladius(p){
 const WORDS = DB_RAW.words;
 const CHARS = DB_RAW.chars;
 WORDS.forEach((w,i)=>{ w.id=i; w.key=w.key||w.s; });   // ключ карточки: иероглифы; у омографов — «还:hái»
+WORDS.forEach(w=>{ w.k=Object.keys(LESSONS).filter(L=>LESSONS[L].o.includes(w.key)).map(Number); }); // Только основные списки учебника.
 const BYS = {};                     // иероглифы слова → первое слово с ними
 WORDS.forEach(w=>{ if(!(w.s in BYS)) BYS[w.s]=w; });
 const BYK = {};                     // ключ карточки → слово

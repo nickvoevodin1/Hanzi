@@ -227,8 +227,8 @@ function applyStudyUpdateV30(){
   return true;
 }
 
-function applyCoreCurriculumV34(){
-  const m=studyState();if(m.coreCurriculumV34)return false;
+function applyCoreCurriculumV35(){
+  const m=studyState();if(m.coreCurriculumV35)return false;
   const allowed=k=>isRad(k)||!!WORD_L[k]||k?.startsWith('c:')&&!!CHAR_L[k.slice(2)];
   if(m.session?.tasks?.some(t=>!allowed(t.k))){m.session=null;if(State.route.name==='cards')State.route={name:'cards'};}
   for(const [id,ss]of Object.entries(m.sessions))if(ss?.tasks?.some(t=>!allowed(t.k)))delete m.sessions[id];
@@ -240,5 +240,5 @@ function applyCoreCurriculumV34(){
     for(const block of Object.values(classroom.progress||{}))for(const row of Object.values(block))delete row.targetIds;
   }
   if(State.route.name==='notebook'&&(!allowed(State.route.k)||State.route.queue?.some(k=>!allowed(k))))State.route={name:'study'};
-  m.coreCurriculumV34=true;return true;
+  m.coreCurriculumV35=true;return true;
 }
