@@ -3,7 +3,7 @@
 ==================================================================*/
 const TAB_OF={path:'path',play:'path',practice:'practice',cards:'cards',study:'path',session:'practice',decomp:'practice',sent:'practice',addsent:'practice',
   classroom:'path',notebook:'practice',memory:'practice',exam:'exam',dictation:'exam',grammar:'practice',mock:'exam',tests:'practice',test:'practice',keys:'practice',radical:'practice',reports:'practice',
-  dict:'dict',list:'dict',lessons:'dict',lesson:'dict',extra:'dict',strokes:'dict',progress:'progress',settings:'settings'};
+  dict:'dict',list:'dict',lessons:'dict',lesson:'dict',extra:'dict',strokes:'dict',progress:'progress',settings:'settings',knownCheck:'settings'};
 function go(name,params){
   State.route={name,...params}; if(TAB_OF[name]) State.tab=TAB_OF[name];
   closeSheet(); hideFB(); clearTimeout(playT); Speech.stop(); if(typeof stopClassListening==='function') stopClassListening(); render(); window.scrollTo(0,0);
@@ -16,7 +16,7 @@ function render(){
   renderTop();
   const V={path:viewPath,exam:viewExam,classroom:viewClassroom,notebook:viewNotebook,play:viewPlay,practice:viewPractice,memory:viewMemory,dictation:viewDictation,grammar:viewGrammar,cards:viewStudyCards,study:viewStudy,decomp:viewDecomp,sent:viewSent,addsent:viewAddSent,mock:viewMock,reports:viewReports,
     lessons:viewLessons,lesson:viewLesson,extra:viewExtra,strokes:viewStrokes,card:viewCard,session:viewSession,draw:viewDraw,
-    tests:viewTests,test:viewTest,keys:viewKeys,radical:viewRadical,dict:viewDict,list:viewList,progress:viewProgress,settings:viewSettings};
+    tests:viewTests,test:viewTest,keys:viewKeys,radical:viewRadical,dict:viewDict,list:viewList,progress:viewProgress,settings:viewSettings,knownCheck:viewKnownCheck};
   const s=$('#screen'); s.innerHTML=''; (V[State.route.name]||viewPath)(s);
   Resume.later();
 }

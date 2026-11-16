@@ -18,6 +18,7 @@ function viewSettings(s){
   const v=el('div','view'), S=State.settings, sem=S.semester;
   const ss=()=>{ save('settings'); renderTop(); };
   v.appendChild(el('h2','title','Настройки'));
+  const known=el('button','btn ghost','Что я уже знаю · проверка');known.onclick=()=>go('knownCheck');v.appendChild(known);
   // — семестр
   v.appendChild(el('p','eyebrow','Семестр'));
   const b1=el('div','meta');
