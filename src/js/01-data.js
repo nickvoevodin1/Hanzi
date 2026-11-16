@@ -62,7 +62,7 @@ const isHan = c => c>='一' && c<='鿿';
 const hanOf = s => [...s].filter(isHan);
 function radOf(c){ const h=HZ.c[c]; return h? h[0] : 0; }           // номер ключа Канси
 function lessonWords(L){ return ((LESSONS[L]||{}).o||[]).map(k=>BYK[k]).filter(Boolean); }
-function lessonExtras(L){ return ((LESSONS[L]||{}).x||[]).map(x=>({...x,words:x.o.map(k=>BYK[k]).filter(Boolean)})); }   // список группы, презентации
+function lessonExtras(L){ return []; } // В курсе только основной материал учебника; старые данные x сохранены для совместимости.
 function lessonTitle(L){ return (LESSONS[L]&&LESSONS[L].t) || ('Урок '+L); }
 
 // kondr_chars.json: KC.order — порядок изучения 214 ключей, KC.py/KC.ru — словарный пиньинь и перевод 587 знаков уроков

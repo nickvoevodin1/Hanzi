@@ -52,10 +52,10 @@ function studyMatches(k,q){
 function studyHasWriting(k){return !!notebookData(k,false)?.days?.some(d=>d?.hz?.done);}
 function studyLearnedPool(){
   const entries=State.meta.memory?.entries||{}, candidates=semWords().concat(KEY_ORDER.map(n=>'r:'+n),Object.keys(entries));
-  return uniq(candidates).filter(k=>notebookKey(k)&&(!isNew(k)&&memoryValid(k)||memoryActuallyStarted(entries[k])||!!entries[k]?.notebook?.days?.some(d=>d&&['hz','py'].some(sk=>d[sk]?.done||d[sk]?.attempts?.length||d[sk]?.currentInk?.length||d[sk]?.ink?.length))))
+  return uniq(candidates).filter(k=>notebookKey(k)&&(isRad(k)||!!WORD_L[k]||k.startsWith('c:')&&!!CHAR_L[k.slice(2)])&&(!isNew(k)&&memoryValid(k)||memoryActuallyStarted(entries[k])||!!entries[k]?.notebook?.days?.some(d=>d&&['hz','py'].some(sk=>d[sk]?.done||d[sk]?.attempts?.length||d[sk]?.currentInk?.length||d[sk]?.ink?.length))))
     .sort((a,b)=>isRad(a)&&isRad(b)?radNum(a)-radNum(b):isRad(a)?1:isRad(b)?-1:(WORD_L[a]||CHAR_L[a.slice(2)]||99)-(WORD_L[b]||CHAR_L[b.slice(2)]||99));
 }
-function studyWrittenPool(){return Object.keys(State.meta.memory?.entries||{}).filter(k=>notebookKey(k)&&studyHasWriting(k));}
+function studyWrittenPool(){return Object.keys(State.meta.memory?.entries||{}).filter(k=>notebookKey(k)&&(isRad(k)||!!WORD_L[k]||k.startsWith('c:')&&!!CHAR_L[k.slice(2)])&&studyHasWriting(k));}
 function studyIsDifficult(k){
   const marks=State.meta.study?.difficult||{};if(marks[k])return true;
   return !isRad(k)&&hanOf(notebookInfo(k)?.hz||'').some(ch=>marks[notebookKey(ch)]||marks['c:'+ch]);
@@ -225,4 +225,20 @@ function applyStudyUpdateV30(){
   }
   m.adjustments.lesson14WritingV30={reportedOn,words:words.length};
   return true;
+}
+
+function applyCoreCurriculumV34(){
+  const m=studyState();if(m.coreCurriculumV34)return false;
+  const allowed=k=>isRad(k)||!!WORD_L[k]||k?.startsWith('c:')&&!!CHAR_L[k.slice(2)];
+  if(m.session?.tasks?.some(t=>!allowed(t.k))){m.session=null;if(State.route.name==='cards')State.route={name:'cards'};}
+  for(const [id,ss]of Object.entries(m.sessions))if(ss?.tasks?.some(t=>!allowed(t.k)))delete m.sessions[id];
+  const classroom=State.meta.classroom;
+  if(classroom){
+    const stale=ss=>ss?.config&&ss.queue?.some(x=>!classroomPool(ss.config).some(y=>y.id===x.id));
+    if(stale(classroom.session)){classroom.session=null;if(State.route.name==='classroom')State.route={name:'path'};}
+    for(const [id,ss]of Object.entries(classroom.sessions||{}))if(stale(ss))delete classroom.sessions[id];
+    for(const block of Object.values(classroom.progress||{}))for(const row of Object.values(block))delete row.targetIds;
+  }
+  if(State.route.name==='notebook'&&(!allowed(State.route.k)||State.route.queue?.some(k=>!allowed(k))))State.route={name:'study'};
+  m.coreCurriculumV34=true;return true;
 }

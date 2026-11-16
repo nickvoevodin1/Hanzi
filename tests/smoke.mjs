@@ -28,7 +28,7 @@ await T('path-home',()=>{ ev("go('path')"); const t=txt(); ok(!doc.querySelector
   ok(/Китайский как на парах · уроки 1–30/.test(t)&&/История с выбором/.test(t),'единый путь курса'); ok(doc.querySelector('.pnode.cur'),'нет текущего узла'); });
 await T('dict-search',()=>{ ev("go('dict')"); const i=doc.querySelector('.search'); i.value='shuijiao'; i.dispatchEvent(new A.w.Event('input'));
   ok(/睡觉/.test(txt()),'поиск по пиньиню'); i.value='кровать'; i.dispatchEvent(new A.w.Event('input')); ok(/床/.test(txt()),'поиск по-русски'); });
-await T('extra-in-lessons',()=>{ ev("go('lessons')"); ok(/Список группы · уроки 1–16/.test(txt()),'нет строки списка группы'); ok(click(/Список группы/),'не открыть'); ok(ev("State.route.name")==='extra','экран'); ok(/姥姥/.test(txt()),'слова'); });
+await T('core-only-lessons',()=>{ev("go('lessons')");ok(!/Список группы|Презентация/.test(txt()),'дополнительные наборы видны в уроках');});
 await T('homograph-session',()=>{ ev("State.cards={}; startSession(['还','还:hái'],'recog','t')"); ok(/huán/.test(txt()),'还 huán'); click(/Запомнил/); A.key(' '); A.key('ArrowRight'); ok(/hái/.test(txt()),'还 hái: '+txt().slice(0,80)); });
 await T('stroke-order-ui',()=>{ ev("openChar('心')"); const t=doc.getElementById('sheetc').textContent; ok(/Порядок черт \(4\)/.test(t)&&/точка влево/.test(t)&&/лежачая с крюком/.test(t),'порядок черт: '+t.slice(0,200)); ev("closeSheet()"); });
 await T('evolution-ui',()=>{ ev("openChar('马')"); ok(doc.querySelector('#sheetc .evo img[src="evolution/9a6c.jpg"]'),'нет эволюции 马'); ev("closeSheet()"); });
