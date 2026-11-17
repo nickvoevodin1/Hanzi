@@ -100,7 +100,7 @@ function viewDecomp(s){
   if(!DEC||DEC.done){
     const back=el('button','back','‹ Повторение'); back.onclick=()=>go('practice'); v.appendChild(back);
     v.appendChild(el('h2','title','Разбор на ключи'));
-    v.appendChild(el('div','',mascotRow('calm','Пиши на бумаге: тип иероглифа, ключ и фонетик (или части идеограммы), их пиньинь и перевод, потом пиньинь и перевод иероглифа.')));
+    v.appendChild(el('div','',mascotRow('calm','Пиши на бумаге: тип иероглифа, ключ и фонетик (или части идеограммы), значение ключа; пиньинь и перевод иероглифа.')));
     const q=decompQueue(10), d=D();
     v.appendChild(el('p','note',`Сегодня разобрано: ${d.dec} из 5 · к сроку: ${dueKeys(isKC).length} · в очереди: ${q.length} (сначала ошибки, затем новые иероглифы выученных слов).`));
     v.appendChild(el('div','info','Как в «Пособии по иероглифике» Кондрашевского: тип — изобразительный (рисунок) · условный знак · идеограмма (смысл частей) · фоноидеограмма (ключ даёт смысл, фонетик — только звук); ключ — номер из 214, под которым знак ищут в словаре. Фонетик на ключи не дробим.'));
@@ -119,7 +119,7 @@ function viewDecomp(s){
   v.appendChild(top);
   head(v,'Разбери иероглиф');
   const c=el('div','qcard'); c.style.minHeight='22vh';
-  c.innerHTML=`${w&&w.s!==ch?`<div class="han" style="font-size:22px;color:var(--text2)">${esc(w.s).replace(ch,'<b style="color:var(--primary-text)">'+ch+'</b>')}</div>`:''}<div class="qhz han">${esc(ch)}</div><div class="qsub">тип · части (ключ, фонетик) с пиньинем и переводом · пиньинь и перевод знака</div>`;
+  c.innerHTML=`${w&&w.s!==ch?`<div class="han" style="font-size:22px;color:var(--text2)">${esc(w.s).replace(ch,'<b style="color:var(--primary-text)">'+ch+'</b>')}</div>`:''}<div class="qhz han">${esc(ch)}</div><div class="qsub">тип · ключ и его значение · фонетик · пиньинь и перевод знака</div>`;
   v.appendChild(c);
   const sb=el('button','btn showbtn','Показать ответ'); sb.dataset.key='space'; v.appendChild(sb);
   sb.onclick=()=>{
@@ -298,7 +298,7 @@ function viewMock(s){
     const fmt=()=>{ const l=left(); tm.textContent=Math.floor(l/60)+':'+String(l%60).padStart(2,'0'); tm.classList.toggle('low',l<300); };
     fmt(); mockTimer=setInterval(()=>{ if(!document.body.contains(tm)){ clearInterval(mockTimer); return; } fmt(); if(!left()){ clearInterval(mockTimer); toast('Время вышло'); } },1000);
     let i=0; const part=(t,html)=>`<p class="eyebrow">${t}</p><div class="paper"><ol start="${i+1}">${html}</ol></div>`;
-    let h=part('1. Разбери на ключи: тип иероглифа, ключ, фонетик; пиньинь и перевод ключей и иероглифа',MOCK.words.map(k=>{ i++; const w=BYK[k]; return `<li><span class="han" style="font-size:30px;color:var(--title)">${esc(w.d||w.s)}</span></li>`; }).join(''));
+    let h=part('1. Разбери на ключи: тип иероглифа, ключ, фонетик; значение ключей; пиньинь и перевод иероглифа',MOCK.words.map(k=>{ i++; const w=BYK[k]; return `<li><span class="han" style="font-size:30px;color:var(--title)">${esc(w.d||w.s)}</span></li>`; }).join(''));
     h+=part('2. Переведи на китайский',MOCK.ruzh.map(x=>{ i++; return `<li>${esc(x.ru)}</li>`; }).join(''));
     h+=part('3. Переведи на русский',MOCK.zhru.map(x=>{ i++; return `<li><span class="han" style="font-size:20px">${esc(x.zh)}</span></li>`; }).join(''));
     v.insertAdjacentHTML('beforeend',h);

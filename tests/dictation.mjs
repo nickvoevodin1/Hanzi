@@ -16,17 +16,18 @@ await T('pinyin compares tones and accepts equivalent numbered spelling',()=>{
 await T('mistakes repeat; revealed hints cannot permanently block learning',()=>{
   ev(`dictationStart({kind:'radicals',from:37,to:44,count:8});`);
   ok(ev(`dictationStore().active.items.length`)===8,'8 selected');
+  ok(ev(`dictationStore().active.q.every(x=>x.field!=='pinyin')`),'radical pinyin still tested');
   ok(ev(`dictationStore().active.items.every(x=>radNum(x.id)>=37&&radNum(x.id)<=44)`),'range leaked');
   ev(`dictationStore().active.open=true;dictationStore().active.q[0].gaveUp=true;dictationAnswer(false);`);
-  ok(ev(`dictationStore().active.q.length`)===24,'mistake should remain in queue');
+  ok(ev(`dictationStore().active.q.length`)===16,'mistake should remain in queue');
   ok(ev(`dictationStore().active.q[4].tries===1&&!dictationStore().active.q[4].gaveUp`),'retry must clear hint and allow independent response');
   ok(ev(`dictationStore().active.ok`)===0,'mistake counts as correct');
   ev(`while(!dictationStore().active.finished){dictationStore().active.open=true;dictationAnswer(true);}`);
-  ok(ev(`dictationStore().active.ok`)===23,'first-attempt accuracy changed by retries');
-  ok(ev(`dictationStore().active.done`)===24,'all three skills not checked');
+  ok(ev(`dictationStore().active.ok`)===15,'first-attempt accuracy changed by retries');
+  ok(ev(`dictationStore().active.done`)===16,'both radical skills not checked');
   ok(ev(`memoryState().entries[dictationStore().active.errors[0]].skills.hz.grade`)===1,'retry must not erase first writing failure');
   ok(ev(`dictationStore().history[0].errors.length`)===1,'missed error record');
-  ok(ev(`Object.keys(dictationStore().records).length`)===24,'skill records not independent');
+  ok(ev(`Object.keys(dictationStore().records).length`)===16,'skill records not independent');
   const failedId=ev(`dictationStore().active.errors[0]`);
   ok(ev(`dictationStore().records[${JSON.stringify(failedId+'|write')}].ok`)===false,'immediate correction erased independent failure');
   ok(ev(`dictationStore().records[${JSON.stringify(failedId+'|write')}].corrected`)===true,'correction not recorded separately');

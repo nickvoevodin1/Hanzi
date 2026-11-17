@@ -12,7 +12,7 @@ await T('enrollment-is-small-and-preserves-existing',()=>{
   ok(ev("memoryState().session.keys.length")===5,'порция не 3 слова +2 ключа');
   ok(ev("Object.keys(memoryState().entries).length")===5,'лишние автоматически добавленные элементы');
   ok(ev("JSON.stringify(State.cards)===window.__before"),'при старте поменялось существующее расписание');
-  ok(ev("memoryState().session.tasks.length")===15,'три навыка для каждого элемента');
+  ok(ev("memoryState().session.tasks.length")===13,'слова: три навыка, ключи: два');
 });
 await T('answers-hidden-and-session-resumable',()=>{
   reset(); ev("memoryStart({kind:'words'}); window.__memoryK=memoryState().session.tasks[0].k"); mount();
@@ -63,10 +63,11 @@ await T('same-day-error-only-downgrades-and-readiness-is-honest',()=>{
   ev("window.__memoryFailed=JSON.stringify(window.__memoryES.skills.py); memoryRecordSkill(window.__memoryK,'py',3)");
   ok(ev("JSON.stringify(window.__memoryES.skills.py)===window.__memoryFailed"),'повтор после ошибки повысил оценку в тот же день');
 });
-await T('all-radicals-have-three-skills',()=>{
+await T('all-radicals-have-two-skills-without-pinyin',()=>{
   reset(); ev("for(let n=1;n<=214;n++) memoryEnroll('r:'+n)");
   ok(ev("Object.keys(memoryState().entries).length")===214,'не все ключи могут учиться в тетради');
   ev("memoryRecordSkill('r:120','writing',3); memoryRecordSkill('r:120','pinyin',3); memoryRecordSkill('r:120','meaning',3)");
+  ok(!ev("memoryState().entries['r:120'].skills.py"),'пиньинь ключа всё ещё проверяется');
   ok(ev("memoryStats().keys.started")===214,'ключи посчитаны как слова');
   ok(!ev("isNew('r:120')"),'три навыка ключа не засчитаны');
   ok(ev("memoryInfo('r:85').hz.includes('氵')"),'нет формы ключа для состава знака');

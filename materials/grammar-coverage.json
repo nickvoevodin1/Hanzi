@@ -1,0 +1,199 @@
+[
+  {
+    "lesson": 2,
+    "section": "Порядок слов; общий вопрос с 吗",
+    "topics": [
+      "g02-order",
+      "g02-ma"
+    ]
+  },
+  {
+    "lesson": 3,
+    "section": "Качественное сказуемое",
+    "topics": [
+      "g03-adjective",
+      "g03-negative"
+    ]
+  },
+  {
+    "lesson": 5,
+    "section": "Связка 是; притяжательное определение",
+    "topics": [
+      "g05-shi",
+      "g05-de"
+    ]
+  },
+  {
+    "lesson": 7,
+    "section": "Вопросительные местоимения",
+    "topics": [
+      "g06-who",
+      "g07-question-place",
+      "g07-shenme-kind",
+      "g07-na-classifier"
+    ]
+  },
+  {
+    "lesson": 10,
+    "section": "Глагольное сказуемое",
+    "topics": [
+      "g10-verbal-predicate"
+    ]
+  },
+  {
+    "lesson": 13,
+    "section": "A不A; несколько глаголов; 也 и 都",
+    "topics": [
+      "g13-a-not-a",
+      "g13-serial-purpose",
+      "g13-ye-dou-negative"
+    ]
+  },
+  {
+    "lesson": 14,
+    "section": "有; предложные конструкции",
+    "topics": [
+      "g14-you-have",
+      "g14-prep-groups"
+    ]
+  },
+  {
+    "lesson": 15,
+    "section": "Числа 1–99; счётные слова; двойное дополнение",
+    "topics": [
+      "g15-numerals",
+      "g15-numbers-classifiers",
+      "g15-double-object"
+    ]
+  },
+  {
+    "lesson": 16,
+    "section": "是 (2), субстантивация с 的; 从",
+    "topics": [
+      "g16-shi-de",
+      "g16-from"
+    ]
+  },
+  {
+    "lesson": 17,
+    "section": "Точное время; обстоятельство времени; 好吗",
+    "topics": [
+      "g17-clock",
+      "g17-time-position",
+      "g17-proposal"
+    ]
+  },
+  {
+    "lesson": 18,
+    "section": "Члены предложения; определение с 的 (1)",
+    "topics": [
+      "g18-sentence-roles",
+      "g18-possessive",
+      "g18-classifying-attribute"
+    ]
+  },
+  {
+    "lesson": 19,
+    "section": "还是; последовательно связанные предложения со вторым исполнителем",
+    "topics": [
+      "g19-alternative",
+      "g19-pivotal"
+    ]
+  },
+  {
+    "lesson": 20,
+    "section": "年、月、星期; порядок даты; именное сказуемое",
+    "topics": [
+      "g20-calendar-order",
+      "g20-birthday",
+      "g20-nominal-predicate"
+    ]
+  },
+  {
+    "lesson": 21,
+    "section": "Качественное сказуемое; удвоение глагола; развёрнутые определения",
+    "topics": [
+      "g21-adjective-degree",
+      "g21-verb-reduplication",
+      "g21-attributive-phrases"
+    ]
+  },
+  {
+    "lesson": 22,
+    "section": "Слова места; местонахождение и наличие",
+    "topics": [
+      "g22-localizers",
+      "g22-location-existence"
+    ]
+  },
+  {
+    "lesson": 23,
+    "section": "Продолженное действие; сокращённый вопрос с 呢",
+    "topics": [
+      "g23-progressive",
+      "g23-ne-ellipsis"
+    ]
+  },
+  {
+    "lesson": 24,
+    "section": "Виды вопросов; 的 (2); порядок определений",
+    "topics": [
+      "g24-question-types",
+      "g24-confirmation",
+      "g24-de-di-de",
+      "g24-attribute-order"
+    ]
+  },
+  {
+    "lesson": 25,
+    "section": "Дополнение результата (в этом разделе 得); препозиция дополнения",
+    "topics": [
+      "g25-degree-complement",
+      "g25-object-and-repeat"
+    ]
+  },
+  {
+    "lesson": 26,
+    "section": "Модальные глаголы",
+    "topics": [
+      "g26-ability-permission",
+      "g26-intention-necessity"
+    ]
+  },
+  {
+    "lesson": 27,
+    "section": "Глагольное 了: состоявшееся действие",
+    "topics": [
+      "g27-verbal-le",
+      "g27-negative-completed"
+    ]
+  },
+  {
+    "lesson": 28,
+    "section": "Модальная частица 了",
+    "topics": [
+      "g28-final-le",
+      "g28-two-le-functions"
+    ]
+  },
+  {
+    "lesson": 29,
+    "section": "要…了; 了 с запретом; предикативная конструкция в сказуемом",
+    "topics": [
+      "g29-imminent",
+      "g29-prohibition",
+      "g29-subject-predicate-predicate"
+    ]
+  },
+  {
+    "lesson": 30,
+    "section": "Четыре вида; глагольные модели; два 了; модальные глаголы",
+    "topics": [
+      "g30-predicate-review",
+      "g30-verbal-structures",
+      "g30-le-modal-review",
+      "g26-ability-permission",
+      "g26-intention-necessity"
+    ]
+  }
+]

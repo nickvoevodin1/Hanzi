@@ -5,6 +5,7 @@
   Старые карточки и их расписание сохраняются. Состояние сессии в IndexedDB.
 ==================================================================*/
 const MEMORY_SKILLS=['hz','py','ru'];
+function memorySkills(k){return isRad(k)?['hz','ru']:MEMORY_SKILLS;}
 const MEMORY_LABELS={hz:'Написание',py:'Пиньинь и тон',ru:'Перевод'};
 function memoryState(){
   const m=State.meta.memory||(State.meta.memory={v:2,entries:{},session:null,lesson:0,round:0});
@@ -27,10 +28,10 @@ function memoryEnroll(k,o){
   return e;
 }
 function memoryRows(e){ return Math.min(3,(e.days||[]).length); }
-function memoryDueSkills(e,day){
-  if(!e) return MEMORY_SKILLS.slice();
+function memoryDueSkills(e,day,k){
+  if(!e) return memorySkills(k).slice();
   day=day||todayStr(); const rows=memoryRows(e), ss=e.skills||{};
-  return MEMORY_SKILLS.filter(sk=>{
+  return memorySkills(k).filter(sk=>{
     const x=ss[sk];
     if(!e.priorLearned&&rows<3){
       // The tutor's first three rows are three calendar days, never three
@@ -49,7 +50,7 @@ function memoryOldPool(o){
   return [...new Set(semWords().concat(KEY_ORDER.map(n=>'r:'+n),Object.keys(es)))].filter(k=>memoryValid(k)&&(!allowed||allowed.has(k))&&(!isNew(k)||memoryActuallyStarted(es[k])));
 }
 function memoryBaseDue(k,e){ return !isNew(k)&&isDue(k)&&(!e||!e.baseReviewedAt||cardOf(k).due>e.baseReviewedAt); }
-function memoryOldDue(k,es){ const e=es[k]; return memoryDueSkills(e).length>0||memoryBaseDue(k,e); }
+function memoryOldDue(k,es){ const e=es[k]; return memoryDueSkills(e,null,k).length>0||memoryBaseDue(k,e); }
 function memoryDueKeys(){
   const es=(State.meta.memory||{}).entries||{};
   return memoryOldPool().filter(k=>memoryOldDue(k,es));
@@ -104,8 +105,8 @@ function memoryStats(){
   const m=memoryState(), entries=Object.entries(m.entries).filter(([k])=>memoryValid(k));
   const stat=rad=>{ const es=entries.filter(([k])=>isRad(k)===rad).map(([,e])=>e); return {
     started:es.length,threeDays:es.filter(e=>memoryRows(e)>=3).length,
-    solid:es.filter(e=>(e.priorLearned||memoryRows(e)>=3)&&MEMORY_SKILLS.every(sk=>e.skills[sk]&&e.skills[sk].card&&e.skills[sk].grade>=2&&e.skills[sk].card.S>=21)).length,
-    ready:es.filter(e=>(e.priorLearned||memoryRows(e)>=3)&&MEMORY_SKILLS.every(sk=>e.skills[sk]&&e.skills[sk].card&&e.skills[sk].grade>=2&&e.skills[sk].card.S>=7)).length}; };
+    solid:es.filter(e=>(e.priorLearned||memoryRows(e)>=3)&&(rad?['hz','ru']:MEMORY_SKILLS).every(sk=>e.skills[sk]&&e.skills[sk].card&&e.skills[sk].grade>=2&&e.skills[sk].card.S>=21)).length,
+    ready:es.filter(e=>(e.priorLearned||memoryRows(e)>=3)&&(rad?['hz','ru']:MEMORY_SKILLS).every(sk=>e.skills[sk]&&e.skills[sk].card&&e.skills[sk].grade>=2&&e.skills[sk].card.S>=7)).length}; };
   return {words:stat(false),keys:stat(true),due:memoryDueKeys().length,active:!!(m.session&&m.session.index<m.session.tasks.length),
     doneToday:entries.filter(([,e])=>e.lastPracticedDay===todayStr()||(e.days||[]).includes(todayStr())).length};
 }
@@ -135,23 +136,23 @@ function memoryStart(o){
     if(maintenance) m.lastMaintenanceKey=k;
   });
   // Skill rounds interleave signs: write A/B/C, then pinyin A/B/C, then meaning.
-  const tasks=MEMORY_SKILLS.flatMap(skill=>p.keys.filter(k=>flags[k].maintenance||flags[k].baseDue||memoryDueSkills(m.entries[k]).includes(skill)).map(k=>({k,skill,retry:false,maintenance:flags[k].maintenance})));
+  const tasks=MEMORY_SKILLS.flatMap(skill=>p.keys.filter(k=>memorySkills(k).includes(skill)&&(flags[k].maintenance||flags[k].baseDue||memoryDueSkills(m.entries[k],null,k).includes(skill))).map(k=>({k,skill,retry:false,maintenance:flags[k].maintenance})));
   m.session={tasks,index:0,studied:[],reveal:false,marks:[],started:todayStr(),keys:p.keys.slice(),flags,plan:p};
   save('meta'); go('memory');
 }
-function memoryCompleteDay(e){
-  if(MEMORY_SKILLS.every(sk=>(e.practice&&e.practice[sk]&&e.practice[sk].day===todayStr())||(e.skills[sk]&&e.skills[sk].day===todayStr()))&&!e.days.includes(todayStr())) e.days.push(todayStr());
+function memoryCompleteDay(e,k){
+  if(memorySkills(k).every(sk=>(e.practice&&e.practice[sk]&&e.practice[sk].day===todayStr())||(e.skills[sk]&&e.skills[sk].day===todayStr()))&&!e.days.includes(todayStr())) e.days.push(todayStr());
 }
 function memoryRecordSkill(k,skill,grade,o){
   skill=({writing:'hz',pinyin:'py',meaning:'ru'})[skill]||skill; o=o||{};
-  if(!MEMORY_SKILLS.includes(skill)||!memoryValid(k)) return;
+  if(!memorySkills(k).includes(skill)||!memoryValid(k)) return;
   const existing=(State.meta.memory||{}).entries||{}, learnedBefore=!isNew(k)&&!memoryActuallyStarted(existing[k]);
   const e=memoryEnroll(k,{priorLearned:learnedBefore}), old=e.skills[skill], g=Math.max(1,Math.min(3,+grade||1));
   e.lastPracticedAt=Date.now(); e.lastPracticedDay=todayStr();
   // Correct early practice is rotation, not proof of a longer interval.
   // Errors can lower the estimate even during an early check.
   if(old&&old.card&&old.card.due>Date.now()&&g>=2){
-    e.practice=e.practice||{}; e.practice[skill]={day:todayStr(),grade:g}; memoryCompleteDay(e); save('meta'); return;
+    e.practice=e.practice||{}; e.practice[skill]={day:todayStr(),grade:g}; memoryCompleteDay(e,k); save('meta'); return;
   }
   const scheduled=!!(old&&old.card&&old.card.due<=Date.now());
   if(old&&old.day===todayStr()&&!scheduled&&g>=old.grade) return;
@@ -159,8 +160,8 @@ function memoryRecordSkill(k,skill,grade,o){
   const card=FSRS.review(prior,g,REQ);
   e.skills[skill]={card,day:todayStr(),grade:g,prior};
   e.practice=e.practice||{}; e.practice[skill]={day:todayStr(),grade:g};
-  memoryCompleteDay(e);
-  if(isNew(k)&&MEMORY_SKILLS.every(sk=>e.skills[sk]&&e.skills[sk].grade>=2)){
+  memoryCompleteDay(e,k);
+  if(isNew(k)&&memorySkills(k).every(sk=>e.skills[sk]&&e.skills[sk].grade>=2)){
     State.cards[k]=FSRS.review({},3,REQ); if(isRad(k)) D().keys++; else D().new++; save('cards');
   }
   save('meta');
@@ -168,7 +169,7 @@ function memoryRecordSkill(k,skill,grade,o){
 function memoryCompleteBase(k,ss){
   const f=(ss.flags||{})[k], e=memoryState().entries[k];
   if(!f||!f.baseDue||f.baseDone) return;
-  const checks=ss.marks.filter(t=>t.k===k), grades=MEMORY_SKILLS.map(sk=>checks.find(t=>t.skill===sk));
+  const checks=ss.marks.filter(t=>t.k===k), grades=memorySkills(k).map(sk=>checks.find(t=>t.skill===sk));
   if(grades.some(x=>!x)) return;
   f.baseDone=true;
   // Another mode may have changed this card while a paused circle was saved.
@@ -182,7 +183,7 @@ function memoryDelayRetry(ss,t){
   const rest=ss.tasks.slice(ss.index+1).filter(x=>x.k!==t.k).length;
   const other=ss.keys.filter(k=>k!==t.k);
   if(rest<3&&!other.length) return; // A one-item custom set returns at its next interval.
-  for(let i=rest;i<3;i++) ss.tasks.push({k:other[i%other.length],skill:MEMORY_SKILLS[i%3],spacer:true,retry:false});
+  for(let i=rest;i<3;i++) ss.tasks.push({k:other[i%other.length],skill:memorySkills(other[i%other.length])[i%memorySkills(other[i%other.length]).length],spacer:true,retry:false});
   ss.tasks.push(retry);
 }
 function memoryGrade(grade){

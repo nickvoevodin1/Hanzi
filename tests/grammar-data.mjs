@@ -27,3 +27,10 @@ for(let L=1;L<=30;L++){const t=classroom.lessons[L];assert(t.origin==='original'
 assert.equal(classroom.stories.length,10);
 for(const story of classroom.stories){assert(story.origin==='original'&&story.zh&&story.py&&story.ru&&story.questions.length>=2,'incomplete story '+story.id);for(const q of story.questions)assert(new Set(q.choices).size===q.choices.length&&q.choices.includes(q.answer),'ambiguous story answer '+story.id);}
 console.log('PASS grammar data: '+topics.length+' topics, '+exercises.size+' exercises,30 lessons and original classroom materials');
+// Every formal grammar section in the verified first-volume contents has actual
+// rules and independent exercises; path integration is checked in course-path.
+const coverage=JSON.parse(fs.readFileSync(new URL('../materials/grammar-coverage.json',import.meta.url),'utf8'));
+assert.deepEqual(coverage.map(r=>r.lesson),[2,3,5,7,10,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]);
+for(const row of coverage)for(const id of row.topics)assert(ids.has(id),'book section missing: '+row.lesson+' '+id);
+const pivotal=topics.find(t=>t.id==='g19-pivotal');assert(pivotal.rule.includes('请他来')&&pivotal.rule.includes('让'),'lesson19 confused with one-subject serial actions');
+assert(topics.find(t=>t.id==='g30-verbal-structures').rule.includes('我知道他是谁'),'clausal object missing from review');

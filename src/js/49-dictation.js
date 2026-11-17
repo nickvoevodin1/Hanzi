@@ -50,9 +50,10 @@ function dictationPinyinOK(input,answer){
   if(typeof normalizePinyin==='function'){ const got=normalizePinyin(input); return !!got&&answer.split(/\s*[/／;；]\s*/).some(p=>got===normalizePinyin(p)); }
   return answer.split(/\s*[/／;；]\s*/).some(p=>dictationPinyinKey(input)===dictationPinyinKey(p));
 }
+function dictationFields(item){return Object.keys(DICTATION_FIELDS).filter(f=>f!=='pinyin'||!isRad(item.id));}
 function dictationItemScore(item){
   const r=dictationStore().records;
-  return Object.keys(DICTATION_FIELDS).reduce((n,f)=>n+(r[item.id+'|'+f]?.ok?1:0),0);
+  return dictationFields(item).reduce((n,f)=>n+(r[item.id+'|'+f]?.ok?1:0),0);
 }
 function dictationStart(config,wrongOnly){
   const c=dictationConfig(config), store=dictationStore();
@@ -63,7 +64,7 @@ function dictationStart(config,wrongOnly){
   pool=pool.map((x,i)=>({x,i,score:dictationItemScore(x),at:Math.max(...Object.keys(DICTATION_FIELDS).map(f=>store.records[x.id+'|'+f]?.at||0))}))
     .sort((a,b)=>a.score-b.score||a.at-b.at||a.i-b.i).map(x=>x.x).slice(0,c.count===214?undefined:c.count);
   const order=shuffle(pool), q=[];
-  for(const field of Object.keys(DICTATION_FIELDS)) order.forEach(item=>q.push({item,field,tries:0}));
+  for(const field of Object.keys(DICTATION_FIELDS)) order.filter(item=>dictationFields(item).includes(field)).forEach(item=>q.push({item,field,tries:0}));
   store.active={config:c,title:dictationTitle(c),items:pool,q,total:q.length,first:0,ok:0,done:0,errors:[],started:Date.now(),open:false};
   store.lastConfig=c;
   save('meta'); go('dictation',{run:true});
@@ -111,8 +112,8 @@ function viewDictation(s){
   v.appendChild(el('p','eyebrow','Быстрый старт · 8 слов или ключей'));
   const presets=el('div','rowlist');
   DICTATION_PRESETS.forEach(p=>{
-    const items=dictationItems(p), full=items.filter(x=>dictationItemScore(x)===3).length;
-    const b=el('button','row',`<div class="n">${IC(p.kind==='radicals'?'splitW':'pencilW',22)}</div><div class="tt"><b>${esc(p.title)}</b><small>${items.length} ${p.kind==='radicals'?'ключей':'слов'} · три навыка проверены: ${full}/${items.length}</small></div>${IC('chev',18)}`);
+    const items=dictationItems(p), full=items.filter(x=>dictationItemScore(x)===dictationFields(x).length).length;
+    const b=el('button','row',`<div class="n">${IC(p.kind==='radicals'?'splitW':'pencilW',22)}</div><div class="tt"><b>${esc(p.title)}</b><small>${items.length} ${p.kind==='radicals'?'ключей':'слов'} · навыки проверены: ${full}/${items.length}</small></div>${IC('chev',18)}`);
     b.onclick=()=>dictationStart(p); presets.appendChild(b);
   }); v.appendChild(presets);
   v.appendChild(el('p','eyebrow','Свой набор'));
@@ -120,7 +121,7 @@ function viewDictation(s){
   form.innerHTML=`<label class="setrow"><span class="lab"><b>Что повторяем</b></span><select name="kind" aria-label="Тип набора"><option value="lessons">Слова уроков</option><option value="radicals">Ключи по номеру</option></select></label>
     <label class="setrow" data-lessons><span class="lab"><b>Уроки 1–30</b><small>Через запятую: 18, 19 или диапазон 18–20</small></span><input name="lessons" value="18, 19" aria-label="Номера уроков" style="max-width:130px"></label>
     <div class="setrow" data-radicals hidden><span class="lab"><b>Ключи Канси 1–214</b></span><label>От <input name="from" type="number" min="1" max="214" value="1" aria-label="Первый ключ" style="width:64px"></label><label>до <input name="to" type="number" min="1" max="214" value="40" aria-label="Последний ключ" style="width:64px"></label></div>
-    <label class="setrow"><span class="lab"><b>Порция</b><small>По 3 задания на каждый элемент</small></span><select name="count" aria-label="Размер порции"><option value="4">4 · легко начать</option><option value="8" selected>8 · обычный раунд</option><option value="16">16 · большой раунд</option><option value="214">Весь набор</option></select></label>
+    <label class="setrow"><span class="lab"><b>Порция</b><small>Слова — 3 задания, ключи — 2, без пиньиня</small></span><select name="count" aria-label="Размер порции"><option value="4">4 · легко начать</option><option value="8" selected>8 · обычный раунд</option><option value="16">16 · большой раунд</option><option value="214">Весь набор</option></select></label>
     <label class="setrow"><span class="lab"><b>Писать под диктовку</b><small>Вместо перевода — только аудио. Для слов; ключи — по названию.</small></span><input name="audio" type="checkbox"></label>
     <p class="note" data-error role="alert"></p><button class="btn" type="submit">${IC('play',18)} Начать свой раунд</button>`;
   const fields=form.elements;
