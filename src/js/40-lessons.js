@@ -4,16 +4,16 @@
 function viewLessons(s){
   const v=el('div','view'), N=groupL();
   const back=el('button','back','‹ Словарь'); back.onclick=()=>go('dict'); v.appendChild(back);
-  v.appendChild(el('h2','title','Уроки'));
-  v.appendChild(el('p','note','Кондрашевский, том 1. Красным — текущий урок группы ('+N+'). Цифра справа — слов в работе.'));
+  v.appendChild(el('h2','title',State.route.browse?'Иероглифы по урокам':'Уроки'));
+  v.appendChild(el('p','note',State.route.browse?'Выбери урок: покажем все иероглифы его основного списка слов, включая повторяющиеся.':'Кондрашевский, том 1. Красным — текущий урок группы ('+N+'). Цифра справа — слов в работе.'));
   const list=el('div','rowlist'); list.style.marginTop='10px';
   for(let L=1;L<=NL;L++){
     const ws=lessonWords(L), lw=learnedCount(ws.map(w=>w.key));
     const has=TESTS.some(t=>t.lesson===L);
     const r=el('button','row'+(L===N?' cur':''),`<div class="n">${L}</div>
-      <div class="tt"><b>${esc(lessonTitle(L))}</b><small><span class="han">${esc(LESSONS[L].sub||'')}</span> · ${ws.length} слов · ${LESSON_CHARS[L].length} нов. иероглифов${has?' · 考 проверочная':''}</small></div>
+      <div class="tt"><b>${esc(lessonTitle(L))}</b><small><span class="han">${esc(LESSONS[L].sub||'')}</span> · ${ws.length} слов · ${State.route.browse?uniq(ws.flatMap(w=>hanOf(w.s))).length:LESSON_CHARS[L].length} ${State.route.browse?'иероглифов':'нов. иероглифов'}${has?' · 考 проверочная':''}</small></div>
       <div class="cnt"${lw===ws.length&&ws.length?' style="color:var(--jade)"':''}>${lw}/${ws.length}</div>`);
-    r.onclick=()=>go('lesson',{L}); list.appendChild(r);
+    r.onclick=()=>go('lesson',State.route.browse?{L,browse:true,tab:'chars'}:{L}); list.appendChild(r);
     lessonExtras(L).forEach(x=>{ const xl=learnedCount(x.words.map(w=>w.key));
       const xr=el('button','row',`<div class="n" style="color:var(--cinnabar-2)">+</div>
         <div class="tt"><b>${esc(x.title)}</b><small>${x.words.length} слов · после урока ${L}</small></div><div class="cnt">${xl}/${x.words.length}</div>`);
@@ -38,6 +38,7 @@ function viewExtra(s){
 }
 const MODES=[['auto','Авто'],['recog','汉字 → перевод'],['recall','Перевод → 汉字'],['write','Написать'],['listen','На слух'],['tones','Тоны'],['pinyin','Пиньинь']];
 function viewLesson(s){
+  if(State.route.browse)return viewLessonCharacterBrowser(s);
   const L=State.route.L, tab=State.route.tab||'words', mode=State.route.mode||'auto';
   const ws=lessonWords(L), keys=lessonKeys(L);
   const v=el('div','view');
@@ -116,3 +117,13 @@ function viewCard(s){
 }
 function mr(k,v){ return el('div','mr',`<div class="k">${k}</div><div class="v">${v}</div>`); }
 
+
+function viewLessonCharacterBrowser(s){
+  const L=Math.max(1,Math.min(NL,+State.route.L||1)),v=el('div','view');s.appendChild(v);
+  const back=el('button','back','‹ Иероглифы по урокам');back.onclick=()=>go('lessons',{browse:true});v.appendChild(back);
+  v.appendChild(el('h1','','Урок '+L+' · '+esc(lessonTitle(L))));
+  const select=el('select');select.setAttribute('aria-label','Урок для просмотра иероглифов');for(let n=1;n<=NL;n++){const o=el('option','','Урок '+n);o.value=String(n);o.selected=n===L;select.appendChild(o);}select.onchange=()=>go('lesson',{L:+select.value,browse:true,tab:'chars'});v.appendChild(select);
+  const chars=uniq(lessonWords(L).flatMap(w=>hanOf(w.s)));
+  v.appendChild(el('p','note',chars.length+' иероглифов из основного списка слов урока, включая уже встречавшиеся. Нажми на знак — откроются состав и порядок черт.'));
+  const list=el('div','rowlist');for(const ch of chars){const row=el('div','row');row.appendChild(hzBtn(ch));row.appendChild(el('div','tt',`<div class="py">${pinyinHTML(charPy(ch))}</div><small>${esc(charRu(ch))}</small>`));row.appendChild(studyKnownButton('c:'+ch));list.appendChild(row);}v.appendChild(list);
+}

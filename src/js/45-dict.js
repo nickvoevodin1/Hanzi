@@ -5,6 +5,8 @@ function viewDict(s){
   const v=el('div','view');
   const heading=el('div','dict-heading');heading.appendChild(el('h1','','Поиск'));const settings=el('button','linkbtn',IC('gear',24));settings.setAttribute('aria-label','Настройки');settings.onclick=()=>go('settings');heading.appendChild(settings);v.appendChild(heading);
   const inp=el('input','search'); inp.placeholder='Иероглиф, пиньинь или перевод…'; inp.value=State.route.q||''; v.appendChild(inp);
+  const browse=el('div','rowlist');browse.style.margin='12px 0';
+  for(const [title,sub,route,params]of[['Ключи по порядку','Все 214 ключей: от №1 до №214','keys',{scope:'order'}],['Иероглифы по урокам','Основные иероглифы уроков 1–30','lessons',{browse:true}]]){const b=el('button','row',`<div class="tt"><b>${title}</b><small>${sub}</small></div>${IC('chev',18)}`);b.onclick=()=>go(route,params);browse.appendChild(b);}v.appendChild(browse);
   const res=el('div',''); v.appendChild(res);
   const run=()=>{
     const q=inp.value.trim().toLowerCase(); State.route.q=inp.value; res.innerHTML='';

@@ -10,10 +10,10 @@ function radGrid(nums){
 }
 function viewKeys(s){
   const v=el('div','view'), scope=State.route.scope==='learned'?'learned':'order';
-  const back=el('button','back','‹ Повторение'); back.onclick=()=>go('practice'); v.appendChild(back);
+  const back=el('button','back','‹ Поиск'); back.onclick=()=>go('dict'); v.appendChild(back);
   v.appendChild(el('h2','title','Ключи'));
   const all=KEY_ORDER.slice(), la=learnedCount(all.map(n=>'r:'+n)), kq=todayKeysQuota();
-  v.appendChild(el('p','note',`Все 214 ключей идут последовательно, от №1 до №214. Диапазоны в пути и диктантах совпадают с номерами ключей. Введено ${la} из 214; сегодня новых — ${kq.quota} (осталось ${kq.left}). Номера — по Канси; названия — таблица ДВФУ.`));
+  v.appendChild(el('p','note',`Все 214 ключей идут последовательно, от №1 до №214. Номера в прописях и диктантах совпадают с этой таблицей. Введено ${la} из 214; сегодня новых — ${kq.quota} (осталось ${kq.left}). Номера — по Канси; названия — таблица ДВФУ.`));
   const act=el('div','actionrow');
   const b1=el('button','btn',IC('play',16)+' Учить ключи'); const q1=()=>poolQueue(all.map(n=>'r:'+n),8); b1.onclick=()=>playStart(q1(),{title:'Ключи',kind:'learn',more:q1});
   const b2=el('button','btn ghost',IC('cards',18)+' Карточки'); const q2=()=>poolQueue(all.map(n=>'r:'+n)); b2.onclick=()=>startSession(q2(),'auto','Все ключи',q2);

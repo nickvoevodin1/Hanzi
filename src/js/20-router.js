@@ -2,7 +2,7 @@
   РОУТЕР И НАВИГАЦИЯ: Путь · Карточки · Поиск; старые маршруты для продолжения сохранены
 ==================================================================*/
 const TAB_OF={path:'path',play:'path',practice:'practice',cards:'cards',study:'path',session:'practice',decomp:'practice',sent:'practice',addsent:'practice',
-  classroom:'path',notebook:'practice',memory:'practice',exam:'exam',dictation:'exam',grammar:'practice',mock:'exam',tests:'practice',test:'practice',keys:'practice',radical:'practice',reports:'practice',
+  classroom:'path',notebook:'practice',memory:'practice',exam:'exam',dictation:'exam',grammar:'practice',mock:'exam',tests:'practice',test:'practice',keys:'dict',radical:'dict',reports:'practice',
   dict:'dict',list:'dict',lessons:'dict',lesson:'dict',extra:'dict',strokes:'dict',progress:'progress',settings:'settings',knownCheck:'settings'};
 function go(name,params){
   State.route={name,...params}; if(TAB_OF[name]) State.tab=TAB_OF[name];

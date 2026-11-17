@@ -173,6 +173,21 @@ await T('dedicated-exam-tab-selected-lessons-and-dictation',()=>{
  ok(ev("MOCK.lessons.join()") ==='5,18','mock lost selected lessons');
  ev("window.__mock=mockGen([5,18])");ok(ev("window.__mock.words.every(k=>[5,18].some(L=>LESSONS[L].o.includes(k)))"),'mock includes words outside chosen lessons');
 });
+await T('search-browses-numeric-radicals-and-full-main-lesson-characters',()=>{
+ reset();ev("window.__cards=JSON.stringify(State.cards);go('dict')");
+ const button=title=>[...doc.querySelectorAll('#screen button')].find(b=>b.textContent.includes(title));
+ button('Ключи по порядку').click();ok(ev("State.route.name==='keys'&&State.tab==='dict'"),'radical catalogue outside search');
+ const nums=[...doc.querySelectorAll('.rc .rn span:first-child')].map(x=>+x.textContent.replace('№',''));
+ ok(nums.join()===Array.from({length:214},(_,i)=>i+1).join(),'radicals not sorted1–214');
+ button('‹ Поиск').click();button('Иероглифы по урокам').click();
+ ok(ev('State.route.browse'),'not in character browsing mode');
+ doc.querySelectorAll('.rowlist > button.row')[4].click();
+ ok(ev('State.route.L')===5,'wrong lesson opened');
+ const chars=[...doc.querySelectorAll('#screen [data-c]')].map(x=>x.dataset.c);
+ ok(chars.join()===ev("uniq(lessonWords(5).flatMap(w=>hanOf(w.s))).join()"),'lesson character list missing repeated signs');
+ ok(chars.includes('是')&&!chars.includes('纸'),'wrong main/additional character distinction');
+ ok(ev('JSON.stringify(State.cards)===window.__cards'),'browsing awarded knowledge');
+});
 await T('main-path-includes-rules-and-stories-without-radical-lessons',()=>{
  reset();const units=ev('courseClassUnits()');
  ok(units.flatMap(u=>u.nodes.filter(n=>n.type==='grammar').map(n=>n.topicId)).sort().join()===ev('grammarTopics().map(t=>t.id).sort().join()'),'grammar omitted/duplicated');
