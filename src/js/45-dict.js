@@ -13,7 +13,7 @@ function viewDict(s){
     if(!q){
       res.appendChild(el('p','note','Ищи слова и ключи по иероглифам, русскому переводу или пиньиню: nǐ hǎo, ni3 hao3 и nihao работают одинаково.'));
       const recent=studyLearnedPool().slice(0,12),list=el('div','rowlist');
-      if(recent.length){res.appendChild(el('p','eyebrow','Из пройденного'));for(const k of recent){const info=notebookInfo(k),b=el('button','row',`<span class="ri han">${esc(info.hz)}</span><div class="tt"><b>${esc(info.ru)}</b><small>${pinyinHTML(info.py)}</small></div>`);b.onclick=()=>isRad(k)?go('radical',{n:radNum(k)}):info.w?go('card',{id:info.w.id}):go('notebook',{k,fromStudy:true});list.appendChild(b);list.appendChild(studyKnownButton(k,run));}res.appendChild(list);}
+      if(recent.length){res.appendChild(el('p','eyebrow','Из пройденного'));for(const k of recent){const info=notebookInfo(k),b=el('button','row',`<span class="ri han">${esc(info.hz)}</span><div class="tt"><b>${esc(info.ru)}</b><small>${pinyinHTML(info.py)}</small></div>`);b.onclick=()=>isRad(k)?go('radical',{n:radNum(k)}):info.w?go('card',{id:info.w.id}):openChar(k.replace(/^c:/,''));list.appendChild(b);list.appendChild(studyKnownButton(k,run));}res.appendChild(list);}
       return;
     }
     const qt=studySearchText(q);

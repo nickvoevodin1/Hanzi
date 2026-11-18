@@ -240,7 +240,7 @@ function jumpEnd(s){
 function viewPath(s){
   applyFreezes(); renderTop();
   const v=el('div','view');
-  v.appendChild(studyCycleBanner());
+  v.appendChild(recallCycleBanner());
   v.appendChild(pathEl());
   s.appendChild(v);
   checkQuests(); checkAch();

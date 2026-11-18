@@ -26,8 +26,9 @@ function studyKnownButton(k,onchange){
 }
 function studyRememberedCounts(){
   const chars=studyKnownChars(),keys=new Set();
-  const pool=uniq(Object.keys(State.meta.study?.known||{}).concat(Object.keys(State.cards),studyLearnedPool()));
-  for(const k of pool){if(!studyKnown(k)&&isNew(k)&&(!notebookKey(k)||studyStatus(k).stage!=='done'))continue;
+  const pool=uniq(Object.keys(State.meta.study?.known||{}).concat(Object.keys(State.cards),studyLearnedPool(),Object.keys(State.meta.study?.recall?.entries||{})));
+  for(const k of pool){const recallDays=State.meta.study?.recall?.entries?.[k]?.days||[],recalled=recallDays.length>=3&&recallDays.slice(0,3).every((row,n)=>recallRowDone(row,n+1));
+    if(!studyKnown(k)&&isNew(k)&&!recalled&&(!notebookKey(k)||studyStatus(k).stage!=='done'))continue;
     if(isRad(k)){keys.add(k);continue;}if(BYK[k]||k.startsWith('c:'))for(const ch of hanOf(BYK[k]?.s||k.slice(2)))chars.add(ch);
   }
   return {chars:chars.size,keys:keys.size};

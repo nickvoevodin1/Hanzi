@@ -35,9 +35,7 @@ function viewSettings(s){
     setRow(b1,'Минут в обычный день','справочно',stepper(()=>sem.minutesNormal,x=>{ sem.minutesNormal=x; ss(); },10,120,5));
   }else setRow(b1,'Новых слов в день','без семестрового плана',stepper(()=>S.newPerDay,x=>{ S.newPerDay=x; ss(); },0,40,1));
   v.appendChild(b1);
-  const writing=el('div','meta');
-  const amount=el('select');amount.setAttribute('aria-label','Ключей за занятие');for(let n=0;n<=30;n++){const option=el('option','',String(n));option.value=String(n);option.selected=n===(studyState().notebookRadicalCount??5);amount.appendChild(option);}amount.onchange=()=>{studyState().notebookRadicalCount=+amount.value;save('meta');};
-  setRow(writing,'Ключей за занятие','После слов выбранных уроков. 0 — без ключей.',amount);v.appendChild(writing);
+  const learning=el('div','meta');setRow(learning,'Ключи в новых карточках','Только ключи выбранных уроков из раздела А пособия.',switchEl(()=>recallState().includeKeys,x=>{recallState().includeKeys=x;save('meta');}));v.appendChild(learning);
   // поездки
   const b2=el('div','meta'); b2.style.padding='12px 14px';
   b2.innerHTML='<div class="lab"><b style="color:var(--title)">Поездки к родителям</b><small style="display:block;color:var(--text3);font-size:12px">в эти дни — только повторения (~10 мин), серия не сгорает</small></div>';

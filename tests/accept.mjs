@@ -75,7 +75,7 @@ await T('sentences-mode',()=>{ ev("SENT=null; SENT_OPT.lm='pick'; SENT_OPT.pick=
   for(let i=0;i<30&&!ev("SENT.done");i++){ click(/Показать ответ/); click(/^Верно/); } ok(ev("D().sent")===n,'засчитано предложений: '+ev("D().sent")); ev("SENT_OPT.lm='group'"); });
 await T('fragments',()=>{ const f=ev("fragsOf({id:'x',zh:'我很忙，你呢？',ru:'Я очень занят, а ты?',py:'Wǒ hěn máng, nǐ ne?',L:3})"); ok(f.length===2&&f[0].zh==='我很忙'&&f[1].ru==='а ты?','отрывки: '+JSON.stringify(f)); });
 await T('mock-gen',()=>{ const g=ev("mockGen([19,20,21])"); ok(g.words.length===5&&g.ruzh.length===5&&g.zhru.length===5,'5 слов + 10 предложений: '+[g.words.length,g.ruzh.length,g.zhru.length]);
-  ok(g.words.every(k=>[19,20,21].includes(ev(`WORD_L['${k}']`))),'слова не из выбранных уроков'); ok(g.ruzh.concat(g.zhru).every(x=>(x.ls&&x.ls.length?x.ls:[x.L]).some(l=>[19,20,21].includes(l))),'предложения не из уроков');
+  ok(g.words.every(k=>ev(`[19,20,21].some(L=>lessonWords(L).some(w=>w.key===${JSON.stringify(k)}))`)),'слова не из выбранных уроков'); ok(g.ruzh.concat(g.zhru).every(x=>(x.ls&&x.ls.length?x.ls:[x.L]).some(l=>[19,20,21].includes(l))),'предложения не из уроков');
   ok(new Set(g.ruzh.concat(g.zhru).map(x=>x.id)).size===10,'предложения повторяются'); });
 await T('mock-flow',()=>{ ev("State.meta=freshMeta(); MOCK=null; go('mock',{setup:{lessons:[19,20,21],title:'Пробная'}})"); click(/^Начать/); ok(/Разбери на ключи/.test(txt())&&/Переведи на китайский/.test(txt())&&/Переведи на русский/.test(txt()),'бланк');
   ok(A.doc.querySelector('.timer'),'таймер'); click(/Сдать на проверку/);

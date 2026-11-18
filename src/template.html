@@ -653,6 +653,17 @@ body.notebook-focus #app{max-width:none;padding-bottom:0}body.notebook-focus #sc
 .study-item .ri{font-size:30px;min-width:64px;max-width:100px;overflow-wrap:anywhere;line-height:1.35}.study-item .tt{min-width:0}.study-item .py{margin-top:4px}.study-item small{white-space:normal}.study-difficult[aria-pressed="true"]{color:#ba6800;background:#fff1d7;border-radius:10px}.study-difficult{display:inline-flex;align-items:center;gap:6px;padding:8px 4px;font-size:14px}
 .study-flashcard{margin-top:18px;text-align:center;min-height:300px;display:flex;flex-direction:column;align-items:center;gap:14px}.study-flashcard h2{font-size:28px;overflow-wrap:anywhere}.study-flashcard h2.han,.study-answer{font-size:52px;line-height:1.35}.study-flashcard .btn{width:100%}.study-grades{display:grid;grid-template-columns:1fr;gap:10px;width:100%}.study-progress{height:10px;border-radius:8px;overflow:hidden;background:var(--line)}.study-progress i{height:100%;display:block;background:var(--primary)}.study-list-view h2{font-size:19px;margin:22px 0 10px}.study-list-view .search,.study-cards-view .search{margin:14px 0}.dict-heading{display:flex;align-items:center;justify-content:space-between}.notebook-practice-target .study-difficult{font-size:12px;padding:4px}.story-scene{padding:14px 0;border-bottom:1px solid var(--line)}
 @media(min-width:420px){.study-grades{grid-template-columns:repeat(3,1fr)}.study-grades .btn{font-size:12px;padding-left:4px;padding-right:4px}}
+
+/* Карточки и письмо по памяти */
+body.recall-writing .top,body.recall-writing .nav{display:none}body.recall-writing #app{padding-bottom:0}body.recall-writing #screen .view{animation:none}body.recall-writing .recall-card{margin-top:6px;padding:14px;gap:9px}
+.recall-lesson-picker>.chips:first-of-type{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.recall-lesson-picker label.chip{font-size:12px;padding:8px 5px;white-space:nowrap;justify-content:flex-start;min-width:0}
+
+.study-week small{display:block;font-size:10px;line-height:1.4;overflow-wrap:anywhere;margin-top:4px}
+.recall-card{margin-top:18px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;min-width:0}
+.recall-card .btn{width:100%}.recall-glyph{font-size:58px;line-height:1.45;overflow-wrap:anywhere}.recall-answer{font-size:27px;overflow-wrap:anywhere}.recall-prompt{font-size:24px;overflow-wrap:anywhere}
+.recall-card .note{margin:0}.recall-writer{width:100%;display:flex;flex-direction:column;align-items:center;gap:8px}.recall-pad{max-width:100%;touch-action:none;background:linear-gradient(90deg,transparent calc(50% - .5px),#eee 50%,transparent calc(50% + .5px)),linear-gradient(transparent calc(50% - .5px),#eee 50%,transparent calc(50% + .5px));border:2px solid var(--line);border-radius:16px}
+.recall-stroke-note{font-size:13px;min-height:36px}.recall-lesson-picker,.recall-method{padding:16px;margin:16px 0}.recall-lesson-picker summary,.recall-method summary,.recall-preview summary{font-weight:900;cursor:pointer}.recall-lesson-picker .chips{margin-top:14px}.recall-method .note{margin-top:12px}.recall-item{margin-top:8px}.recall-verdict{font-weight:800}.recall-preview{margin:18px 0}.recall-demo{max-width:100%}
+@media(max-width:360px){.study-week{gap:4px}.study-week small{font-size:9px}.recall-glyph{font-size:48px}}
 </style>
 </head>
 <body>

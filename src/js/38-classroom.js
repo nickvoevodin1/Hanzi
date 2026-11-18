@@ -136,7 +136,7 @@ function classroomRun(v,ss){
   else if(x.kind==='translation')q.innerHTML=`<div class="${x.dir==='zh'?'qbig':'han'}" style="font-size:25px">${esc(x.dir==='zh'?x.ru:x.zh)}</div><p class="note">${x.dir==='zh'?'Переведи на китайский язык':'Переведи на русский язык'} до открытия ответа.</p>`;
   else{q.innerHTML='<div class="qbig">Послушай и переведи фразу</div>';const audio=el('button','btn mini',SPK(20)+' Слушать фразу');audio.onclick=()=>classroomListen(x);q.appendChild(audio);}
   if(!ss.revealed){
-    if(x.kind==='vocab'&&typeof notebookPanel==='function'){v.appendChild(notebookPanel(x.k,{compact:true,hideModel:true}));}
+    if(x.kind==='vocab'){const cards=el('button','linkbtn','Закрепить в карточках');cards.onclick=()=>{const m=recallState();m.lessons=uniq(m.lessons.concat(WORD_L[x.k]||1));save('meta');recallStart('today',[x.k]);};v.appendChild(cards);}
     else if(x.kind==='vocab'&&typeof dictationInk==='function'){const ink=el('div');dictationInk(ink,x);v.appendChild(ink);}
     const show=el('button','btn','Сверить ответ');show.style.marginTop='12px';show.dataset.key='space';show.onclick=classroomReveal;v.appendChild(show);
     const no=el('button','linkbtn','Не помню — посмотреть');no.onclick=()=>{x.gaveUp=true;if(x.kind==='listening'&&!x.listened)classroomListen(x);classroomReveal();};v.appendChild(no);return;

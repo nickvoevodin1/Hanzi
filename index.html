@@ -653,6 +653,17 @@ body.notebook-focus #app{max-width:none;padding-bottom:0}body.notebook-focus #sc
 .study-item .ri{font-size:30px;min-width:64px;max-width:100px;overflow-wrap:anywhere;line-height:1.35}.study-item .tt{min-width:0}.study-item .py{margin-top:4px}.study-item small{white-space:normal}.study-difficult[aria-pressed="true"]{color:#ba6800;background:#fff1d7;border-radius:10px}.study-difficult{display:inline-flex;align-items:center;gap:6px;padding:8px 4px;font-size:14px}
 .study-flashcard{margin-top:18px;text-align:center;min-height:300px;display:flex;flex-direction:column;align-items:center;gap:14px}.study-flashcard h2{font-size:28px;overflow-wrap:anywhere}.study-flashcard h2.han,.study-answer{font-size:52px;line-height:1.35}.study-flashcard .btn{width:100%}.study-grades{display:grid;grid-template-columns:1fr;gap:10px;width:100%}.study-progress{height:10px;border-radius:8px;overflow:hidden;background:var(--line)}.study-progress i{height:100%;display:block;background:var(--primary)}.study-list-view h2{font-size:19px;margin:22px 0 10px}.study-list-view .search,.study-cards-view .search{margin:14px 0}.dict-heading{display:flex;align-items:center;justify-content:space-between}.notebook-practice-target .study-difficult{font-size:12px;padding:4px}.story-scene{padding:14px 0;border-bottom:1px solid var(--line)}
 @media(min-width:420px){.study-grades{grid-template-columns:repeat(3,1fr)}.study-grades .btn{font-size:12px;padding-left:4px;padding-right:4px}}
+
+/* Карточки и письмо по памяти */
+body.recall-writing .top,body.recall-writing .nav{display:none}body.recall-writing #app{padding-bottom:0}body.recall-writing #screen .view{animation:none}body.recall-writing .recall-card{margin-top:6px;padding:14px;gap:9px}
+.recall-lesson-picker>.chips:first-of-type{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.recall-lesson-picker label.chip{font-size:12px;padding:8px 5px;white-space:nowrap;justify-content:flex-start;min-width:0}
+
+.study-week small{display:block;font-size:10px;line-height:1.4;overflow-wrap:anywhere;margin-top:4px}
+.recall-card{margin-top:18px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;min-width:0}
+.recall-card .btn{width:100%}.recall-glyph{font-size:58px;line-height:1.45;overflow-wrap:anywhere}.recall-answer{font-size:27px;overflow-wrap:anywhere}.recall-prompt{font-size:24px;overflow-wrap:anywhere}
+.recall-card .note{margin:0}.recall-writer{width:100%;display:flex;flex-direction:column;align-items:center;gap:8px}.recall-pad{max-width:100%;touch-action:none;background:linear-gradient(90deg,transparent calc(50% - .5px),#eee 50%,transparent calc(50% + .5px)),linear-gradient(transparent calc(50% - .5px),#eee 50%,transparent calc(50% + .5px));border:2px solid var(--line);border-radius:16px}
+.recall-stroke-note{font-size:13px;min-height:36px}.recall-lesson-picker,.recall-method{padding:16px;margin:16px 0}.recall-lesson-picker summary,.recall-method summary,.recall-preview summary{font-weight:900;cursor:pointer}.recall-lesson-picker .chips{margin-top:14px}.recall-method .note{margin-top:12px}.recall-item{margin-top:8px}.recall-verdict{font-weight:800}.recall-preview{margin:18px 0}.recall-demo{max-width:100%}
+@media(max-width:360px){.study-week{gap:4px}.study-week small{font-size:9px}.recall-glyph{font-size:48px}}
 </style>
 </head>
 <body>
@@ -1691,7 +1702,7 @@ function reportDecomp(ch){
 /*==================================================================
   РОУТЕР И НАВИГАЦИЯ: Путь · Карточки · Поиск; старые маршруты для продолжения сохранены
 ==================================================================*/
-const TAB_OF={path:'path',play:'path',practice:'practice',cards:'cards',study:'path',session:'practice',decomp:'practice',sent:'practice',addsent:'practice',
+const TAB_OF={path:'path',play:'path',practice:'practice',cards:'cards',study:'cards',session:'practice',decomp:'practice',sent:'practice',addsent:'practice',
   classroom:'path',notebook:'practice',memory:'practice',exam:'exam',dictation:'exam',grammar:'practice',mock:'exam',tests:'practice',test:'practice',keys:'dict',radical:'dict',reports:'practice',
   dict:'dict',list:'dict',lessons:'dict',lesson:'dict',extra:'dict',strokes:'dict',progress:'progress',settings:'settings',knownCheck:'settings'};
 function go(name,params){
@@ -1701,10 +1712,11 @@ function go(name,params){
 function render(){
   if(State.meta.day!==todayStr()){ State.meta.day=todayStr(); applyFreezes(); save('meta'); }
   document.body.classList.toggle('focus',['play','session'].includes(State.route.name));
+  document.body.classList.toggle('recall-writing',State.route.name==='cards'&&!!State.route.run&&State.meta.study?.recall?.session?.current?.skill==='write'&&!State.meta.study.recall.session.finished);
   document.body.classList.toggle('notebook-focus',State.route.name==='notebook'&&!!State.route.practice);
   document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.nav===State.tab));
   renderTop();
-  const V={path:viewPath,exam:viewExam,classroom:viewClassroom,notebook:viewNotebook,play:viewPlay,practice:viewPractice,memory:viewMemory,dictation:viewDictation,grammar:viewGrammar,cards:viewStudyCards,study:viewStudy,decomp:viewDecomp,sent:viewSent,addsent:viewAddSent,mock:viewMock,reports:viewReports,
+  const V={path:viewPath,exam:viewExam,classroom:viewClassroom,notebook:viewNotebook,play:viewPlay,practice:viewPractice,memory:viewMemory,dictation:viewDictation,grammar:viewGrammar,cards:viewRecallCards,study:viewRecallCards,decomp:viewDecomp,sent:viewSent,addsent:viewAddSent,mock:viewMock,reports:viewReports,
     lessons:viewLessons,lesson:viewLesson,extra:viewExtra,strokes:viewStrokes,card:viewCard,session:viewSession,draw:viewDraw,
     tests:viewTests,test:viewTest,keys:viewKeys,radical:viewRadical,dict:viewDict,list:viewList,progress:viewProgress,settings:viewSettings,knownCheck:viewKnownCheck};
   const s=$('#screen'); s.innerHTML=''; (V[State.route.name]||viewPath)(s);
@@ -2025,7 +2037,7 @@ function jumpEnd(s){
 function viewPath(s){
   applyFreezes(); renderTop();
   const v=el('div','view');
-  v.appendChild(studyCycleBanner());
+  v.appendChild(recallCycleBanner());
   v.appendChild(pathEl());
   s.appendChild(v);
   checkQuests(); checkAch();
@@ -3553,8 +3565,9 @@ function studyKnownButton(k,onchange){
 }
 function studyRememberedCounts(){
   const chars=studyKnownChars(),keys=new Set();
-  const pool=uniq(Object.keys(State.meta.study?.known||{}).concat(Object.keys(State.cards),studyLearnedPool()));
-  for(const k of pool){if(!studyKnown(k)&&isNew(k)&&(!notebookKey(k)||studyStatus(k).stage!=='done'))continue;
+  const pool=uniq(Object.keys(State.meta.study?.known||{}).concat(Object.keys(State.cards),studyLearnedPool(),Object.keys(State.meta.study?.recall?.entries||{})));
+  for(const k of pool){const recallDays=State.meta.study?.recall?.entries?.[k]?.days||[],recalled=recallDays.length>=3&&recallDays.slice(0,3).every((row,n)=>recallRowDone(row,n+1));
+    if(!studyKnown(k)&&isNew(k)&&!recalled&&(!notebookKey(k)||studyStatus(k).stage!=='done'))continue;
     if(isRad(k)){keys.add(k);continue;}if(BYK[k]||k.startsWith('c:'))for(const ch of hanOf(BYK[k]?.s||k.slice(2)))chars.add(ch);
   }
   return {chars:chars.size,keys:keys.size};
@@ -3813,6 +3826,252 @@ function applyStudyUpdateV40(){
   // Устаревшее полноэкранное поле ключа возвращается к его расписанию.
   if(State.route.name==='notebook'&&isRad(State.route.k)&&State.route.skill==='py')State.route={name:'notebook',k:State.route.k,queue:State.route.queue||State.route.backRoute?.queue,fromStudy:true};
   m.noRadicalPinyinV40=true;return true;
+}
+
+/* Карточки → проверенное письмо → ежедневное накопительное повторение.
+   Отдельное состояние: прежние прописи и FSRS-карточки не переписываются. */
+const POSOBIE_KEYS={"1":[{"n":9,"form":"人"},{"n":38,"form":"女"},{"n":39,"form":"子"}],"2":[{"n":62,"form":"戈"},{"n":60,"form":"彳"},{"n":138,"form":"艮"},{"n":5,"form":"乙"},{"n":44,"form":"尸"},{"n":21,"form":"匕"},{"n":30,"form":"口"},{"n":187,"form":"马"}],"3":[{"n":61,"form":"心"},{"n":1,"form":"一"},{"n":57,"form":"弓"},{"n":169,"form":"门"},{"n":163,"form":"阝"},{"n":170,"form":"阝"}],"4":[{"n":162,"form":"辶"},{"n":67,"form":"文"},{"n":149,"form":"讠"},{"n":88,"form":"父"},{"n":74,"form":"月"},{"n":29,"form":"又"},{"n":72,"form":"日"},{"n":24,"form":"十"}],"5":[{"n":106,"form":"白"},{"n":159,"form":"车"},{"n":2,"form":"丨"},{"n":73,"form":"曰"},{"n":129,"form":"聿"},{"n":37,"form":"大"}],"6":[{"n":31,"form":"囗"},{"n":96,"form":"玉(王)"},{"n":172,"form":"隹"},{"n":196,"form":"鸟"},{"n":125,"form":"老"},{"n":50,"form":"巾"},{"n":85,"form":"水"}],"7":[{"n":99,"form":"甘"},{"n":4,"form":"丿"},{"n":28,"form":"厶"},{"n":200,"form":"麻"},{"n":32,"form":"土"},{"n":34,"form":"夂"},{"n":109,"form":"目"},{"n":64,"form":"手"}],"8":[{"n":174,"form":"青"},{"n":140,"form":"艹"},{"n":75,"form":"木"},{"n":76,"form":"欠"},{"n":158,"form":"身"},{"n":41,"form":"寸"},{"n":40,"form":"宀"},{"n":84,"form":"气"},{"n":119,"form":"米"},{"n":86,"form":"火"},{"n":146,"form":"覀"}],"9":[{"n":154,"form":"贝"},{"n":100,"form":"生"},{"n":102,"form":"田"},{"n":36,"form":"夕"},{"n":25,"form":"卜"},{"n":10,"form":"儿"},{"n":15,"form":"冫"},{"n":124,"form":"羽"}],"10":[{"n":135,"form":"舌"},{"n":141,"form":"虍"},{"n":16,"form":"几"},{"n":7,"form":"二"}],"11":[{"n":17,"form":"凵"},{"n":12,"form":"八"},{"n":147,"form":"见"},{"n":101,"form":"用"},{"n":13,"form":"冂"},{"n":8,"form":"亠"}],"12":[{"n":18,"form":"刀"},{"n":180,"form":"音"},{"n":118,"form":"竹"},{"n":120,"form":"纟"}],"13":[{"n":53,"form":"广"},{"n":82,"form":"毛"},{"n":83,"form":"氏"},{"n":19,"form":"力"},{"n":115,"form":"禾"},{"n":48,"form":"工"},{"n":79,"form":"殳"},{"n":87,"form":"爪(爫)"},{"n":69,"form":"斤"}],"14":[{"n":152,"form":"豕"},{"n":130,"form":"肉"},{"n":144,"form":"行"},{"n":93,"form":"牛"},{"n":66,"form":"攴(攵)"},{"n":133,"form":"至"},{"n":33,"form":"士"}],"15":[{"n":52,"form":"幺"},{"n":128,"form":"耳"},{"n":117,"form":"立"},{"n":131,"form":"臣"},{"n":184,"form":"食"}],"16":[{"n":145,"form":"衣"},{"n":168,"form":"长"},{"n":113,"form":"示"},{"n":134,"form":"臼"},{"n":116,"form":"穴"},{"n":92,"form":"牙"}],"17":[{"n":203,"form":"黑"},{"n":123,"form":"羊"},{"n":157,"form":"足"},{"n":156,"form":"走"},{"n":173,"form":"雨"},{"n":175,"form":"非"}],"18":[{"n":80,"form":"毋"},{"n":132,"form":"自"},{"n":111,"form":"矢"},{"n":181,"form":"页"}],"19":[{"n":110,"form":"矛"},{"n":98,"form":"瓦"},{"n":164,"form":"酉"},{"n":56,"form":"弋"}],"20":[{"n":185,"form":"首"},{"n":46,"form":"山"},{"n":77,"form":"止"},{"n":136,"form":"舛"}],"21":[{"n":189,"form":"高"},{"n":47,"form":"巛"},{"n":55,"form":"廾"},{"n":63,"form":"户"},{"n":27,"form":"厂"},{"n":166,"form":"里"},{"n":206,"form":"鼎"}],"22":[{"n":70,"form":"方"},{"n":151,"form":"豆"},{"n":176,"form":"面"}],"23":[{"n":91,"form":"片"},{"n":90,"form":"爿"},{"n":105,"form":"癶"}],"24":[{"n":161,"form":"辰"},{"n":167,"form":"金"},{"n":195,"form":"鱼"},{"n":20,"form":"勹"},{"n":112,"form":"石"},{"n":201,"form":"黄"},{"n":150,"form":"谷"}],"25":[{"n":148,"form":"角"},{"n":43,"form":"尢"}],"26":[{"n":171,"form":"隶"},{"n":51,"form":"干"},{"n":121,"form":"缶"}],"27":[{"n":160,"form":"辛"},{"n":81,"form":"比"},{"n":177,"form":"革"},{"n":188,"form":"骨"}],"28":[],"29":[{"n":183,"form":"飞"}],"30":[{"n":94,"form":"犬"}]};
+function recallState(){
+  const m=studyState();if(!m.recall)m.recall={v:1,lessons:(m.notebookLessons||[]).slice(),unit:'words',includeKeys:true,entries:{},session:null};
+  return m.recall;
+}
+function recallValid(k){return isRad(k)?!!RADS[radNum(k)-1]:k?.startsWith('c:')?!!CHAR_L[k.slice(2)]:!!WORD_L[k];}
+function recallVerifiedChars(){
+  const m=studyState(),out=new Set();
+  for(const [k,proof]of Object.entries(m.verifiedKnown||{}))if(proof&&studyKnown(k)&&!isRad(k))for(const ch of hanOf(BYK[k]?.s||k.replace(/^c:/,'')))out.add(ch);
+  return out;
+}
+function recallExcluded(k){
+  if(isRad(k))return !!studyState().verifiedKnown?.[k]&&studyKnown(k);
+  const chars=hanOf(notebookInfo(k)?.hz||''),known=recallVerifiedChars();return chars.length>0&&chars.every(ch=>known.has(ch));
+}
+function recallLessonKeys(L){return (POSOBIE_KEYS[L]||[]).map(x=>'r:'+x.n);}
+function recallInfo(k){
+  const info=notebookInfo(k);if(!info)return null;
+  if(!isRad(k))return {...info,forms:hanOf(info.hz)};
+  const n=radNum(k),source=Object.entries(POSOBIE_KEYS).find(([,rows])=>rows.some(x=>x.n===n)),row=source?.[1].find(x=>x.n===n),available=(RADW[n]||[]).map(x=>x[0]);
+  const forms=uniq(hanOf(row?.form||'').filter(ch=>available.includes(ch)));
+  if(!forms.length)forms.push(available[0]||RADS[n-1][4][0]);
+  return {...info,hz:forms.join(' / '),forms,label:'Ключ №'+n+(source?' · пособие, урок '+source[0]:' · таблица ключей')};
+}
+function recallPool(){
+  const m=recallState(),lessons=m.lessons.filter(L=>L>=1&&L<=NL).slice().sort((a,b)=>a-b),out=[];
+  for(const L of lessons){
+    const words=lessonWords(L),vocab=m.unit==='chars'?uniq(words.flatMap(w=>hanOf(w.s))).map(ch=>'c:'+ch):words.map(w=>w.key);
+    out.push(...vocab);if(m.includeKeys)out.push(...recallLessonKeys(L));
+  }
+  return uniq(out).filter(k=>recallValid(k)&&!recallExcluded(k));
+}
+function recallGoal(phase){return {py:phase===1?3:phase===4?1:2,meaning:phase===1?3:phase===4?1:2,write:phase===1?0:1};}
+function recallRowDone(row,phase){const goal=recallGoal(phase);return !!row&&row.py?.streak>=goal.py&&row.meaning?.streak>=goal.meaning&&(!goal.write||row.write?.passed===true);}
+function recallPlan(k){
+  if(!recallValid(k)||recallExcluded(k))return {stage:'excluded',phase:0};
+  const e=recallState().entries[k],days=e?.days||[],today=todayStr();let complete=0;
+  while(complete<3&&recallRowDone(days[complete],complete+1))complete++;
+  const last=complete?days[complete-1].date:'';
+  if(last&&today<=last)return {stage:'wait',phase:complete<3?complete+1:4,availableOn:addDays(last,1),complete};
+  if(complete<3)return {stage:'learn',phase:complete+1,complete};
+  return {stage:recallRowDone(e.reviews?.[today],4)?'wait':'review',phase:4,complete,availableOn:addDays(today,1)};
+}
+function recallDue(){return Object.keys(recallState().entries).filter(k=>['learn','review'].includes(recallPlan(k).stage));}
+function recallFresh(){return recallPool().filter(k=>!recallState().entries[k]);}
+function recallOrder(keys){const es=recallState().entries;return keys.slice().sort((a,b)=>Number(studyIsDifficult(b))-Number(studyIsDifficult(a))||Number(es[b]?.lastGrade===1)-Number(es[a]?.lastGrade===1)||(es[a]?.lastAt||0)-(es[b]?.lastAt||0));}
+function recallPickFresh(n){
+  // Rotate selected lessons; neither the old lesson nor radicals swallow a whole portion.
+  const pool=recallFresh(),lessons=recallState().lessons.slice().sort((a,b)=>a-b),chosen=[];
+  const buckets=lessons.map(L=>pool.filter(k=>isRad(k)?recallLessonKeys(L).includes(k):recallState().unit==='chars'?hanOf(lessonWords(L).map(w=>w.s).join('')).includes(k.slice(2)):lessonWords(L).some(w=>w.key===k)));
+  while(chosen.length<n&&buckets.some(b=>b.length))for(const b of buckets){for(let j=b.length-1;j>=0;j--)if(chosen.includes(b[j]))b.splice(j,1);if(b.length&&chosen.length<n){const words=b.filter(k=>!isRad(k)),keys=b.filter(isRad),preferKey=chosen.length%3===2;const k=(preferKey?keys[0]||words[0]:words[0]||keys[0]);chosen.push(k);b.splice(b.indexOf(k),1);}}
+  return chosen;
+}
+function recallData(k,goal,create){
+  let e=recallState().entries[k];if(!e&&create)e=recallState().entries[k]={started:todayStr(),days:[],reviews:{},skills:{},familiar:false};if(!e)return null;
+  const bag=goal.phase===4?(e.reviews||(e.reviews={})):(e.days||(e.days=[])),id=goal.phase===4?goal.date:goal.phase-1;
+  if(bag[id]&&create&&bag[id].date!==goal.date&&!recallRowDone(bag[id],goal.phase)){
+    e.attemptHistory=(e.attemptHistory||[]).concat({phase:goal.phase,...bag[id]}).slice(-30);delete bag[id];
+  }
+  if(!bag[id]&&create)bag[id]={date:goal.date,py:{streak:0,tries:0},meaning:{streak:0,tries:0},write:{passed:false,tries:0}};
+  return bag[id]||null;
+}
+function recallCurrentSession(){const ss=recallState().session;return ss&&!ss.finished?ss:null;}
+function recallTasks(ss){
+  ss.practiceQueue=(ss.practiceQueue||[]).filter(x=>recallValid(x.k)&&!recallExcluded(x.k));
+  if(ss.practiceQueue.length)return ss.practiceQueue.slice();
+  const out=[];
+  for(const k of ss.keys){
+    if(!recallValid(k)||recallExcluded(k)||ss.deferred?.includes(k))continue;
+    const e=recallState().entries[k],goal=ss.goals[k];if(!e||!goal)continue;
+    if(!e.familiar){out.push({k,skill:'intro'});continue;}
+    const row=recallData(k,goal,false),need=recallGoal(goal.phase);
+    for(const skill of ['py','meaning'])if((row?.[skill]?.streak||0)<need[skill])out.push({k,skill});
+  }
+  // Read first on days2/3, then reverse the cue. Writing never substitutes for reading.
+  if(out.some(x=>x.skill==='intro'))return out.filter(x=>x.skill==='intro');
+  if(out.length)return out;
+  for(const k of ss.keys){if(!recallValid(k)||recallExcluded(k)||ss.deferred?.includes(k))continue;const goal=ss.goals[k];if(goal&&recallGoal(goal.phase).write&&!recallData(k,goal,false)?.write?.passed)out.push({k,skill:'write'});}
+  return out;
+}
+function recallAdvance(ss){
+  const tasks=recallTasks(ss),recent=ss.recent||[],previous=ss.previous;
+  const x=tasks.find(x=>!recent.includes(x.k))||tasks.find(x=>x.k!==previous?.k)||tasks.find(x=>x.skill!==previous?.skill)||tasks[0];
+  ss.current=x?{...x,id:++ss.serial}:null;ss.revealed=false;ss.finished=!x;
+  if(ss.finished)ss.completed=ss.keys.filter(k=>!recallExcluded(k)&&recallRowDone(recallData(k,ss.goals[k],false),ss.goals[k].phase));
+}
+function recallStart(mode,selected){
+  mode=mode||'today';const m=recallState(),old=m.session,context=mode+'|'+(selected||[]).join(',')+(mode==='new'?'|'+m.unit+'|'+m.lessons.join(',')+'|'+m.includeKeys:'');
+  for(const [id,s]of Object.entries(m.paused||{}))if(s.date!==todayStr())delete m.paused[id];
+  if(old&&!old.finished&&old.date===todayStr()&&!selected&&old.context===context){go('cards',{run:true});return;}
+  if(old&&!old.finished&&old.date===todayStr()){m.paused=m.paused||{};m.paused[old.context]=old;}
+  if(m.paused?.[context]?.date===todayStr()&&!m.paused[context].finished){m.session=m.paused[context];delete m.paused[context];save('meta');go('cards',{run:true});return;}
+  const due=recallOrder(recallDue()),fresh=recallPickFresh(5);let keys;
+  if(selected)keys=uniq(selected).filter(k=>recallValid(k)&&!recallExcluded(k)&&(due.includes(k)||recallFresh().includes(k)||mode==='catalog'&&isRad(k))).slice(0,5);
+  else if(mode==='new')keys=fresh;
+  else if(mode==='difficult')keys=due.filter(studyIsDifficult).slice(0,5);
+  else keys=due.slice(0,5);
+  if(!keys.length&&mode==='today')keys=fresh;
+  if(!keys.length){toast('На сегодня эта порция завершена. Можно выбрать другой урок.');return false;}
+  const ss={v:1,mode,context,keys,goals:{},date:todayStr(),serial:0,current:null,recent:[],attempts:0,correct:0,revealed:false,finished:false,deferred:[]};
+  for(const k of keys){const plan=recallPlan(k);ss.goals[k]={phase:plan.phase,date:ss.date};recallData(k,ss.goals[k],true);}
+  m.session=ss;recallAdvance(ss);save('meta');go('cards',{run:true});return true;
+}
+function recallSessionReady(){
+  const ss=recallCurrentSession();if(!ss)return null;
+  if(ss.date!==todayStr()){ss.finished=true;ss.stale=true;save('meta');return null;}
+  if(ss.current&&recallExcluded(ss.current.k)){recallAdvance(ss);save('meta');}
+  return ss.finished?null:ss;
+}
+function recallIntro(){const ss=recallSessionReady(),x=ss?.current;if(!x||x.skill!=='intro')return false;recallState().entries[x.k].familiar=true;ss.previous=x;ss.recent=(ss.recent||[]).concat(x.k).slice(-3);recallAdvance(ss);save('meta');render();return true;}
+function recallReveal(){const ss=recallSessionReady(),x=ss?.current;if(!x||!['py','meaning'].includes(x.skill))return false;ss.revealed=true;save('meta');render();return true;}
+function recallRecord(ss,x,grade){
+  if(x.practice){ss.practiceQueue.splice(ss.practiceQueue.findIndex(t=>t.k===x.k&&t.skill===x.skill),1);ss.previous=x;ss.recent=ss.recent.concat(x.k).slice(-3);recallAdvance(ss);save('meta');render();return;}
+  const row=recallData(x.k,ss.goals[x.k],true),e=recallState().entries[x.k],datum=row[x.skill];
+  const first=datum.tries===0;datum.tries++;ss.attempts++;if(grade>=2)ss.correct++;
+  if(x.skill==='write')datum.passed=grade>=2;else datum.streak=grade>=2?(datum.streak||0)+1:0;
+  if(first){
+    datum.firstGrade=grade;const prev=e.skills[x.skill];if(!prev?.state||prev.due<=Date.now()||grade===1)e.skills[x.skill]=FSRS.review(prev||{},grade,REQ);
+    // Repeated drills and immediate corrections do not inflate FSRS or XP.
+    D().t++;if(grade>=2){D().ok++;addXP(2);}
+  }
+  if(grade===1){const others=ss.keys.filter(k=>k!==x.k&&!recallExcluded(k)&&recallState().entries[k]?.familiar),pool=others.length?others:[x.k];ss.practiceQueue=Array.from({length:3},(_,n)=>({k:pool[n%pool.length],skill:x.skill==='py'?'meaning':x.skill==='meaning'?'py':n%2?'meaning':'py',practice:true}));}
+  e.lastAt=Date.now();e.lastGrade=grade;ss.previous={k:x.k,skill:x.skill};ss.recent=(ss.recent||[]).concat(x.k).slice(-3);recallAdvance(ss);save('meta');render();
+}
+function recallGrade(grade){
+  const ss=recallSessionReady(),x=ss?.current;if(!x||!ss.revealed||![1,2,3].includes(grade)||!['py','meaning'].includes(x.skill))return false;
+  recallRecord(ss,x,grade);return true;
+}
+function recallWriteGrade(){
+  const ss=recallSessionReady(),x=ss?.current;if(!x||x.skill!=='write'||!ss.revealed||!x.writer?.completed)return false;
+  recallRecord(ss,x,x.writer.mistakes||x.writer.assisted?1:3);return true;
+}
+function recallWritingForms(k){const info=recallInfo(k),known=recallVerifiedChars();return isRad(k)?info.forms:info.forms.filter(ch=>!known.has(ch));}
+function recallWriterCurrent(ss,x,host){return host.isConnected&&recallCurrentSession()===ss&&ss.current===x&&ss.date===todayStr()&&!recallExcluded(x.k);}
+async function recallWriter(host,ss,x){
+  const forms=recallWritingForms(x.k);if(!forms.length){recallAdvance(ss);save('meta');render();return;}
+  if(x.writer?.forms&&x.writer.forms.join()!==forms.join())x.writer=null;
+  x.writer=x.writer||{index:0,mistakes:0,assisted:false,completed:false,forms:forms.slice()};const w=x.writer;
+  // A partial current character starts again after reload; finished characters survive.
+  const index=w.index,f=forms[index];if(!f)return;
+  const progress=el('p','note',`Знак ${index+1} из ${forms.length} · без образца`),pad=el('div','writer recall-pad'),cap=el('p','recall-stroke-note','Загружаем поле письма…');host.append(progress,pad,cap);
+  const size=Math.max(220,Math.min(360,(window.innerWidth||390)-44));pad.style.width=size+'px';pad.style.height=size+'px';
+  let data=null;try{if(window.HZREADY)await window.HZREADY;data=window.HZDATA?.[f]||await hwLoad(f);}catch(e){}
+  if(!recallWriterCurrent(ss,x,host))return;
+  const unavailable=()=>{cap.textContent='Проверка черт сейчас недоступна. Этот знак не будет засчитан.';const retry=el('button','btn ghost','Загрузить поле ещё раз');retry.onclick=render;const later=el('button','linkbtn','Отложить знак');later.onclick=()=>{ss.deferred.push(x.k);recallAdvance(ss);save('meta');render();};host.append(retry,later);};
+  if(!canHW()||!data?.strokes?.length||!data?.medians?.length){unavailable();return;}
+  cap.textContent='Пиши черты в правильном порядке и направлении.';
+  try{
+    const hw=HanziWriter.create(pad,f,{width:size,height:size,padding:12,showCharacter:false,showOutline:false,strokeColor:HWC.stroke,outlineColor:HWC.outline,drawingColor:HWC.draw,drawingWidth:6,highlightColor:HWC.hl,charDataLoader:(ch,ok)=>ok(data),acceptBackwardsStrokes:false,leniency:1});
+    hw.quiz({showHintAfterMisses:Infinity,acceptBackwardsStrokes:false,leniency:1,highlightOnComplete:true,
+      onMistake:st=>{if(!recallWriterCurrent(ss,x,host))return;w.mistakes++;cap.textContent='Черта '+(st.strokeNum+1)+': проверь форму, порядок и направление. Затем повторим без ошибок.';save('meta');},
+      onCorrectStroke:st=>{if(!recallWriterCurrent(ss,x,host))return;cap.textContent=st.strokesRemaining?'Верно · осталось черт: '+st.strokesRemaining:'Все черты написаны';},
+      onComplete:()=>{if(!recallWriterCurrent(ss,x,host)||w.index!==index)return;w.index++;save('meta');if(w.index<forms.length){host.replaceChildren();recallWriter(host,ss,x);}else{w.completed=true;ss.revealed=true;save('meta');render();}}
+    });
+  }catch(e){unavailable();}
+}
+function recallHint(){
+  const ss=recallSessionReady(),x=ss?.current;if(!x||x.skill!=='write')return;
+  x.writer=x.writer||{index:0,mistakes:0,assisted:false,completed:false};x.writer.assisted=true;x.writer.completed=true;ss.revealed=true;save('meta');render();
+}
+function recallSessionView(v){
+  const raw=recallState().session,ss=recallSessionReady(),back=el('button','back','‹ К карточкам');back.onclick=()=>go('cards');v.appendChild(back);
+  if(!ss){
+    v.appendChild(el('h1','',raw?.stale?'Начался новый день':'Порция завершена'));
+    v.appendChild(el('p','note',raw?.stale?'Вчерашние ответы сохранены. Открой сегодняшнее занятие.':`Готово на сегодня: ${raw?.completed?.length||0} из ${raw?.keys?.filter(k=>!recallExcluded(k)).length||0}. Следующий день откроется завтра; пропущенные дни не засчитываются сами.`));
+    if(raw?.deferred?.length)v.appendChild(el('p','note','Отложено знаков: '+raw.deferred.length+'. Их этап остаётся незавершённым.'));
+    const more=el('button','btn','К занятиям на сегодня');more.onclick=()=>go('cards');v.appendChild(more);return;
+  }
+  const x=ss.current,info=recallInfo(x.k),goal=ss.goals[x.k],datum=recallData(x.k,goal,false),need=recallGoal(goal.phase);
+  v.appendChild(el('p','eyebrow',(goal.phase===4?'Общее повторение':'День '+goal.phase)+' · '+info.label));
+  const total=ss.keys.filter(k=>!recallExcluded(k)).length,completed=ss.keys.filter(k=>!recallExcluded(k)&&recallRowDone(recallData(k,ss.goals[k],false),ss.goals[k].phase)).length;
+  v.appendChild(el('div','study-progress',`<i style="width:${Math.round(completed/total*100)}%"></i>`));
+  const card=el('section','hero recall-card');v.appendChild(card);
+  if(x.skill==='intro'){
+    card.appendChild(el('p','kind','Сначала познакомимся'));
+    card.appendChild(el('h1','han recall-glyph',esc(info.hz)));card.appendChild(el('p','py',pinyinHTML(info.py)));card.appendChild(el('p','tr',esc(info.ru)));
+    const speak=el('button','linkbtn',IC('speaker',18)+' Послушать');speak.onclick=()=>Speech.say(info.forms[0]&&isRad(x.k)?info.forms[0]:info.hz,undefined,info.py);card.appendChild(speak);
+    card.appendChild(el('p','note','Посмотри, произнеси с тонами и свяжи со смыслом. Затем ответ будет скрыт.'));
+    const next=el('button','btn','Начать вспоминать');next.onclick=recallIntro;card.appendChild(next);
+  }else if(x.skill==='write'){
+    card.appendChild(el('p','kind','Напиши по переводу'));card.appendChild(el('h2','recall-prompt',esc(info.ru)));
+    card.appendChild(el('p','note',isRad(x.k)?'Ключ: напиши форму из пособия.':'Напиши иероглифы слова по очереди. Уже подтверждённые знаки пропускаются.'));
+    if(!isRad(x.k)&&recallVerifiedChars().size){const known=info.forms.filter(ch=>recallVerifiedChars().has(ch));if(known.length)card.appendChild(el('p','note','Эти знаки уже подтверждены и не проверяются: '+known.join(' ')));}
+    if(!ss.revealed){const host=el('div','recall-writer');card.appendChild(host);recallWriter(host,ss,x);const hint=el('button','linkbtn','Не помню — показать порядок черт');hint.onclick=recallHint;card.appendChild(hint);}
+    else{
+      const w=x.writer,good=w?.completed&&!w.mistakes&&!w.assisted;
+      card.appendChild(el('p','recall-verdict',good?'Верно: форма, порядок и направление черт проверены.':'Это была тренировка. Позже напишем ещё раз без подсказки и ошибок.'));
+      if(!good){const model=el('div','recall-demo');card.appendChild(model);notebookStrokeDemo(model,{...info,hz:recallWritingForms(x.k)[Math.min(w?.index||0,recallWritingForms(x.k).length-1)]});}
+      const next=el('button','btn',good?'Верно · Дальше':'Повторить после других карточек');next.onclick=recallWriteGrade;card.appendChild(next);
+    }
+  }else{
+    const reading=x.skill==='py';card.appendChild(el('p','kind',(x.practice?'Пауза перед повторной попыткой · ':'')+(reading?'Как читается?':'Что это значит?')));card.appendChild(el('h1','han recall-glyph',esc(info.hz)));
+    card.appendChild(el('p','note',x.practice?'Вспомни другой навык, затем вернёмся к ошибке.':`Успешных ответов подряд: ${datum[x.skill]?.streak||0} из ${need[x.skill]}`));
+    if(!ss.revealed){card.appendChild(el('p','note',reading?'Произнеси пиньинь с тонами вслух, затем открой ответ.':'Назови перевод до открытия ответа.'));const reveal=el('button','btn','Показать ответ');reveal.dataset.key='space';reveal.onclick=recallReveal;card.appendChild(reveal);}
+    else{
+      card.appendChild(el('div',reading?'py recall-answer':'tr recall-answer',reading?pinyinHTML(info.py):esc(info.ru)));
+      if(reading){const speak=el('button','linkbtn',IC('speaker',18)+' Послушать');speak.onclick=()=>Speech.say(isRad(x.k)?info.forms[0]:info.hz,undefined,info.py);card.appendChild(speak);}
+      const grades=el('div','study-grades');for(const [g,label]of[[1,'Не вспомнил'],[2,'С трудом'],[3,'Вспомнил']]){const b=el('button','btn '+(g===3?'':'ghost'),label);b.onclick=()=>recallGrade(g);grades.appendChild(b);}card.appendChild(grades);
+      card.appendChild(el('p','note','Оцени ответ, который вспомнил до открытия. Ошибка вернёт карточку после других заданий.'));
+    }
+  }
+  card.appendChild(studyDifficultButton(x.k));
+}
+function recallCycleBanner(){
+  const c=el('section','hero study-cycle-banner'),due=recallDue();
+  c.innerHTML='<div class="kind">Твой цикл памяти · 1 → 2 → 3 → каждый день</div><h2>Узнаю. Вспоминаю. Пишу.</h2><p class="note">1-й день: иероглиф → пиньинь и перевод. 2-й: повторение, затем письмо по переводу. 3-й: оба направления. С 4-го — всё пройденное, каждый день.</p>';
+  const counts=studyRememberedCounts();c.appendChild(el('p','study-counts',`Запомнил: <b>${counts.chars}</b> ${plural(counts.chars,'иероглиф','иероглифа','иероглифов')} · <b>${counts.keys}</b> ${plural(counts.keys,'ключ','ключа','ключей')} из 214`));
+  const line=el('div','study-week');for(const [n,label]of[[1,'Читаю'],[2,'Пишу'],[3,'Закрепляю'],[4,'Повторяю']])line.appendChild(el('span',n===1?'recall':n<4?'writing':'total',n+'<small>'+label+'</small>'));c.appendChild(line);
+  const start=el('button','btn',IC('cards',20)+' '+(due.length?'Заниматься сегодня · '+due.length:'Выбрать уроки и учить'));start.onclick=()=>go('cards');c.appendChild(start);return c;
+}
+function viewRecallCards(s){
+  const v=el('div','view study-cards-view');s.appendChild(v);if(State.route.run)return recallSessionView(v);
+  const m=recallState();v.appendChild(el('h1','','Мои карточки'));
+  v.appendChild(el('p','note','Короткие порции до 5 элементов. Сначала вспоминай сам, потом открывай ответ. Дни 2 и 3 открываются после занятия в предыдущий день; с 4-го повторяем пройденное ежедневно.'));
+  const chooser=el('details','hero recall-lesson-picker');chooser.open=!m.lessons.length;chooser.appendChild(el('summary','','Выбрать уроки · '+(m.lessons.join(', ')||'не выбраны')));
+  const choices=el('div','chips');for(let L=1;L<=NL;L++){const label=el('label','chip'),input=el('input');input.type='checkbox';input.checked=m.lessons.includes(L);input.setAttribute('aria-label','Урок '+L);input.onchange=()=>{m.lessons=[...choices.querySelectorAll('input:checked')].map(x=>+x.value);chooser.querySelector('summary').textContent='Выбрать уроки · '+(m.lessons.join(', ')||'не выбраны');save('meta');draw();};input.value=L;label.append(input,document.createTextNode(' Урок '+L));choices.appendChild(label);}chooser.appendChild(choices);
+  const unit=el('div','chips');for(const [id,title]of[['words','Слова урока'],['chars','Отдельные иероглифы']]){const b=el('button','chip'+(m.unit===id?' on':''),title);b.onclick=()=>{m.unit=id;save('meta');render();};unit.appendChild(b);}chooser.appendChild(unit);
+  const keys=el('label','setrow'),toggle=el('input');toggle.type='checkbox';toggle.checked=m.includeKeys;toggle.onchange=()=>{m.includeKeys=toggle.checked;save('meta');draw();};keys.append(toggle,document.createTextNode(' Ключи этих уроков по пособию'));chooser.appendChild(keys);v.appendChild(chooser);
+  const result=el('div');v.appendChild(result);
+  const method=el('details','hero recall-method');method.appendChild(el('summary','','Как устроено запоминание'));
+  method.appendChild(el('p','note','День 1: по три успешных вспоминания подряд отдельно для пиньиня и перевода. Дни 2–3: по два, затем написание по переводу с проверкой каждой черты. Ошибки повторяются между другими карточками, а не сразу вслед за ответом. С 4-го: ежедневный круг всего введённого — чтение, перевод и письмо. Большой список делится на порции и сохраняет остаток.'));
+  method.appendChild(el('p','note','Пиньинь ты произносишь и сверяешь сам, без обязательного ввода тонов. В новом цикле чтение тренируется и у ключей. Письмо засчитывается только при верных чертах без подсказок. Знаки, подтверждённые в проверке настроек, исключаются; простая ручная отметка без проверки не заменяет её.'));
+  method.appendChild(el('p','note','Ключи взяты из раздела А «Пособия по иероглифике»: в выписке к урокам 1–30 есть 155 пронумерованных ключей. Остальным 59 не придумываем урок — все 214 доступны в поиске, где любой ключ можно добавить в этот цикл кнопкой «Учить в карточках». Старые прописи и результаты сохранены; новые этапы засчитываются по новым ответам.'));v.appendChild(method);
+  function draw(){
+    result.replaceChildren();const due=recallOrder(recallDue()),fresh=recallFresh(),ss=recallCurrentSession();
+    if(ss&&ss.date===todayStr()){const resume=el('button','btn blue','Продолжить занятие');resume.onclick=()=>go('cards',{run:true});result.appendChild(resume);}
+    result.appendChild(el('p','note',`На сегодня: ${due.length} · новых в выбранных уроках: ${fresh.length}. Повторения включают все ранее начатые уроки.`));
+    if(due.length){const start=el('button','btn','Повторить · '+Math.min(5,due.length)+' из '+due.length);start.onclick=()=>recallStart('today');result.appendChild(start);}
+    if(fresh.length){const learn=el('button','btn '+(due.length?'ghost':''),'Учить выбранное · '+Math.min(5,fresh.length)+' из '+fresh.length);learn.style.marginTop='12px';learn.onclick=()=>recallStart('new');result.appendChild(learn);}
+    if(!due.length&&!fresh.length)result.appendChild(el('p','empty',m.lessons.length?'На сегодня всё готово или знаки исключены после проверки. Можно выбрать другой урок.':'Выбери один или несколько уроков — например, старый и новый.'));
+    const hard=due.filter(studyIsDifficult);if(hard.length){const b=el('button','linkbtn','Сложные на сегодня · '+hard.length);b.onclick=()=>recallStart('difficult');result.appendChild(b);}
+    const progress=el('div','rowlist');for(const k of due){const info=recallInfo(k),plan=recallPlan(k),row=el('button','row recall-item',`<span class="ri han">${esc(info.hz)}</span><div class="tt"><b>${esc(info.ru)}</b><small>${esc(info.label)} · ${plan.phase===4?'общее повторение':'день '+plan.phase}${studyIsDifficult(k)?' · сложный':''}</small></div>${IC('chev',18)}`);row.onclick=()=>recallStart('today',[k]);progress.appendChild(row);}result.appendChild(progress);
+    if(m.lessons.length){const preview=el('details','recall-preview');preview.appendChild(el('summary','','Что входит в выбранные уроки'));for(const L of m.lessons){const words=m.unit==='chars'?uniq(lessonWords(L).flatMap(w=>hanOf(w.s))).length:lessonWords(L).length;preview.appendChild(el('p','note',`Урок ${L}: ${words} ${m.unit==='chars'?'иероглифов':'слов'} · ключи: `+(m.includeKeys?recallLessonKeys(L).map(k=>recallInfo(k).hz+' №'+radNum(k)).join(', ')||'новых ключей в разделе А нет':'выключены')));}result.appendChild(preview);}
+  }draw();
+}
+function applyStudyUpdateV41(){
+  const m=studyState();if(m.recallV41)return false;
+  recallState();m.verifiedKnown=m.verifiedKnown||{};
+  const ss=m.knowledgeCheck?.session;if(ss?.finished&&ss.saved)for(const k of ss.keys||[])if(knownCheckPassed(ss,k)&&studyKnown(k))m.verifiedKnown[k]={date:ss.savedOn||ss.started,source:'knowledge-check'};
+  // Archived paper dates cannot prove the new reading/write stages.
+  if(State.route.name==='study'||State.route.name==='cards'&&State.route.run&&!m.recall?.session?.v)State.route={name:'cards'};
+  m.recallV41=true;return true;
 }
 
 /*==================================================================
@@ -4235,7 +4494,7 @@ function classroomRun(v,ss){
   else if(x.kind==='translation')q.innerHTML=`<div class="${x.dir==='zh'?'qbig':'han'}" style="font-size:25px">${esc(x.dir==='zh'?x.ru:x.zh)}</div><p class="note">${x.dir==='zh'?'Переведи на китайский язык':'Переведи на русский язык'} до открытия ответа.</p>`;
   else{q.innerHTML='<div class="qbig">Послушай и переведи фразу</div>';const audio=el('button','btn mini',SPK(20)+' Слушать фразу');audio.onclick=()=>classroomListen(x);q.appendChild(audio);}
   if(!ss.revealed){
-    if(x.kind==='vocab'&&typeof notebookPanel==='function'){v.appendChild(notebookPanel(x.k,{compact:true,hideModel:true}));}
+    if(x.kind==='vocab'){const cards=el('button','linkbtn','Закрепить в карточках');cards.onclick=()=>{const m=recallState();m.lessons=uniq(m.lessons.concat(WORD_L[x.k]||1));save('meta');recallStart('today',[x.k]);};v.appendChild(cards);}
     else if(x.kind==='vocab'&&typeof dictationInk==='function'){const ink=el('div');dictationInk(ink,x);v.appendChild(ink);}
     const show=el('button','btn','Сверить ответ');show.style.marginTop='12px';show.dataset.key='space';show.onclick=classroomReveal;v.appendChild(show);
     const no=el('button','linkbtn','Не помню — посмотреть');no.onclick=()=>{x.gaveUp=true;if(x.kind==='listening'&&!x.listened)classroomListen(x);classroomReveal();};v.appendChild(no);return;
@@ -5074,17 +5333,18 @@ function viewStrokes(s){
   s.appendChild(v);
 }
 function viewRadical(s){
-  const n=State.route.n, r=RADS[n-1], st=statusOf('r:'+n);
+  const n=State.route.n, r=RADS[n-1], st=statusOf('r:'+n),guideLesson=Object.keys(POSOBIE_KEYS).find(L=>POSOBIE_KEYS[L].some(row=>row.n===n));
   const v=el('div','view');
   const back=el('button','back','‹ Ключи'); back.onclick=()=>go('keys'); v.appendChild(back);
   const card=el('div','card');
   card.innerHTML=`<div class="bighz han" style="font-size:76px">${esc(r[4][0])}</div>
     ${r[4].length>1?`<div class="han" style="font-size:22px;color:var(--paper-dim);margin-bottom:6px">${esc([...r[4]].slice(1).join('  '))}</div>`:''}
     <div class="bigpy">${pinyinHTML(r[2])}</div><div class="bigtr">${esc(r[3])}</div>
-    <div class="tagrow"><span class="pill">Ключ №${n}</span><span class="pill">${r[1]} ${plural(r[1],'черта','черты','черт')}</span>${KEY_L[n]?`<span class="pill k">урок ${KEY_L[n]}</span>`:''}${st!=='new'?'<span class="pill ok">в работе</span>':''}</div>
+    <div class="tagrow"><span class="pill">Ключ №${n}</span><span class="pill">${r[1]} ${plural(r[1],'черта','черты','черт')}</span>${guideLesson?`<span class="pill k">пособие · урок ${guideLesson}</span>`:''}${st!=='new'?'<span class="pill ok">в работе</span>':''}</div>
     <div class="cardbtns"><button class="iconbtn primary" data-say="${esc(r[4][0])}" aria-label="Слушать">${SPK(26)}</button><button class="iconbtn" data-draw="${esc((RADW[n]||[[r[4][0]]]).map(x=>x[0]).join(''))}" aria-label="Прописи">${IC('brush',26)}</button></div>
     <div class="note" style="margin:8px 0 0">Пишется: <span class="han" style="font-size:22px;color:var(--title)">${(RADW[n]||[[r[4][0]]]).map(x=>esc(x[0])).join(' · ')}</span>${!isNew('wr:r:'+n)?' · <b style="color:var(--ok-text)">в прописях</b>':''}</div>`;
   v.appendChild(card);
+  const learn=el('button','btn ghost',recallExcluded('r:'+n)?'Знание подтверждено':'Учить в карточках');learn.disabled=recallExcluded('r:'+n);learn.onclick=()=>recallStart('catalog',['r:'+n]);v.appendChild(learn);
   const p2=RAD2[n];
   if(p2){ const ex=p2.e&&HZ.c[p2.e]?`<span class="hz han" data-c="${p2.e}" style="font-size:20px">${esc(p2.e)}</span>`:`<span class="han" style="font-size:20px">${esc(p2.e||'')}</span>`;
     const box=el('div','meta');
@@ -5120,7 +5380,7 @@ function viewDict(s){
     if(!q){
       res.appendChild(el('p','note','Ищи слова и ключи по иероглифам, русскому переводу или пиньиню: nǐ hǎo, ni3 hao3 и nihao работают одинаково.'));
       const recent=studyLearnedPool().slice(0,12),list=el('div','rowlist');
-      if(recent.length){res.appendChild(el('p','eyebrow','Из пройденного'));for(const k of recent){const info=notebookInfo(k),b=el('button','row',`<span class="ri han">${esc(info.hz)}</span><div class="tt"><b>${esc(info.ru)}</b><small>${pinyinHTML(info.py)}</small></div>`);b.onclick=()=>isRad(k)?go('radical',{n:radNum(k)}):info.w?go('card',{id:info.w.id}):go('notebook',{k,fromStudy:true});list.appendChild(b);list.appendChild(studyKnownButton(k,run));}res.appendChild(list);}
+      if(recent.length){res.appendChild(el('p','eyebrow','Из пройденного'));for(const k of recent){const info=notebookInfo(k),b=el('button','row',`<span class="ri han">${esc(info.hz)}</span><div class="tt"><b>${esc(info.ru)}</b><small>${pinyinHTML(info.py)}</small></div>`);b.onclick=()=>isRad(k)?go('radical',{n:radNum(k)}):info.w?go('card',{id:info.w.id}):openChar(k.replace(/^c:/,''));list.appendChild(b);list.appendChild(studyKnownButton(k,run));}res.appendChild(list);}
       return;
     }
     const qt=studySearchText(q);
@@ -5185,9 +5445,7 @@ function viewSettings(s){
     setRow(b1,'Минут в обычный день','справочно',stepper(()=>sem.minutesNormal,x=>{ sem.minutesNormal=x; ss(); },10,120,5));
   }else setRow(b1,'Новых слов в день','без семестрового плана',stepper(()=>S.newPerDay,x=>{ S.newPerDay=x; ss(); },0,40,1));
   v.appendChild(b1);
-  const writing=el('div','meta');
-  const amount=el('select');amount.setAttribute('aria-label','Ключей за занятие');for(let n=0;n<=30;n++){const option=el('option','',String(n));option.value=String(n);option.selected=n===(studyState().notebookRadicalCount??5);amount.appendChild(option);}amount.onchange=()=>{studyState().notebookRadicalCount=+amount.value;save('meta');};
-  setRow(writing,'Ключей за занятие','После слов выбранных уроков. 0 — без ключей.',amount);v.appendChild(writing);
+  const learning=el('div','meta');setRow(learning,'Ключи в новых карточках','Только ключи выбранных уроков из раздела А пособия.',switchEl(()=>recallState().includeKeys,x=>{recallState().includeKeys=x;save('meta');}));v.appendChild(learning);
   // поездки
   const b2=el('div','meta'); b2.style.padding='12px 14px';
   b2.innerHTML='<div class="lab"><b style="color:var(--title)">Поездки к родителям</b><small style="display:block;color:var(--text3);font-size:12px">в эти дни — только повторения (~10 мин), серия не сгорает</small></div>';
@@ -5993,7 +6251,8 @@ function knownCheckPassed(ss,k){return knownCheckSkills(k).every(skill=>ss.resul
 function knownCheckSave(){
   const ss=knownCheckState().session;if(!ss?.finished||ss.saved)return false;
   const m=studyState();m.known=m.known||{};
-  for(const k of ss.keys)if(knownCheckPassed(ss,k))m.known[k]=todayStr();
+  m.verifiedKnown=m.verifiedKnown||{};
+  for(const k of ss.keys)if(knownCheckPassed(ss,k)){m.known[k]=todayStr();m.verifiedKnown[k]={date:todayStr(),source:'knowledge-check'};}
   ss.saved=true;ss.savedOn=todayStr();save('meta');render();return true;
 }
 function viewKnownCheck(s){
@@ -6059,7 +6318,7 @@ const Splash={
 };
 // Обновления: проверка при запуске, при каждом возвращении в приложение и раз в 30 мин; когда новая версия
 // встала, service worker сам перезагружает окно (место в уроке сохраняет Resume на pagehide).
-const APP_VER='v40';
+const APP_VER='v41';
 function registerSW(){
   if(!('serviceWorker' in navigator)) return;
   navigator.serviceWorker.register('./service-worker.js',{updateViaCache:'none'}).then(reg=>{
@@ -6077,8 +6336,8 @@ window.APPREADY=(async function(){
   registerSW();
   if(!Resume.restore()) go('path');      // вернуться туда, где был (урок, карточки, экран), если свернул приложение
   // После Resume: старый снимок не должен отменить разовую отметку пользователя.
-  const writingUpdated=applyStudyUpdateV30(),curriculumUpdated=applyCoreCurriculumV35(),studyUpdated=applyStudyUpdateV40();
-  if(writingUpdated||curriculumUpdated||studyUpdated){await save('meta');render();Resume.save();}
+  const writingUpdated=applyStudyUpdateV30(),curriculumUpdated=applyCoreCurriculumV35(),studyUpdated=applyStudyUpdateV40(),recallUpdated=applyStudyUpdateV41();
+  if(writingUpdated||curriculumUpdated||studyUpdated||recallUpdated){await save('meta');render();Resume.save();}
   Splash.hide();
 })().catch(()=>Splash.fail());
 

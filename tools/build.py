@@ -44,6 +44,7 @@ def main():
         "/*__KCHARS__*/": (DATA / "kondr_chars.json").read_text(encoding="utf-8"),
         "/*__ETYM__*/": (DATA / "etym.json").read_text(encoding="utf-8"),
         "/*__AUDIO__*/": (DATA / "audio.json").read_text(encoding="utf-8"),
+        "/*__LESSON_KEYS__*/": (DATA / "lesson_keys.json").read_text(encoding="utf-8"),
         "/*__RADW__*/": (DATA / "rad_write.json").read_text(encoding="utf-8"),
     }
     for ph, body in parts.items():

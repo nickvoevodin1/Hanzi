@@ -1,7 +1,7 @@
 /*==================================================================
   РОУТЕР И НАВИГАЦИЯ: Путь · Карточки · Поиск; старые маршруты для продолжения сохранены
 ==================================================================*/
-const TAB_OF={path:'path',play:'path',practice:'practice',cards:'cards',study:'path',session:'practice',decomp:'practice',sent:'practice',addsent:'practice',
+const TAB_OF={path:'path',play:'path',practice:'practice',cards:'cards',study:'cards',session:'practice',decomp:'practice',sent:'practice',addsent:'practice',
   classroom:'path',notebook:'practice',memory:'practice',exam:'exam',dictation:'exam',grammar:'practice',mock:'exam',tests:'practice',test:'practice',keys:'dict',radical:'dict',reports:'practice',
   dict:'dict',list:'dict',lessons:'dict',lesson:'dict',extra:'dict',strokes:'dict',progress:'progress',settings:'settings',knownCheck:'settings'};
 function go(name,params){
@@ -11,10 +11,11 @@ function go(name,params){
 function render(){
   if(State.meta.day!==todayStr()){ State.meta.day=todayStr(); applyFreezes(); save('meta'); }
   document.body.classList.toggle('focus',['play','session'].includes(State.route.name));
+  document.body.classList.toggle('recall-writing',State.route.name==='cards'&&!!State.route.run&&State.meta.study?.recall?.session?.current?.skill==='write'&&!State.meta.study.recall.session.finished);
   document.body.classList.toggle('notebook-focus',State.route.name==='notebook'&&!!State.route.practice);
   document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.nav===State.tab));
   renderTop();
-  const V={path:viewPath,exam:viewExam,classroom:viewClassroom,notebook:viewNotebook,play:viewPlay,practice:viewPractice,memory:viewMemory,dictation:viewDictation,grammar:viewGrammar,cards:viewStudyCards,study:viewStudy,decomp:viewDecomp,sent:viewSent,addsent:viewAddSent,mock:viewMock,reports:viewReports,
+  const V={path:viewPath,exam:viewExam,classroom:viewClassroom,notebook:viewNotebook,play:viewPlay,practice:viewPractice,memory:viewMemory,dictation:viewDictation,grammar:viewGrammar,cards:viewRecallCards,study:viewRecallCards,decomp:viewDecomp,sent:viewSent,addsent:viewAddSent,mock:viewMock,reports:viewReports,
     lessons:viewLessons,lesson:viewLesson,extra:viewExtra,strokes:viewStrokes,card:viewCard,session:viewSession,draw:viewDraw,
     tests:viewTests,test:viewTest,keys:viewKeys,radical:viewRadical,dict:viewDict,list:viewList,progress:viewProgress,settings:viewSettings,knownCheck:viewKnownCheck};
   const s=$('#screen'); s.innerHTML=''; (V[State.route.name]||viewPath)(s);

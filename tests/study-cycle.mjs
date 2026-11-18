@@ -1,4 +1,4 @@
-// Five actual study days, user-reported writing credit, genuine recall and preserved history.
+// Compatibility of archived paper history and v40 scheduler. The active cycle is tested in recall.mjs.
 import {load} from './env.mjs';
 const A=await load();const {T,ev,ok,doc,click}=A;
 ev("window.__studyDate='2026-11-01';todayStr=()=>window.__studyDate");
@@ -14,7 +14,7 @@ await T('read-only-home-and-no-unseen-enrolment',()=>{
  ok(ev('JSON.stringify(State.meta.memory)===window.__meta'),'opening home enrolled notebook entries');
  ok(doc.querySelectorAll('#screen > .view > *').length===2,'extra menus before course path');
  ok(doc.querySelectorAll('.nav button').length===4,'old navigation menus remain');
- ev("go('study')");ok(doc.querySelectorAll('.study-item').length===2,'introduced items absent from aggregate list');
+ ev("go('study')");ok(doc.querySelector('.recall-lesson-picker'),'new lesson selector absent');ok(ev('Object.keys(recallState().entries).length')===0,'opening new cycle silently imported old paper days');
 });
 await T('writing-and-pinyin-three-calendar-days',()=>{
  reset();learn(['你','r:1']);write(['你','r:1']);
@@ -103,7 +103,7 @@ await T('radical-writing-needs-no-pinyin-and-auto-advances',()=>{
  ok(ev("State.route.k==='r:2'"),'radical did not advance after writing');
  ok(ev("notebookStatus('r:1').complete")===1,'radical writing day not complete');
  ok(!ev("notebookRow('r:1',0,false).py.done"),'pinyin completion fabricated');
- ev("go('path')");ok(doc.querySelectorAll('.study-week span').length===7,'timeline missing seven days');
+ ev("go('path')");ok(doc.querySelectorAll('.study-week span').length===4,'new four-stage timeline missing');
 });
 await T('global-round-is-complete-only-after-all-portions',()=>{
  reset();ev("window.__keys=semWords().slice(0,12);for(const k of window.__keys){for(let i=0;i<3;i++){const row=notebookRow(k,i,true);row.date='2026-10-'+(20+i);row.hz={done:true,date:row.date};row.py={done:true,date:row.date};}studyState().reviews[k]={skills:{},days:{'2026-10-23':{hz:3,reading:3},'2026-10-24':{hz:3,reading:3}}};}startStudyCards('today')");
@@ -138,7 +138,7 @@ await T('difficult-priority-extra-retrieval-and-conservative-fsrs',()=>{
 await T('search-hanzi-russian-pinyin-tones-digits-and-umlaut',()=>{
  reset();learn(['你','好','弟弟','r:1']);
  for(const [q,k] of [['弟','弟弟'],['младший','弟弟'],['di4 di5','弟弟'],['didi','弟弟'],['nǐ','你'],['ni3','你']])ok(ev(`studyWritingPool(${JSON.stringify(q)}).includes(${JSON.stringify(k)})`),'search '+q);
- ev("go('study');");const input=doc.querySelector('.search');input.value='младший';input.dispatchEvent(new A.w.Event('input'));ok(doc.querySelectorAll('.study-item').length===1,'list did not filter');
+ ev("go('dict',{q:'младший'})");ok(A.txt().includes('弟弟'),'word translation no longer searchable');
  ev("go('dict',{q:'lv4'})");ok(A.txt().includes('绿'),'numbered umlaut pinyin not searchable');
 });
 await T('notebook-single-item-no-lesson-menu-and-difficult-on-writing-pad',()=>{
@@ -165,8 +165,8 @@ await T('midnight-never-credits-yesterday-session-to-today',()=>{
 await T('multiple-lesson-selection-and-auto-next-after-both-paper-marks',()=>{
  reset();ev("go('study')");
  for(const L of [5,18]){const input=doc.querySelector('input[aria-label="Урок '+L+'"]');input.checked=true;input.dispatchEvent(new A.w.Event('change'));}
- ok(ev("studyState().notebookLessons.join()") ==='5,18','cannot combine old and new lessons');
- ok(ev("studyNotebookPool().filter(k=>!isRad(k)).join()")===ev("uniq(notebookPool('words',5).concat(notebookPool('words',18))).join()"),'selected lesson vocabulary incomplete');
+ ok(ev("recallState().lessons.join()") ==='5,18','cannot combine old and new lessons');
+ ok(ev("recallPool().filter(k=>!isRad(k)).join()")===ev("uniq(notebookPool('words',5).concat(notebookPool('words',18))).join()"),'selected lesson vocabulary incomplete');ev("studyState().notebookLessons=[5,18]");
  ev("window.__queue=studyNotebookPool();window.__first=window.__queue[0];window.__next=window.__queue[1];go('notebook',{k:window.__first,queue:window.__queue})");
  let buttons=[...doc.querySelectorAll('.notebook-day[data-notebook-day="1"] button')].filter(b=>b.textContent==='Прописал');buttons[0].click();
  ok(ev('State.route.k===window.__first'),'advanced before pinyin');

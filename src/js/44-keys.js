@@ -43,17 +43,18 @@ function viewStrokes(s){
   s.appendChild(v);
 }
 function viewRadical(s){
-  const n=State.route.n, r=RADS[n-1], st=statusOf('r:'+n);
+  const n=State.route.n, r=RADS[n-1], st=statusOf('r:'+n),guideLesson=Object.keys(POSOBIE_KEYS).find(L=>POSOBIE_KEYS[L].some(row=>row.n===n));
   const v=el('div','view');
   const back=el('button','back','‹ Ключи'); back.onclick=()=>go('keys'); v.appendChild(back);
   const card=el('div','card');
   card.innerHTML=`<div class="bighz han" style="font-size:76px">${esc(r[4][0])}</div>
     ${r[4].length>1?`<div class="han" style="font-size:22px;color:var(--paper-dim);margin-bottom:6px">${esc([...r[4]].slice(1).join('  '))}</div>`:''}
     <div class="bigpy">${pinyinHTML(r[2])}</div><div class="bigtr">${esc(r[3])}</div>
-    <div class="tagrow"><span class="pill">Ключ №${n}</span><span class="pill">${r[1]} ${plural(r[1],'черта','черты','черт')}</span>${KEY_L[n]?`<span class="pill k">урок ${KEY_L[n]}</span>`:''}${st!=='new'?'<span class="pill ok">в работе</span>':''}</div>
+    <div class="tagrow"><span class="pill">Ключ №${n}</span><span class="pill">${r[1]} ${plural(r[1],'черта','черты','черт')}</span>${guideLesson?`<span class="pill k">пособие · урок ${guideLesson}</span>`:''}${st!=='new'?'<span class="pill ok">в работе</span>':''}</div>
     <div class="cardbtns"><button class="iconbtn primary" data-say="${esc(r[4][0])}" aria-label="Слушать">${SPK(26)}</button><button class="iconbtn" data-draw="${esc((RADW[n]||[[r[4][0]]]).map(x=>x[0]).join(''))}" aria-label="Прописи">${IC('brush',26)}</button></div>
     <div class="note" style="margin:8px 0 0">Пишется: <span class="han" style="font-size:22px;color:var(--title)">${(RADW[n]||[[r[4][0]]]).map(x=>esc(x[0])).join(' · ')}</span>${!isNew('wr:r:'+n)?' · <b style="color:var(--ok-text)">в прописях</b>':''}</div>`;
   v.appendChild(card);
+  const learn=el('button','btn ghost',recallExcluded('r:'+n)?'Знание подтверждено':'Учить в карточках');learn.disabled=recallExcluded('r:'+n);learn.onclick=()=>recallStart('catalog',['r:'+n]);v.appendChild(learn);
   const p2=RAD2[n];
   if(p2){ const ex=p2.e&&HZ.c[p2.e]?`<span class="hz han" data-c="${p2.e}" style="font-size:20px">${esc(p2.e)}</span>`:`<span class="han" style="font-size:20px">${esc(p2.e||'')}</span>`;
     const box=el('div','meta');

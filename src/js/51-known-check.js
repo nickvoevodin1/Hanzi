@@ -33,7 +33,8 @@ function knownCheckPassed(ss,k){return knownCheckSkills(k).every(skill=>ss.resul
 function knownCheckSave(){
   const ss=knownCheckState().session;if(!ss?.finished||ss.saved)return false;
   const m=studyState();m.known=m.known||{};
-  for(const k of ss.keys)if(knownCheckPassed(ss,k))m.known[k]=todayStr();
+  m.verifiedKnown=m.verifiedKnown||{};
+  for(const k of ss.keys)if(knownCheckPassed(ss,k)){m.known[k]=todayStr();m.verifiedKnown[k]={date:todayStr(),source:'knowledge-check'};}
   ss.saved=true;ss.savedOn=todayStr();save('meta');render();return true;
 }
 function viewKnownCheck(s){
