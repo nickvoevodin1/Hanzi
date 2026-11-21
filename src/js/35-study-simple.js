@@ -27,3 +27,23 @@ function applyStudyUpdateV42(){
  if(State.route.name==='cards'||State.route.name==='study')State.route={name:'cards'};
  m.simpleCardsV42=true;return true;
 }
+// Карточка соответствует словарной строке учебника; известные части не
+// доказывают знание значения и чтения многознакового слова.
+recallExcluded=function(k){
+ if(isRad(k))return !!studyState().verifiedKnown?.[k]&&studyKnown(k);
+ const chars=hanOf(notebookInfo(k)?.hz||'');
+ if(chars.length>1)return !!studyState().verifiedKnown?.[k]&&!!studyState().known?.[k];
+ return chars.length===1&&recallVerifiedChars().has(chars[0]);
+};
+recallPool=function(){return uniq(recallState().lessons.flatMap(L=>lessonWords(L).map(w=>w.key))).filter(k=>!!BYK[k]&&!recallExcluded(k));};
+recallDue=function(){return Object.keys(recallState().entries).filter(k=>!!BYK[k]&&['learn','review'].includes(recallPlan(k).stage));};
+function applyStudyUpdateV43(){
+ const m=studyState();if(m.wordCardsV43)return false;
+ const r=recallState();r.unit='words';r.includeKeys=false;
+ // Остановить только старую порцию с отдельными знаками или ключами;
+ // уже записанные результаты всех элементов сохраняются.
+ if(r.session?.keys?.some(k=>!BYK[k]))r.session=null;
+ for(const [id,ss]of Object.entries(r.paused||{}))if(ss.keys?.some(k=>!BYK[k]))delete r.paused[id];
+ if(State.route.name==='cards'&&State.route.run&&!r.session)State.route={name:'cards'};
+ m.wordCardsV43=true;return true;
+}
