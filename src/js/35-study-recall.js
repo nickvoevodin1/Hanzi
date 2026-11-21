@@ -164,12 +164,12 @@ function recallSessionView(v){
   const raw=recallState().session,ss=recallSessionReady(),back=el('button','back','‹ К карточкам');back.onclick=()=>go('cards');v.appendChild(back);
   if(!ss){
     v.appendChild(el('h1','',raw?.stale?'Начался новый день':'Порция завершена'));
-    v.appendChild(el('p','note',raw?.stale?'Вчерашние ответы сохранены. Открой сегодняшнее занятие.':`Готово на сегодня: ${raw?.completed?.length||0} из ${raw?.keys?.filter(k=>!recallExcluded(k)).length||0}. Следующий день откроется завтра; пропущенные дни не засчитываются сами.`));
+    v.appendChild(el('p','note',raw?.stale?'Вчерашние ответы сохранены. Открой сегодняшнее занятие.':`Готово на сегодня: ${raw?.completed?.length||0} из ${raw?.keys?.filter(k=>!recallExcluded(k)).length||0}. Повторение изученного будет доступно завтра.`));
     if(raw?.deferred?.length)v.appendChild(el('p','note','Отложено знаков: '+raw.deferred.length+'. Их этап остаётся незавершённым.'));
     const more=el('button','btn','К занятиям на сегодня');more.onclick=()=>go('cards');v.appendChild(more);return;
   }
   const x=ss.current,info=recallInfo(x.k),goal=ss.goals[x.k],datum=recallData(x.k,goal,false),need=recallGoal(goal.phase);
-  v.appendChild(el('p','eyebrow',(goal.phase===4?'Общее повторение':'День '+goal.phase)+' · '+info.label));
+  v.appendChild(el('p','eyebrow',(goal.phase===4?'Повторение':'Изучение')+' · '+info.label));
   const total=ss.keys.filter(k=>!recallExcluded(k)).length,completed=ss.keys.filter(k=>!recallExcluded(k)&&recallRowDone(recallData(k,ss.goals[k],false),ss.goals[k].phase)).length;
   v.appendChild(el('div','study-progress',`<i style="width:${Math.round(completed/total*100)}%"></i>`));
   const card=el('section','hero recall-card');v.appendChild(card);
