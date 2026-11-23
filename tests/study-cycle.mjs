@@ -14,7 +14,7 @@ await T('read-only-home-and-no-unseen-enrolment',()=>{
  ok(ev('JSON.stringify(State.meta.memory)===window.__meta'),'opening home enrolled notebook entries');
  ok(doc.querySelectorAll('#screen > .view > *').length===2,'extra menus before course path');
  ok(doc.querySelectorAll('.nav button').length===4,'old navigation menus remain');
- ev("go('study')");ok(doc.querySelector('select[aria-label="Выбрать урок"]'),'new lesson selector absent');ok(ev('Object.keys(recallState().entries).length')===0,'opening new cycle silently imported old paper days');
+ ev("go('study')");ok(doc.querySelector('.recall-lesson-picker'),'new lesson selector absent');ok(ev('Object.keys(recallState().entries).length')===0,'opening new cycle silently imported old paper days');
 });
 await T('writing-and-pinyin-three-calendar-days',()=>{
  reset();learn(['你','r:1']);write(['你','r:1']);
@@ -164,7 +164,8 @@ await T('midnight-never-credits-yesterday-session-to-today',()=>{
 });
 await T('multiple-lesson-selection-and-auto-next-after-both-paper-marks',()=>{
  reset();ev("go('study')");
- const select=doc.querySelector('select[aria-label="Выбрать урок"]');select.value='18';select.dispatchEvent(new A.w.Event('change'));
+ doc.querySelector('input[aria-label="Урок 18"]').click();
+ if(doc.querySelector('input[aria-label="Урок 1"]').checked)doc.querySelector('input[aria-label="Урок 1"]').click();
  ok(ev("recallState().lessons.join()")==='18','lesson not saved');ev("studyState().notebookLessons=[5,18]");
  ev("window.__queue=studyNotebookPool();window.__first=window.__queue[0];window.__next=window.__queue[1];go('notebook',{k:window.__first,queue:window.__queue})");
  let buttons=[...doc.querySelectorAll('.notebook-day[data-notebook-day="1"] button')].filter(b=>b.textContent==='Прописал');buttons[0].click();
@@ -173,7 +174,7 @@ await T('multiple-lesson-selection-and-auto-next-after-both-paper-marks',()=>{
  ok(ev('State.route.k===window.__next'),'did not auto advance after both marks');
  ok(ev('notebookStatus(window.__first).complete')===1,'paper day not saved');
  ok(ev('Object.keys(State.cards).length')===0,'lesson selection granted knowledge');
- ev("go('study')");ok(doc.querySelector('select[aria-label="Выбрать урок"]').value==='18','lesson selection not retained');
+ ev("go('study')");ok(doc.querySelector('input[aria-label="Урок 18"]').checked,'lesson selection not retained');
 });
 await T('radicals-follow-lesson-words-in-bounded-stable-batches',()=>{
  reset();ev("studyState().notebookLessons=[5];studyState().notebookRadicalCount=3;window.__pool=studyNotebookPool()");

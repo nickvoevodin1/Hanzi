@@ -11,7 +11,7 @@ function viewLessons(s){
       if(!words.length)continue;
       const row=el('button','row',`<div class="tt"><b>Урок ${lesson}</b><small class="han">${esc(words.map(w=>w.d).join(' · '))}</small></div>${IC('chev',18)}`);
       row.onclick=()=>{
-        const state=recallState();state.radicalDeck=true;state.radicalLesson=lesson;
+        const state=recallState();state.radicalDeck=true;state.radicalLesson=lesson;state.radicalLessons=uniq((state.radicalLessons||[]).concat(lesson));
         save('meta');go('cards');
       };
       list.appendChild(row);

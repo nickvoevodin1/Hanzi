@@ -73,7 +73,7 @@ await T('radicals by lesson have their own deck and schedule',()=>{
  ok(click(/Урок 1/),'lesson missing from radical catalogue');
  ok(ev('recallState().radicalDeck&&recallState().radicalLesson===1'),'catalogue opened wrong deck');
  click(/^Постоянные$/);click(/^Листать карточки$/);
- ok(ev("State.route.keys.join()")==='r:9,r:38,r:39','free deck differs from guide');
+ ok(ev("State.route.deck.map(x=>x.key).join()")==='r:9,r:38,r:39','free deck differs from guide');
  ev("go('cards');stageCardStart(1);stageCardStart(1,true)");
  ok(ev("stageCardEntry(1).session.keys.every(k=>!isRad(k))"),'word session was overwritten');
  ok(ev("recallCurrentSession().keys.join()")==='r:9,r:38,r:39','staged deck differs from guide');
@@ -81,5 +81,21 @@ await T('radicals by lesson have their own deck and schedule',()=>{
  ok(doc.querySelector('.recall-writer'),'radical writing missing');
  ev("for(let i=0;i<3;i++){const s=recallCurrentSession();s.current.writer={completed:true};s.revealed=true;recallWriteGrade()}");
  ok(ev('stageCardEntry(1,true).completed===1&&stageCardEntry(1).completed===0'),'radical and word schedules mixed');
+});
+await T('multiple lesson selections, free deck and staged batch',()=>{
+ ev("State.meta=freshMeta();recallState().lessons=[1];go('cards')");
+ click(/^Постоянные$/);
+ const toggle=n=>doc.querySelector(`input[aria-label="Урок ${n}"]`).click();
+ toggle(2);click(/^Листать карточки$/);
+ ok(ev('State.route.deck.some(card=>card.lesson===1)&&State.route.deck.some(card=>card.lesson===2)'),'word deck missing selected lesson');
+ ev("go('cards')");click(/^Ключи по урокам$/);toggle(2);click(/^Листать карточки$/);
+ ok(ev('State.route.deck.length')===ev('recallLessonKeys(1).length+recallLessonKeys(2).length'),'radical deck missing selected lesson');
+ ev("go('cards')");click(/^Поэтапные$/);click(/^Пройти выбранные/);
+ ok(ev("State.route.staged==='keys:1'&&State.route.remainingLessons.join()==='2'"),'batch did not enqueue lesson 2');
+ ev("window.__complete()");
+ ok(click(/^Следующий урок · 2$/),'batch continuation missing');
+ ok(ev("State.route.staged==='keys:2'&&stageCardEntry(1,true).completed===1&&stageCardEntry(2,true).completed===0"),'batch mixed schedules');
+ ev("go('cards')");click(/^Слова по урокам$/);
+ ok(ev("recallState().lessons.join()==='1,2'"),'key lesson selection changed word lesson selection');
 });
 A.finish('simple cards');
