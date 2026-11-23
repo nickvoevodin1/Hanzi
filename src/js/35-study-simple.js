@@ -9,27 +9,6 @@ recallPlan=function(k){
   if(recallRowDone(e.reviews?.[todayStr()],4))return {stage:'wait',phase:4};
   return {stage:'review',phase:4};
 };
-recallCycleBanner=function(){
-  const c=el('section','hero study-cycle-banner'),due=recallDue();
-  c.innerHTML='<div class="kind">Карточки</div><h2>Учи и повторяй каждый день</h2><p class="note">Выбери урок, запомни чтение, перевод и написание, затем повторяй изученное.</p>';
-  const b=el('button','btn',due.length?'Карточки на сегодня · '+due.length:'Выбрать урок');b.onclick=()=>go('cards');c.appendChild(b);return c;
-};
-viewRecallCards=function(s){
- const v=el('div','view study-cards-view');s.appendChild(v);if(State.route.run)return recallSessionView(v);
- const m=recallState();v.appendChild(el('h1','','Карточки'));v.appendChild(el('p','note','Выбери урок и учи слова. Каждый день повторяй уже изученное.'));
- const select=el('select');select.setAttribute('aria-label','Выбрать урок');for(let L=1;L<=NL;L++){const o=el('option','','Урок '+L);o.value=L;o.selected=m.lessons[0]===L;select.appendChild(o);}if(m.lessons.length!==1)m.lessons=[m.lessons[0]||1];select.value=m.lessons[0];select.onchange=()=>{m.lessons=[+select.value];save('meta');render();};v.appendChild(select);
- const facing=el('select');facing.setAttribute('aria-label','Начать с');
- for(const [value,label]of [['han','Начать с иероглифов'],['ru','Начать с перевода'],['py','Начать с пиньиня']]){
-   const option=el('option','',label);option.value=value;facing.appendChild(option);
- }
- facing.value=m.facing||'han';facing.onchange=()=>{m.facing=facing.value;save('meta');};v.appendChild(facing);
- const label=el('label','setrow'),mix=el('input');mix.type='checkbox';mix.checked=!!m.mix;
- mix.onchange=()=>{m.mix=mix.checked;save('meta');};label.append(mix,document.createTextNode(' Перемешать карточки'));v.appendChild(label);
- const due=recallDue(),fresh=recallFresh(),ss=recallCurrentSession();
- if(ss&&ss.date===todayStr()){const b=el('button','btn blue','Продолжить');b.onclick=()=>go('cards',{run:true});v.appendChild(b);}
- const learn=el('button','btn','Учить урок · '+fresh.length);learn.disabled=!fresh.length;learn.onclick=()=>recallStart('new');v.appendChild(learn);
- const review=el('button','btn ghost','Повторить изученное · '+due.length);review.disabled=!due.length;review.onclick=()=>recallStart('today');v.appendChild(review);
-};
 function applyStudyUpdateV42(){
  const m=studyState();if(m.simpleCardsV42)return false;
  const previous=recallState();m.recall={v:1,lessons:previous.lessons?.slice(0,1)||[],unit:'words',includeKeys:true,entries:{},session:null};

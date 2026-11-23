@@ -1718,7 +1718,7 @@ function go(name,params){
 function render(){
   if(State.meta.day!==todayStr()){ State.meta.day=todayStr(); applyFreezes(); save('meta'); }
   document.body.classList.toggle('focus',['play','session'].includes(State.route.name));
-  document.body.classList.toggle('recall-writing',State.route.name==='cards'&&!!State.route.run&&State.meta.study?.recall?.session?.current?.skill==='write'&&!State.meta.study.recall.session.finished);
+  document.body.classList.toggle('recall-writing',State.route.name==='cards'&&!!State.route.run&&recallActiveSession()?.current?.skill==='write'&&!recallActiveSession()?.finished);
   document.body.classList.toggle('notebook-focus',State.route.name==='notebook'&&!!State.route.practice);
   document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.nav===State.tab));
   renderTop();
@@ -3899,7 +3899,11 @@ function recallData(k,goal,create){
   if(!bag[id]&&create)bag[id]={date:goal.date,py:{streak:0,tries:0},meaning:{streak:0,tries:0},write:{passed:false,tries:0}};
   return bag[id]||null;
 }
-function recallCurrentSession(){const ss=recallState().session;return ss&&!ss.finished?ss:null;}
+function recallActiveSession(){
+  const state=recallState(),lesson=State.route.staged;
+  return lesson?state.staged?.[lesson]?.session:state.session;
+}
+function recallCurrentSession(){const ss=recallActiveSession();return ss&&!ss.finished?ss:null;}
 function recallTasks(ss){
   ss.practiceQueue=(ss.practiceQueue||[]).filter(x=>recallValid(x.k)&&!recallExcluded(x.k));
   if(ss.practiceQueue.length)return ss.practiceQueue.slice();
@@ -3947,13 +3951,14 @@ function recallStart(mode,selected){
 }
 function recallSessionReady(){
   const ss=recallCurrentSession();if(!ss)return null;
-  if(ss.date!==todayStr()){ss.finished=true;ss.stale=true;save('meta');return null;}
-  if(ss.current&&recallExcluded(ss.current.k)){recallAdvance(ss);save('meta');}
+  if(!ss.staged&&ss.date!==todayStr()){ss.finished=true;ss.stale=true;save('meta');return null;}
+  if(!ss.staged&&ss.current&&recallExcluded(ss.current.k)){recallAdvance(ss);save('meta');}
   return ss.finished?null:ss;
 }
 function recallIntro(){const ss=recallSessionReady(),x=ss?.current;if(!x||x.skill!=='intro')return false;recallState().entries[x.k].familiar=true;ss.previous=x;ss.recent=(ss.recent||[]).concat(x.k).slice(-3);recallAdvance(ss);save('meta');render();return true;}
 function recallReveal(){const ss=recallSessionReady(),x=ss?.current;if(!x||!['py','meaning','flip'].includes(x.skill))return false;ss.revealed=true;save('meta');render();return true;}
 function recallRecord(ss,x,grade){
+  if(ss.staged){stageCardRecord(ss,grade);return;}
   if(x.practice){ss.practiceQueue.splice(ss.practiceQueue.findIndex(t=>t.k===x.k&&t.skill===x.skill),1);ss.previous=x;ss.recent=ss.recent.concat(x.k).slice(-3);recallAdvance(ss);save('meta');render();return;}
   const row=recallData(x.k,ss.goals[x.k],true),e=recallState().entries[x.k],datum=row[x.skill==='flip'?'py':x.skill];
   const first=datum.tries===0;datum.tries++;ss.attempts++;if(grade>=2)ss.correct++;
@@ -3977,7 +3982,7 @@ function recallWriteGrade(){
   recallRecord(ss,x,x.writer.mistakes||x.writer.assisted?1:3);return true;
 }
 function recallWritingForms(k){return recallInfo(k).forms;}
-function recallWriterCurrent(ss,x,host){return host.isConnected&&recallCurrentSession()===ss&&ss.current===x&&ss.date===todayStr()&&!recallExcluded(x.k);}
+function recallWriterCurrent(ss,x,host){return host.isConnected&&recallCurrentSession()===ss&&ss.current===x&&(ss.staged||ss.date===todayStr()&&!recallExcluded(x.k));}
 async function recallWriter(host,ss,x){
   const forms=recallWritingForms(x.k);if(!forms.length){recallAdvance(ss);save('meta');render();return;}
   if(x.writer?.forms&&x.writer.forms.join()!==forms.join())x.writer=null;
@@ -3988,7 +3993,7 @@ async function recallWriter(host,ss,x){
   const size=Math.max(220,Math.min(360,(window.innerWidth||390)-44));pad.style.width=size+'px';pad.style.height=size+'px';
   let data=null;try{if(window.HZREADY)await window.HZREADY;data=window.HZDATA?.[f]||await hwLoad(f);}catch(e){}
   if(!recallWriterCurrent(ss,x,host))return;
-  const unavailable=()=>{cap.textContent='Проверка черт сейчас недоступна. Этот знак не будет засчитан.';const retry=el('button','btn ghost','Загрузить поле ещё раз');retry.onclick=render;const later=el('button','linkbtn','Отложить знак');later.onclick=()=>{ss.deferred.push(x.k);recallAdvance(ss);save('meta');render();};host.append(retry,later);};
+  const unavailable=()=>{cap.textContent='Проверка черт сейчас недоступна. Этот знак не будет засчитан.';const retry=el('button','btn ghost','Загрузить поле ещё раз');retry.onclick=render;const later=el('button','linkbtn','Отложить знак');later.onclick=()=>{if(ss.staged){go('cards');return;}ss.deferred.push(x.k);recallAdvance(ss);save('meta');render();};host.append(retry,later);};
   if(!canHW()||!data?.strokes?.length||!data?.medians?.length){unavailable();return;}
   cap.textContent='Пиши черты в правильном порядке и направлении.';
   try{
@@ -4005,7 +4010,8 @@ function recallHint(){
   x.writer=x.writer||{index:0,mistakes:0,assisted:false,completed:false};x.writer.assisted=true;x.writer.completed=true;ss.revealed=true;save('meta');render();
 }
 function recallSessionView(v){
-  const raw=recallState().session,ss=recallSessionReady(),back=el('button','back','‹ К карточкам');back.onclick=()=>go('cards');v.appendChild(back);
+  const raw=recallActiveSession(),ss=recallSessionReady(),back=el('button','back','‹ К карточкам');back.onclick=()=>go('cards');v.appendChild(back);
+  if(!ss&&raw?.staged){stageCardSummary(v,raw.lesson);return;}
   if(!ss){
     v.appendChild(el('h1','',raw?.stale?'Начался новый день':'Порция завершена'));
     v.appendChild(el('p','note',raw?.stale?'Вчерашние ответы сохранены. Открой сегодняшнее занятие.':`Готово на сегодня: ${raw?.completed?.length||0} из ${raw?.keys?.filter(k=>!recallExcluded(k)).length||0}. Готовые слова доступны в повторении.`));
@@ -4013,12 +4019,15 @@ function recallSessionView(v){
     if(raw?.mode==='new'&&recallDue().length){const review=el('button','btn','Повторить изученное');review.onclick=()=>recallStart('today');v.appendChild(review);}
     const more=el('button','btn ghost','К карточкам');more.onclick=()=>go('cards');v.appendChild(more);return;
   }
-  const x=ss.current,info=recallInfo(x.k),goal=ss.goals[x.k],datum=recallData(x.k,goal,false),need=recallGoal(goal.phase);
+  const x=ss.current,info=recallInfo(x.k),goal=ss.staged?{lesson:ss.lesson}:ss.goals[x.k];
   const word=textbookWords(goal.lesson||WORD_L[x.k]).find(w=>w.key===x.k);
   if(word)Object.assign(info,{hz:word.d||word.s,py:word.p,ru:word.ru});
+  if(ss.staged)v.appendChild(el('p','eyebrow',`Урок ${ss.lesson} · круг ${ss.round+1} из 2 · ${ss.index+1} / ${ss.keys.length}`));
+  else{
   v.appendChild(el('p','eyebrow',(goal.phase===4?'Повторение':'Изучение')+' · '+info.label));
   const total=ss.keys.filter(k=>!recallExcluded(k)).length,completed=ss.keys.filter(k=>!recallExcluded(k)&&recallRowDone(recallData(k,ss.goals[k],false),ss.goals[k].phase)).length;
   v.appendChild(el('div','study-progress',`<i style="width:${Math.round(completed/total*100)}%"></i>`));
+  }
   const card=el('section','hero recall-card');v.appendChild(card);
   if(x.skill==='intro'){
     card.appendChild(el('p','kind','Сначала познакомимся'));
@@ -4033,8 +4042,13 @@ function recallSessionView(v){
       const show=el('button','btn','Показать ответ');show.dataset.key='space';show.onclick=recallReveal;card.appendChild(show);
     }else{
       for(const side of ['han','py','ru'])if(side!==ss.facing)card.appendChild(el('div',...faces[side]));
-      const again=el('button','btn ghost','Ещё раз'),good=el('button','btn','Вспомнил');
-      again.onclick=()=>recallGrade(1);good.onclick=()=>recallGrade(3);card.append(again,good);
+      const next=el('button','btn',ss.staged?'Дальше':'Вспомнил');
+      next.onclick=()=>recallGrade(3);
+      if(!ss.staged){
+        const again=el('button','btn ghost','Ещё раз');
+        again.onclick=()=>recallGrade(1);card.appendChild(again);
+      }
+      card.appendChild(next);
     }
   }else if(x.skill==='write'){
     card.appendChild(el('p','kind','Напиши по переводу'));card.appendChild(el('h2','recall-prompt',esc(info.ru)));
@@ -4047,7 +4061,7 @@ function recallSessionView(v){
       const next=el('button','btn',good?'Верно · Дальше':'Повторить после других карточек');next.onclick=recallWriteGrade;card.appendChild(next);
     }
   }else{
-    const reading=x.skill==='py';card.appendChild(el('p','kind',(x.practice?'Пауза перед повторной попыткой · ':'')+(reading?'Как читается?':'Что это значит?')));card.appendChild(el('h1','han recall-glyph',esc(info.hz)));
+    const datum=recallData(x.k,goal,false),need=recallGoal(goal.phase),reading=x.skill==='py';card.appendChild(el('p','kind',(x.practice?'Пауза перед повторной попыткой · ':'')+(reading?'Как читается?':'Что это значит?')));card.appendChild(el('h1','han recall-glyph',esc(info.hz)));
     card.appendChild(el('p','note',x.practice?'Вспомни другой навык, затем вернёмся к ошибке.':`Успешных ответов подряд: ${datum[x.skill]?.streak||0} из ${need[x.skill]}`));
     if(!ss.revealed){card.appendChild(el('p','note',reading?'Произнеси пиньинь с тонами вслух, затем открой ответ.':'Назови перевод до открытия ответа.'));const reveal=el('button','btn','Показать ответ');reveal.dataset.key='space';reveal.onclick=recallReveal;card.appendChild(reveal);}
     else{
@@ -4111,27 +4125,6 @@ recallPlan=function(k){
   if(recallRowDone(e.reviews?.[todayStr()],4))return {stage:'wait',phase:4};
   return {stage:'review',phase:4};
 };
-recallCycleBanner=function(){
-  const c=el('section','hero study-cycle-banner'),due=recallDue();
-  c.innerHTML='<div class="kind">Карточки</div><h2>Учи и повторяй каждый день</h2><p class="note">Выбери урок, запомни чтение, перевод и написание, затем повторяй изученное.</p>';
-  const b=el('button','btn',due.length?'Карточки на сегодня · '+due.length:'Выбрать урок');b.onclick=()=>go('cards');c.appendChild(b);return c;
-};
-viewRecallCards=function(s){
- const v=el('div','view study-cards-view');s.appendChild(v);if(State.route.run)return recallSessionView(v);
- const m=recallState();v.appendChild(el('h1','','Карточки'));v.appendChild(el('p','note','Выбери урок и учи слова. Каждый день повторяй уже изученное.'));
- const select=el('select');select.setAttribute('aria-label','Выбрать урок');for(let L=1;L<=NL;L++){const o=el('option','','Урок '+L);o.value=L;o.selected=m.lessons[0]===L;select.appendChild(o);}if(m.lessons.length!==1)m.lessons=[m.lessons[0]||1];select.value=m.lessons[0];select.onchange=()=>{m.lessons=[+select.value];save('meta');render();};v.appendChild(select);
- const facing=el('select');facing.setAttribute('aria-label','Начать с');
- for(const [value,label]of [['han','Начать с иероглифов'],['ru','Начать с перевода'],['py','Начать с пиньиня']]){
-   const option=el('option','',label);option.value=value;facing.appendChild(option);
- }
- facing.value=m.facing||'han';facing.onchange=()=>{m.facing=facing.value;save('meta');};v.appendChild(facing);
- const label=el('label','setrow'),mix=el('input');mix.type='checkbox';mix.checked=!!m.mix;
- mix.onchange=()=>{m.mix=mix.checked;save('meta');};label.append(mix,document.createTextNode(' Перемешать карточки'));v.appendChild(label);
- const due=recallDue(),fresh=recallFresh(),ss=recallCurrentSession();
- if(ss&&ss.date===todayStr()){const b=el('button','btn blue','Продолжить');b.onclick=()=>go('cards',{run:true});v.appendChild(b);}
- const learn=el('button','btn','Учить урок · '+fresh.length);learn.disabled=!fresh.length;learn.onclick=()=>recallStart('new');v.appendChild(learn);
- const review=el('button','btn ghost','Повторить изученное · '+due.length);review.disabled=!due.length;review.onclick=()=>recallStart('today');v.appendChild(review);
-};
 function applyStudyUpdateV42(){
  const m=studyState();if(m.simpleCardsV42)return false;
  const previous=recallState();m.recall={v:1,lessons:previous.lessons?.slice(0,1)||[],unit:'words',includeKeys:true,entries:{},session:null};
@@ -4176,6 +4169,145 @@ function applyStudyUpdateV45(){
  if(State.route.name==='cards'&&State.route.run&&!r.session)State.route={name:'cards'};
  m.flashcardFacesV45=true;return true;
 }
+
+/* Free browsing and lesson-based scheduled review share the textbook deck. */
+const STAGE_HOURS=[4,12,24,48,120];
+const STAGE_LABELS=['4 ч','12 ч','1 день','2 дня','5 дней'];
+function stageCardEntry(lesson){
+  return recallState().staged?.[lesson];
+}
+function stageCardStart(lesson){
+  const state=recallState();
+  state.staged ||= {};
+  const entry=state.staged[lesson] ||= {completed:0,due:0};
+  if(!entry.session||entry.session.finished){
+    if(entry.completed>STAGE_HOURS.length||entry.due>Date.now())return;
+    const keys=textbookWords(lesson).map(w=>w.key);
+    if(!keys.length)return;
+    entry.session={staged:true,lesson,keys,index:0,round:0,facing:'han',revealed:false,
+      current:{k:keys[0],skill:'flip'},finished:false};
+  }
+  save('meta');
+  go('cards',{staged:lesson,run:true});
+}
+function stageCardRecord(session,grade){
+  if(grade===1){
+    // Keep mistakes in the current round and retry them after the remaining cards.
+    session.keys.push(...session.keys.splice(session.index,1));
+  }else{
+    session.index++;
+  }
+  if(session.index===session.keys.length){
+    if(session.round===0){
+      session.round=1;
+      session.index=0;
+      session.keys=textbookWords(session.lesson).map(w=>w.key);
+    }else{
+      const entry=stageCardEntry(session.lesson);
+      entry.completed++;
+      const hours=STAGE_HOURS[entry.completed-1];
+      entry.due=hours?Date.now()+hours*3600000:0;
+      session.finished=true;
+    }
+  }
+  session.revealed=false;
+  session.current=session.finished?null:{k:session.keys[session.index],skill:session.round?'write':'flip'};
+  save('meta');
+  render();
+}
+function stageCardStatus(entry){
+  if(entry?.completed>STAGE_HOURS.length)return 'Все пять повторений завершены';
+  if(entry?.session&&!entry.session.finished)return 'Занятие начато';
+  if(!entry?.completed)return 'Сначала чтение, затем письмо по переводу';
+  const label=STAGE_LABELS[entry.completed-1];
+  if(entry.due<=Date.now())return 'Повторение · '+label+' · доступно';
+  const when=new Intl.DateTimeFormat('ru',{dateStyle:'short',timeStyle:'short'}).format(entry.due);
+  return 'Следующее повторение · '+when;
+}
+function stageCardSummary(view,lesson){
+  view.appendChild(el('h1','','Оба круга завершены'));
+  view.appendChild(el('p','note',esc(stageCardStatus(stageCardEntry(lesson)))));
+}
+function startFreeCards(lesson){
+  const state=recallState(),keys=textbookWords(lesson).map(w=>w.key);
+  go('cards',{free:true,lesson,keys:state.mix?shuffle(keys):keys,index:0,facing:state.facing||'han'});
+}
+function viewFreeCards(view){
+  const route=State.route,words=textbookWords(route.lesson);
+  const keys=Array.isArray(route.keys)?route.keys:words.map(w=>w.key);
+  const index=route.index||0,word=words.find(w=>w.key===keys[index]);
+  const back=el('button','back','‹ К карточкам');back.onclick=()=>go('cards');view.appendChild(back);
+  if(!word)return;
+  view.appendChild(el('p','eyebrow',`Урок ${route.lesson} · ${index+1} / ${keys.length}`));
+  const card=el('section','hero recall-card');view.appendChild(card);
+  const faces={han:['han recall-glyph',esc(word.d||word.s)],ru:['tr recall-answer',esc(word.ru)],py:['py recall-answer',pinyinHTML(word.p)]};
+  const side=Object.hasOwn(faces,route.facing)?route.facing:'han';
+  card.appendChild(el('div',...faces[side]));
+  if(route.revealed){
+    for(const answer of ['han','py','ru'])if(answer!==side)card.appendChild(el('div',...faces[answer]));
+  }else{
+    const flip=el('button','btn','Показать ответ');flip.dataset.key='space';flip.onclick=()=>{route.revealed=true;render();};card.appendChild(flip);
+  }
+  const nav=el('div','actionrow');
+  for(const [delta,label]of [[-1,'Назад'],[1,'Дальше']]){
+    const button=el('button','btn ghost',label);
+    button.onclick=()=>{route.index=(index+delta+keys.length)%keys.length;route.revealed=false;render();};
+    nav.appendChild(button);
+  }
+  card.appendChild(nav);
+}
+recallCycleBanner=function(){
+  const card=el('section','hero study-cycle-banner');
+  card.appendChild(el('h2','','Карточки'));
+  card.appendChild(el('p','note','Листай слова урока или проходи чтение и письмо с повторениями.'));
+  const open=el('button','btn','Открыть карточки');open.onclick=()=>go('cards');card.appendChild(open);return card;
+};
+let stageCardTimer;
+viewRecallCards=function(screen){
+  clearTimeout(stageCardTimer);
+  const view=el('div','view study-cards-view');screen.appendChild(view);
+  if(State.route.free)return viewFreeCards(view);
+  if(State.route.run)return recallSessionView(view);
+  const state=recallState(),lesson=state.lessons[0]||1,free=state.cardType==='free';
+  view.appendChild(el('h1','','Карточки'));
+  const modes=el('div','chips');
+  for(const [value,label]of [['staged','Поэтапные'],['free','Постоянные']]){
+    const button=el('button','chip'+((value==='free')===free?' on':''),label);
+    button.onclick=()=>{state.cardType=value;save('meta');render();};
+    modes.appendChild(button);
+  }
+  view.appendChild(modes);
+  const select=el('select');select.setAttribute('aria-label','Выбрать урок');
+  for(let n=1;n<=NL;n++){
+    const option=el('option','','Урок '+n);option.value=n;select.appendChild(option);
+  }
+  select.value=lesson;select.onchange=()=>{state.lessons=[+select.value];save('meta');render();};view.appendChild(select);
+  if(free){
+    const facing=el('select');facing.setAttribute('aria-label','Начать с');
+    for(const [value,label]of [['han','Начать с иероглифов'],['ru','Начать с перевода'],['py','Начать с пиньиня']]){
+      const option=el('option','',label);option.value=value;facing.appendChild(option);
+    }
+    facing.value=state.facing||'han';facing.onchange=()=>{state.facing=facing.value;save('meta');};view.appendChild(facing);
+    const label=el('label','setrow'),mix=el('input');mix.type='checkbox';mix.checked=!!state.mix;
+    mix.onchange=()=>{state.mix=mix.checked;save('meta');};label.append(mix,document.createTextNode(' Перемешать карточки'));view.appendChild(label);
+    const start=el('button','btn','Листать карточки');start.onclick=()=>startFreeCards(lesson);view.appendChild(start);
+  }else{
+    const entry=stageCardEntry(lesson),active=entry?.session&&!entry.session.finished;
+    view.appendChild(el('p','note',esc(stageCardStatus(entry))));
+    view.appendChild(el('p','note','Интервалы после каждого занятия: 4 ч → 12 ч → 1 день → 2 дня → 5 дней.'));
+    const start=el('button','btn',active?'Продолжить':entry?.completed?'Повторить урок':'Начать урок');
+    start.disabled=!active&&(entry?.due>Date.now()||entry?.completed>STAGE_HOURS.length);
+    start.onclick=()=>stageCardStart(lesson);view.appendChild(start);
+    const due=Object.entries(state.staged||{}).filter(([n,item])=>+n!==lesson&&item.completed<=STAGE_HOURS.length&&(item.session&&!item.session.finished||item.completed&&item.due<=Date.now()));
+    const now=Date.now();
+    const upcoming=Object.values(state.staged||{}).map(item=>item.due).filter(time=>time>now);
+    if(upcoming.length)stageCardTimer=setTimeout(()=>{if(view.isConnected)render();},Math.min(...upcoming)-now);
+    for(const [n,item]of due){
+      const button=el('button','btn ghost','Урок '+n+' · '+(item.session&&!item.session.finished?'продолжить':'повторить'));
+      button.onclick=()=>{state.lessons=[+n];stageCardStart(+n);};view.appendChild(button);
+    }
+  }
+};
 
 /*==================================================================
   ГРАММАТИКА: короткое правило → применение → отдельное повторение FSRS.
@@ -6421,7 +6553,7 @@ const Splash={
 };
 // Обновления: проверка при запуске, при каждом возвращении в приложение и раз в 30 мин; когда новая версия
 // встала, service worker сам перезагружает окно (место в уроке сохраняет Resume на pagehide).
-const APP_VER='v45';
+const APP_VER='v46';
 function registerSW(){
   if(!('serviceWorker' in navigator)) return;
   navigator.serviceWorker.register('./service-worker.js',{updateViaCache:'none'}).then(reg=>{
