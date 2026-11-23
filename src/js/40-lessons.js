@@ -2,6 +2,22 @@
   УРОКИ
 ==================================================================*/
 function viewLessons(s){
+  if(State.route.radicals){
+    const view=el('div','view'),back=el('button','back','‹ Поиск'),list=el('div','rowlist');
+    back.onclick=()=>go('dict');
+    view.append(back,el('h2','title','Ключи по урокам'),list);
+    for(let lesson=1;lesson<=NL;lesson++){
+      const words=deckWords(lesson,true);
+      if(!words.length)continue;
+      const row=el('button','row',`<div class="tt"><b>Урок ${lesson}</b><small class="han">${esc(words.map(w=>w.d).join(' · '))}</small></div>${IC('chev',18)}`);
+      row.onclick=()=>{
+        const state=recallState();state.radicalDeck=true;state.radicalLesson=lesson;
+        save('meta');go('cards');
+      };
+      list.appendChild(row);
+    }
+    s.appendChild(view);return;
+  }
   const v=el('div','view'), N=groupL();
   const back=el('button','back','‹ Словарь'); back.onclick=()=>go('dict'); v.appendChild(back);
   v.appendChild(el('h2','title',State.route.browse?'Слова по урокам':'Уроки'));

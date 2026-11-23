@@ -1,22 +1,31 @@
 /* Free browsing and lesson-based scheduled review share the textbook deck. */
 const STAGE_HOURS=[4,12,24,48,120];
 const STAGE_LABELS=['4 ч','12 ч','1 день','2 дня','5 дней'];
-function stageCardEntry(lesson){
-  return recallState().staged?.[lesson];
+function deckId(lesson,keys){return keys?'keys:'+lesson:lesson;}
+function deckWords(lesson,keys){
+  if(!keys)return textbookWords(lesson);
+  return recallLessonKeys(lesson).map(key=>{
+    const info=recallInfo(key);
+    return {key,d:info.hz,p:info.py,ru:info.ru};
+  });
 }
-function stageCardStart(lesson){
+function stageCardEntry(lesson,keys=false){
+  return recallState().staged?.[deckId(lesson,keys)];
+}
+function stageCardStart(lesson,radicals=false){
   const state=recallState();
   state.staged ||= {};
-  const entry=state.staged[lesson] ||= {completed:0,due:0};
+  const id=deckId(lesson,radicals);
+  const entry=state.staged[id] ||= {completed:0,due:0};
   if(!entry.session||entry.session.finished){
     if(entry.completed>STAGE_HOURS.length||entry.due>Date.now())return;
-    const keys=textbookWords(lesson).map(w=>w.key);
+    const keys=deckWords(lesson,radicals).map(w=>w.key);
     if(!keys.length)return;
-    entry.session={staged:true,lesson,keys,index:0,round:0,facing:'han',revealed:false,
+    entry.session={staged:true,lesson,radicals,keys,index:0,round:0,facing:'han',revealed:false,
       current:{k:keys[0],skill:'flip'},finished:false};
   }
   save('meta');
-  go('cards',{staged:lesson,run:true});
+  go('cards',{staged:id,run:true});
 }
 function stageCardRecord(session,grade){
   if(grade===1){
@@ -29,9 +38,9 @@ function stageCardRecord(session,grade){
     if(session.round===0){
       session.round=1;
       session.index=0;
-      session.keys=textbookWords(session.lesson).map(w=>w.key);
+      session.keys=deckWords(session.lesson,session.radicals).map(w=>w.key);
     }else{
-      const entry=stageCardEntry(session.lesson);
+      const entry=stageCardEntry(session.lesson,session.radicals);
       entry.completed++;
       const hours=STAGE_HOURS[entry.completed-1];
       entry.due=hours?Date.now()+hours*3600000:0;
@@ -52,16 +61,16 @@ function stageCardStatus(entry){
   const when=new Intl.DateTimeFormat('ru',{dateStyle:'short',timeStyle:'short'}).format(entry.due);
   return 'Следующее повторение · '+when;
 }
-function stageCardSummary(view,lesson){
+function stageCardSummary(view,lesson,radicals){
   view.appendChild(el('h1','','Оба круга завершены'));
-  view.appendChild(el('p','note',esc(stageCardStatus(stageCardEntry(lesson)))));
+  view.appendChild(el('p','note',esc(stageCardStatus(stageCardEntry(lesson,radicals)))));
 }
-function startFreeCards(lesson){
-  const state=recallState(),keys=textbookWords(lesson).map(w=>w.key);
-  go('cards',{free:true,lesson,keys:state.mix?shuffle(keys):keys,index:0,facing:state.facing||'han'});
+function startFreeCards(lesson,radicals=false){
+  const state=recallState(),keys=deckWords(lesson,radicals).map(w=>w.key);
+  go('cards',{free:true,lesson,radicals,keys:state.mix?shuffle(keys):keys,index:0,facing:state.facing||'han'});
 }
 function viewFreeCards(view){
-  const route=State.route,words=textbookWords(route.lesson);
+  const route=State.route,words=deckWords(route.lesson,route.radicals);
   const keys=Array.isArray(route.keys)?route.keys:words.map(w=>w.key);
   const index=route.index||0,word=words.find(w=>w.key===keys[index]);
   const back=el('button','back','‹ К карточкам');back.onclick=()=>go('cards');view.appendChild(back);
@@ -96,7 +105,8 @@ viewRecallCards=function(screen){
   const view=el('div','view study-cards-view');screen.appendChild(view);
   if(State.route.free)return viewFreeCards(view);
   if(State.route.run)return recallSessionView(view);
-  const state=recallState(),lesson=state.lessons[0]||1,free=state.cardType==='free';
+  const state=recallState(),radicals=!!state.radicalDeck,free=state.cardType==='free';
+  const lesson=radicals?(state.radicalLesson||1):(state.lessons[0]||1);
   view.appendChild(el('h1','','Карточки'));
   const modes=el('div','chips');
   for(const [value,label]of [['staged','Поэтапные'],['free','Постоянные']]){
@@ -105,11 +115,23 @@ viewRecallCards=function(screen){
     modes.appendChild(button);
   }
   view.appendChild(modes);
+  const decks=el('div','chips');
+  for(const [isRadical,label]of [[false,'Слова по урокам'],[true,'Ключи по урокам']]){
+    const button=el('button','chip'+(isRadical===radicals?' on':''),label);
+    button.onclick=()=>{state.radicalDeck=isRadical;save('meta');render();};decks.appendChild(button);
+  }
+  view.appendChild(decks);
   const select=el('select');select.setAttribute('aria-label','Выбрать урок');
   for(let n=1;n<=NL;n++){
-    const option=el('option','','Урок '+n);option.value=n;select.appendChild(option);
+    const count=radicals?recallLessonKeys(n).length:0;
+    if(radicals&&!count)continue;
+    const option=el('option','','Урок '+n+(radicals?' · '+count+' '+plural(count,'ключ','ключа','ключей'):''));
+    option.value=n;select.appendChild(option);
   }
-  select.value=lesson;select.onchange=()=>{state.lessons=[+select.value];save('meta');render();};view.appendChild(select);
+  select.value=lesson;
+  select.onchange=()=>{if(radicals)state.radicalLesson=+select.value;else state.lessons=[+select.value];save('meta');render();};
+  view.appendChild(select);
+  if(radicals)view.appendChild(el('p','note',esc(deckWords(lesson,true).map(w=>w.d).join(' · '))));
   if(free){
     const facing=el('select');facing.setAttribute('aria-label','Начать с');
     for(const [value,label]of [['han','Начать с иероглифов'],['ru','Начать с перевода'],['py','Начать с пиньиня']]){
@@ -118,21 +140,27 @@ viewRecallCards=function(screen){
     facing.value=state.facing||'han';facing.onchange=()=>{state.facing=facing.value;save('meta');};view.appendChild(facing);
     const label=el('label','setrow'),mix=el('input');mix.type='checkbox';mix.checked=!!state.mix;
     mix.onchange=()=>{state.mix=mix.checked;save('meta');};label.append(mix,document.createTextNode(' Перемешать карточки'));view.appendChild(label);
-    const start=el('button','btn','Листать карточки');start.onclick=()=>startFreeCards(lesson);view.appendChild(start);
+    const start=el('button','btn','Листать карточки');start.onclick=()=>startFreeCards(lesson,radicals);view.appendChild(start);
   }else{
-    const entry=stageCardEntry(lesson),active=entry?.session&&!entry.session.finished;
+    const entry=stageCardEntry(lesson,radicals),active=entry?.session&&!entry.session.finished;
     view.appendChild(el('p','note',esc(stageCardStatus(entry))));
     view.appendChild(el('p','note','Интервалы после каждого занятия: 4 ч → 12 ч → 1 день → 2 дня → 5 дней.'));
     const start=el('button','btn',active?'Продолжить':entry?.completed?'Повторить урок':'Начать урок');
     start.disabled=!active&&(entry?.due>Date.now()||entry?.completed>STAGE_HOURS.length);
-    start.onclick=()=>stageCardStart(lesson);view.appendChild(start);
-    const due=Object.entries(state.staged||{}).filter(([n,item])=>+n!==lesson&&item.completed<=STAGE_HOURS.length&&(item.session&&!item.session.finished||item.completed&&item.due<=Date.now()));
+    start.onclick=()=>stageCardStart(lesson,radicals);view.appendChild(start);
+    const due=Object.entries(state.staged||{}).filter(([n,item])=>n!==String(deckId(lesson,radicals))&&item.completed<=STAGE_HOURS.length&&(item.session&&!item.session.finished||item.completed&&item.due<=Date.now()));
     const now=Date.now();
     const upcoming=Object.values(state.staged||{}).map(item=>item.due).filter(time=>time>now);
     if(upcoming.length)stageCardTimer=setTimeout(()=>{if(view.isConnected)render();},Math.min(...upcoming)-now);
-    for(const [n,item]of due){
-      const button=el('button','btn ghost','Урок '+n+' · '+(item.session&&!item.session.finished?'продолжить':'повторить'));
-      button.onclick=()=>{state.lessons=[+n];stageCardStart(+n);};view.appendChild(button);
+    for(const [id,item]of due){
+      const isRadical=id.startsWith('keys:'),number=Number(isRadical?id.slice(5):id);
+      const button=el('button','btn ghost',(isRadical?'Ключи':'Слова')+' · урок '+number+' · '+(item.session&&!item.session.finished?'продолжить':'повторить'));
+      button.onclick=()=>{
+        state.radicalDeck=isRadical;
+        if(isRadical)state.radicalLesson=number;else state.lessons=[number];
+        stageCardStart(number,isRadical);
+      };
+      view.appendChild(button);
     }
   }
 };

@@ -67,4 +67,19 @@ await T('entire reading round precedes writing and each interval gates the next 
  }
  ok(ev('stageCardEntry(1).completed')===6&&doc.body.textContent.includes('Все пять повторений завершены'),'schedule did not finish');
 });
+await T('radicals by lesson have their own deck and schedule',()=>{
+ ev("State.meta=freshMeta();go('dict')");
+ ok(click(/Ключи по урокам/),'radical lessons missing from search');
+ ok(click(/Урок 1/),'lesson missing from radical catalogue');
+ ok(ev('recallState().radicalDeck&&recallState().radicalLesson===1'),'catalogue opened wrong deck');
+ click(/^Постоянные$/);click(/^Листать карточки$/);
+ ok(ev("State.route.keys.join()")==='r:9,r:38,r:39','free deck differs from guide');
+ ev("go('cards');stageCardStart(1);stageCardStart(1,true)");
+ ok(ev("stageCardEntry(1).session.keys.every(k=>!isRad(k))"),'word session was overwritten');
+ ok(ev("recallCurrentSession().keys.join()")==='r:9,r:38,r:39','staged deck differs from guide');
+ ev("for(let i=0;i<3;i++){recallReveal();recallGrade(3)}");
+ ok(doc.querySelector('.recall-writer'),'radical writing missing');
+ ev("for(let i=0;i<3;i++){const s=recallCurrentSession();s.current.writer={completed:true};s.revealed=true;recallWriteGrade()}");
+ ok(ev('stageCardEntry(1,true).completed===1&&stageCardEntry(1).completed===0'),'radical and word schedules mixed');
+});
 A.finish('simple cards');

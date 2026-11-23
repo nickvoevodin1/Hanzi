@@ -175,7 +175,7 @@ function recallHint(){
 }
 function recallSessionView(v){
   const raw=recallActiveSession(),ss=recallSessionReady(),back=el('button','back','‹ К карточкам');back.onclick=()=>go('cards');v.appendChild(back);
-  if(!ss&&raw?.staged){stageCardSummary(v,raw.lesson);return;}
+  if(!ss&&raw?.staged){stageCardSummary(v,raw.lesson,raw.radicals);return;}
   if(!ss){
     v.appendChild(el('h1','',raw?.stale?'Начался новый день':'Порция завершена'));
     v.appendChild(el('p','note',raw?.stale?'Вчерашние ответы сохранены. Открой сегодняшнее занятие.':`Готово на сегодня: ${raw?.completed?.length||0} из ${raw?.keys?.filter(k=>!recallExcluded(k)).length||0}. Готовые слова доступны в повторении.`));
@@ -186,7 +186,7 @@ function recallSessionView(v){
   const x=ss.current,info=recallInfo(x.k),goal=ss.staged?{lesson:ss.lesson}:ss.goals[x.k];
   const word=textbookWords(goal.lesson||WORD_L[x.k]).find(w=>w.key===x.k);
   if(word)Object.assign(info,{hz:word.d||word.s,py:word.p,ru:word.ru});
-  if(ss.staged)v.appendChild(el('p','eyebrow',`Урок ${ss.lesson} · круг ${ss.round+1} из 2 · ${ss.index+1} / ${ss.keys.length}`));
+  if(ss.staged)v.appendChild(el('p','eyebrow',`${ss.radicals?'Ключи · урок':'Урок'} ${ss.lesson} · круг ${ss.round+1} из 2 · ${ss.index+1} / ${ss.keys.length}`));
   else{
   v.appendChild(el('p','eyebrow',(goal.phase===4?'Повторение':'Изучение')+' · '+info.label));
   const total=ss.keys.filter(k=>!recallExcluded(k)).length,completed=ss.keys.filter(k=>!recallExcluded(k)&&recallRowDone(recallData(k,ss.goals[k],false),ss.goals[k].phase)).length;
