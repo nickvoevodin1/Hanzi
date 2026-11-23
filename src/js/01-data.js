@@ -63,6 +63,12 @@ const isHan = c => c>='一' && c<='鿿';
 const hanOf = s => [...s].filter(isHan);
 function radOf(c){ const h=HZ.c[c]; return h? h[0] : 0; }           // номер ключа Канси
 function lessonWords(L){ return ((LESSONS[L]||{}).o||[]).map(k=>BYK[k]).filter(Boolean); }
+function textbookWords(L){
+  return lessonWords(L).map(w=>{
+    const row=LESSONS[L]?.textbook?.[w.key];
+    return row?{...w,d:row[0],p:row[1],ru:row[2],textbook:true}:w;
+  });
+}
 function lessonExtras(L){ return []; } // В курсе только основной материал учебника; старые данные x сохранены для совместимости.
 function lessonTitle(L){ return (LESSONS[L]&&LESSONS[L].t) || ('Урок '+L); }
 

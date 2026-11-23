@@ -14,7 +14,7 @@ await T('read-only-home-and-no-unseen-enrolment',()=>{
  ok(ev('JSON.stringify(State.meta.memory)===window.__meta'),'opening home enrolled notebook entries');
  ok(doc.querySelectorAll('#screen > .view > *').length===2,'extra menus before course path');
  ok(doc.querySelectorAll('.nav button').length===4,'old navigation menus remain');
- ev("go('study')");ok(doc.querySelector('.recall-lesson-picker'),'new lesson selector absent');ok(ev('Object.keys(recallState().entries).length')===0,'opening new cycle silently imported old paper days');
+ ev("go('study')");ok(doc.querySelector('select[aria-label="Выбрать урок"]'),'new lesson selector absent');ok(ev('Object.keys(recallState().entries).length')===0,'opening new cycle silently imported old paper days');
 });
 await T('writing-and-pinyin-three-calendar-days',()=>{
  reset();learn(['你','r:1']);write(['你','r:1']);
@@ -103,7 +103,7 @@ await T('radical-writing-needs-no-pinyin-and-auto-advances',()=>{
  ok(ev("State.route.k==='r:2'"),'radical did not advance after writing');
  ok(ev("notebookStatus('r:1').complete")===1,'radical writing day not complete');
  ok(!ev("notebookRow('r:1',0,false).py.done"),'pinyin completion fabricated');
- ev("go('path')");ok(doc.querySelectorAll('.study-week span').length===4,'new four-stage timeline missing');
+ ev("go('path')");ok(doc.querySelector('.study-cycle-banner .btn'),'card entry missing');
 });
 await T('global-round-is-complete-only-after-all-portions',()=>{
  reset();ev("window.__keys=semWords().slice(0,12);for(const k of window.__keys){for(let i=0;i<3;i++){const row=notebookRow(k,i,true);row.date='2026-10-'+(20+i);row.hz={done:true,date:row.date};row.py={done:true,date:row.date};}studyState().reviews[k]={skills:{},days:{'2026-10-23':{hz:3,reading:3},'2026-10-24':{hz:3,reading:3}}};}startStudyCards('today')");
@@ -164,9 +164,8 @@ await T('midnight-never-credits-yesterday-session-to-today',()=>{
 });
 await T('multiple-lesson-selection-and-auto-next-after-both-paper-marks',()=>{
  reset();ev("go('study')");
- for(const L of [5,18]){const input=doc.querySelector('input[aria-label="Урок '+L+'"]');input.checked=true;input.dispatchEvent(new A.w.Event('change'));}
- ok(ev("recallState().lessons.join()") ==='5,18','cannot combine old and new lessons');
- ok(ev("recallPool().filter(k=>!isRad(k)).join()")===ev("uniq(notebookPool('words',5).concat(notebookPool('words',18))).join()"),'selected lesson vocabulary incomplete');ev("studyState().notebookLessons=[5,18]");
+ const select=doc.querySelector('select[aria-label="Выбрать урок"]');select.value='18';select.dispatchEvent(new A.w.Event('change'));
+ ok(ev("recallState().lessons.join()")==='18','lesson not saved');ev("studyState().notebookLessons=[5,18]");
  ev("window.__queue=studyNotebookPool();window.__first=window.__queue[0];window.__next=window.__queue[1];go('notebook',{k:window.__first,queue:window.__queue})");
  let buttons=[...doc.querySelectorAll('.notebook-day[data-notebook-day="1"] button')].filter(b=>b.textContent==='Прописал');buttons[0].click();
  ok(ev('State.route.k===window.__first'),'advanced before pinyin');
@@ -174,7 +173,7 @@ await T('multiple-lesson-selection-and-auto-next-after-both-paper-marks',()=>{
  ok(ev('State.route.k===window.__next'),'did not auto advance after both marks');
  ok(ev('notebookStatus(window.__first).complete')===1,'paper day not saved');
  ok(ev('Object.keys(State.cards).length')===0,'lesson selection granted knowledge');
- ev("go('study')");ok(doc.querySelector('input[aria-label="Урок 18"]').checked,'lesson selection not retained');
+ ev("go('study')");ok(doc.querySelector('select[aria-label="Выбрать урок"]').value==='18','lesson selection not retained');
 });
 await T('radicals-follow-lesson-words-in-bounded-stable-batches',()=>{
  reset();ev("studyState().notebookLessons=[5];studyState().notebookRadicalCount=3;window.__pool=studyNotebookPool()");
@@ -192,11 +191,11 @@ await T('known-marks-skip-writing-count-unique-characters-and-preserve-knowledge
  const stats=ev('studyRememberedCounts()');ok(stats.chars===2&&stats.keys===1,'known marks counted with duplicates');
  ok(ev('JSON.stringify(State.cards)===window.__base&&JSON.stringify(State.meta.daily)===window.__daily'),'known mark invented FSRS or XP');
  ev("go('dict',{q:'你'})");ok([...doc.querySelectorAll('#screen button')].some(b=>b.textContent.includes('Уже знаю')),'search has no known toggle');
- ev("go('path')");ok(doc.querySelector('.study-counts').textContent.includes('2'),'home counts missing');
+
 });
 await T('all-lessons-contain-only-main-textbook-words',()=>{
  reset();ev("window.__core=uniq(Object.values(LESSONS).flatMap(l=>l.o));window.__extra=uniq(Object.values(LESSONS).flatMap(l=>l.x.flatMap(x=>x.o))).find(k=>!window.__core.includes(k));State.cards[window.__extra]=FSRS.review({},3,REQ);memoryState().entries[window.__extra]={notebook:{days:[{hz:{done:true}}]}};window.__old=JSON.stringify(State.cards)");
- ok(ev('COURSE.length')===537,'wrong core curriculum size');
+ ok(ev('COURSE.length')===539,'wrong core curriculum size');
  for(let L=1;L<=30;L++)ok(ev(`lessonExtras(${L}).length===0&&notebookPool('words',${L}).every(k=>LESSONS[${L}].o.includes(k))`),'extra words remain in lesson '+L);
  ok(ev('courseClassUnits().every(u=>u.wordItems.every(k=>window.__core.includes(k)))'),'extras remain in path');
  ok(!ev('studyLearnedPool().includes(window.__extra)||studyWrittenPool().includes(window.__extra)'),'old extra writing reappears in queue');
@@ -220,12 +219,12 @@ await T('search-browses-numeric-radicals-and-full-main-lesson-characters',()=>{
  button('Ключи по порядку').click();ok(ev("State.route.name==='keys'&&State.tab==='dict'"),'radical catalogue outside search');
  const nums=[...doc.querySelectorAll('.rc .rn span:first-child')].map(x=>+x.textContent.replace('№',''));
  ok(nums.join()===Array.from({length:214},(_,i)=>i+1).join(),'radicals not sorted1–214');
- button('‹ Поиск').click();button('Иероглифы по урокам').click();
+ button('‹ Поиск').click();button('Слова по урокам').click();
  ok(ev('State.route.browse'),'not in character browsing mode');
  doc.querySelectorAll('.rowlist > button.row')[4].click();
  ok(ev('State.route.L')===5,'wrong lesson opened');
- const chars=[...doc.querySelectorAll('#screen [data-c]')].map(x=>x.dataset.c);
- ok(chars.join()===ev("uniq(lessonWords(5).flatMap(w=>hanOf(w.s))).join()"),'lesson character list missing repeated signs');
+ const chars=[...doc.querySelectorAll('#screen .hzw')].map(x=>x.textContent);
+ ok(chars.join()===ev("textbookWords(5).map(w=>w.d).join()"),'lesson character list missing repeated signs');
  ok(chars.includes('是')&&!chars.includes('纸'),'wrong main/additional character distinction');
  ok(ev('JSON.stringify(State.cards)===window.__cards'),'browsing awarded knowledge');
 });

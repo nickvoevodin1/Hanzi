@@ -7,12 +7,12 @@ await T('rads-index',()=>ok(ev("RADS.every((r,i)=>r[0]===i+1)")&&ev("RADS.length
 await T('lesson-words',()=>{ const n=ev("Object.keys(LESSONS).length"); ok(n===30,'уроков '+n);
   ok(ev("Object.values(LESSONS).every(l=>l.o.every(k=>k in BYK)&&l.x.every(x=>x.o.every(k=>k in BYK)))"),'слово урока не найдено в словаре');
   const nc=ev("COURSE.filter(k=>!isRad(k)).length"); ok(nc===ev("new Set(Object.values(LESSONS).flatMap(l=>l.o)).size"),'слов курса '+nc);
-  ok(nc===537,'слов курса мало: '+nc); });
+  ok(nc===539,'слов курса мало: '+nc); });
 await T('textbook-main-and-additional-sections',()=>{
  const path=new URL('../src/data/kondrashevsky_data.py',import.meta.url).pathname;
  const expected=JSON.parse(execFileSync('python3',['-c',"import json,sys;ns={};exec(open(sys.argv[1]).read(),ns);print(json.dumps({L:[t[0] for section in ('words','names') for t in v.get(section,[])] for L,v in ns['LESSONS'].items()},ensure_ascii=False))",path],{encoding:'utf8'}));
  for(let L=1;L<=30;L++){
-   const fix={'〇':'零','没(有)':'没有','打(电话)':'打电话','开(车)':'开车'};
+   const fix={'《洪湖水，浪打浪》':'洪湖水浪打浪','〇':'零','没(有)':'没有','打(电话)':'打电话','开(车)':'开车'};
    const want=[...new Set(expected[L].map(s=>fix[s]||s.replace(/[()]/g,'')))].sort();
    const actual=[...new Set(ev(`lessonWords(${L}).map(w=>w.s)`))].sort();
    ok(actual.join()===want.join(),'main list differs from textbook source: lesson '+L);

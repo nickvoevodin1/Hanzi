@@ -17,7 +17,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "src" / "data"
-FIX = {"〇": "零","没(有)": "没有", "打(电话)": "打电话", "开(车)": "开车"}
+FIX = {"《洪湖水，浪打浪》": "洪湖水浪打浪", "〇": "零","没(有)": "没有", "打(电话)": "打电话", "开(车)": "开车"}
 PYCH = "a-zA-Zāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜüńňǹ"
 TONED = set("āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜńňǹ")
 BLOCK = 4
@@ -109,11 +109,16 @@ def main():
     for L in range(1, 31):
         v = LESSONS[L]
         order = []
+        textbook = {}
         for grp in ("words", "names"):
             for t in v.get(grp, []):
                 w = pick(FIX.get(t[0], t[0]), t[1])
-                if w and key(w) not in order:
-                    order.append(key(w))
+                if not w:
+                    raise ValueError(f"Урок {L}: нет словарной карточки для {t[0]} ({t[1]})")
+                if key(w) in textbook:
+                    raise ValueError(f"Урок {L}: словарные строки совпали по ключу {key(w)}")
+                order.append(key(w))
+                textbook[key(w)] = list(t[:3])
         # примеры, написанные для этого урока (лексика строго из пройденного)
         units, owners, seen = [], [], set()
         for s in order:
@@ -159,7 +164,7 @@ def main():
         extra = [{"id": g["id"], "title": g["title"], "src": g["src"], "note": g.get("note", ""),
                   "o": [key(pick(x["s"], x.get("p", "")) or bykey[x["s"]]) for x in g["words"]]}
                  for g in group if g["after"] == L]
-        out[str(L)] = {"t": titles.get(str(L), ""), "sub": v.get("sub", ""), "o": order, "b": blocks, "x": extra, "textbookExtra": [key(w) for t in v.get("extra", []) if (w := pick(FIX.get(t[0], t[0]), t[1]))]}
+        out[str(L)] = {"t": titles.get(str(L), ""), "sub": v.get("sub", ""), "o": order, "textbook": textbook, "b": blocks, "x": extra, "textbookExtra": [key(w) for t in v.get("extra", []) if (w := pick(FIX.get(t[0], t[0]), t[1]))]}
     (DATA / "lessons.json").write_text(json.dumps(out, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     print("lessons.json:", stats, "блоков:", sum(len(x["b"]) for x in out.values()))
 

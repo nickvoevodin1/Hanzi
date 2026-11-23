@@ -90,6 +90,14 @@ def main():
             by[gw["s"]] = nw
             changed.append(f"+ {gw['s']} ({g['id']})")
 
+    # Main-list entries missing from the base dictionary (pp. 205 and 505).
+    for hz, py, ru in [
+        ("阅览", "yuè lǎn", "читать, просматривать"),
+        ("洪湖水浪打浪", "hóng hú shuǐ làng dǎ làng", "В озере Хунху волны катятся одна за другой"),
+    ]:
+        if hz not in by:
+            words.append({"s": hz, "p": py, "ru": ru})
+
     fixed = 0
     for w in words:
         if not any("一" <= c <= "鿿" for c in w["s"]) or not w["s"].isascii() and any(c.isascii() and c.isalpha() for c in w["s"]):

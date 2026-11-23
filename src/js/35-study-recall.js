@@ -56,6 +56,7 @@ function recallPickFresh(n){
 function recallData(k,goal,create){
   let e=recallState().entries[k];if(!e&&create)e=recallState().entries[k]={started:todayStr(),days:[],reviews:{},skills:{},familiar:false};if(!e)return null;
   const bag=goal.phase===4?(e.reviews||(e.reviews={})):(e.days||(e.days=[])),id=goal.phase===4?goal.date:goal.phase-1;
+  if(bag[id]&&create&&goal.phase===1&&!recallRowDone(bag[id],goal.phase))bag[id].date=goal.date;
   if(bag[id]&&create&&bag[id].date!==goal.date&&!recallRowDone(bag[id],goal.phase)){
     e.attemptHistory=(e.attemptHistory||[]).concat({phase:goal.phase,...bag[id]}).slice(-30);delete bag[id];
   }
@@ -70,11 +71,16 @@ function recallTasks(ss){
   for(const k of ss.keys){
     if(!recallValid(k)||recallExcluded(k)||ss.deferred?.includes(k))continue;
     const e=recallState().entries[k],goal=ss.goals[k];if(!e||!goal)continue;
-    if(!e.familiar){out.push({k,skill:'intro'});continue;}
+    if(!ss.facing&&!e.familiar){out.push({k,skill:'intro'});continue;}
     const row=recallData(k,goal,false),need=recallGoal(goal.phase);
+    if(ss.facing){
+      if((row?.py?.streak||0)<need.py||(row?.meaning?.streak||0)<need.meaning)out.push({k,skill:'flip'});
+      else if(need.write&&!row?.write?.passed)out.push({k,skill:'write'});
+      continue;
+    }
     for(const skill of ['py','meaning'])if((row?.[skill]?.streak||0)<need[skill])out.push({k,skill});
   }
-  // Read first on days2/3, then reverse the cue. Writing never substitutes for reading.
+  // Flip the word card before testing its handwritten form.
   if(out.some(x=>x.skill==='intro'))return out.filter(x=>x.skill==='intro');
   if(out.length)return out;
   for(const k of ss.keys){if(!recallValid(k)||recallExcluded(k)||ss.deferred?.includes(k))continue;const goal=ss.goals[k];if(goal&&recallGoal(goal.phase).write&&!recallData(k,goal,false)?.write?.passed)out.push({k,skill:'write'});}
@@ -82,25 +88,25 @@ function recallTasks(ss){
 }
 function recallAdvance(ss){
   const tasks=recallTasks(ss),recent=ss.recent||[],previous=ss.previous;
-  const x=tasks.find(x=>!recent.includes(x.k))||tasks.find(x=>x.k!==previous?.k)||tasks.find(x=>x.skill!==previous?.skill)||tasks[0];
+  const x=ss.facing?tasks[0]:tasks.find(x=>!recent.includes(x.k))||tasks.find(x=>x.k!==previous?.k)||tasks.find(x=>x.skill!==previous?.skill)||tasks[0];
   ss.current=x?{...x,id:++ss.serial}:null;ss.revealed=false;ss.finished=!x;
   if(ss.finished)ss.completed=ss.keys.filter(k=>!recallExcluded(k)&&recallRowDone(recallData(k,ss.goals[k],false),ss.goals[k].phase));
 }
 function recallStart(mode,selected){
-  mode=mode||'today';const m=recallState(),old=m.session,context=mode+'|'+(selected||[]).join(',')+(mode==='new'?'|'+m.unit+'|'+m.lessons.join(',')+'|'+m.includeKeys:'');
+  mode=mode||'today';const m=recallState(),old=m.session,context=mode+'|'+(selected||[]).join(',')+(mode==='new'?'|'+m.unit+'|'+m.lessons.join(',')+'|'+m.includeKeys:'')+'|'+(m.facing||'han')+'|'+!!m.mix;
   for(const [id,s]of Object.entries(m.paused||{}))if(s.date!==todayStr())delete m.paused[id];
-  if(old&&!old.finished&&old.date===todayStr()&&!selected&&old.context===context){go('cards',{run:true});return;}
+  if(mode!=='today'&&old&&!old.finished&&old.date===todayStr()&&!selected&&old.context===context){go('cards',{run:true});return;}
   if(old&&!old.finished&&old.date===todayStr()){m.paused=m.paused||{};m.paused[old.context]=old;}
-  if(m.paused?.[context]?.date===todayStr()&&!m.paused[context].finished){m.session=m.paused[context];delete m.paused[context];save('meta');go('cards',{run:true});return;}
-  const due=recallOrder(recallDue()),fresh=recallPickFresh(5);let keys;
-  if(selected)keys=uniq(selected).filter(k=>recallValid(k)&&!recallExcluded(k)&&(due.includes(k)||recallFresh().includes(k)||mode==='catalog'&&isRad(k))).slice(0,5);
+  if(mode!=='today'&&m.paused?.[context]?.date===todayStr()&&!m.paused[context].finished){m.session=m.paused[context];delete m.paused[context];save('meta');go('cards',{run:true});return;}
+  const due=recallDue(),fresh=recallFresh();let keys;
+  if(selected)keys=uniq(selected).filter(k=>recallValid(k)&&!recallExcluded(k)&&(due.includes(k)||recallFresh().includes(k)||mode==='catalog'&&isRad(k)));
   else if(mode==='new')keys=fresh;
-  else if(mode==='difficult')keys=due.filter(studyIsDifficult).slice(0,5);
-  else keys=due.slice(0,5);
-  if(!keys.length&&mode==='today')keys=fresh;
+  else if(mode==='difficult')keys=due.filter(studyIsDifficult);
+  else keys=due;
+  if(m.mix)keys=shuffle(keys);
   if(!keys.length){toast('На сегодня эта порция завершена. Можно выбрать другой урок.');return false;}
-  const ss={v:1,mode,context,keys,goals:{},date:todayStr(),serial:0,current:null,recent:[],attempts:0,correct:0,revealed:false,finished:false,deferred:[]};
-  for(const k of keys){const plan=recallPlan(k);ss.goals[k]={phase:plan.phase,date:ss.date};recallData(k,ss.goals[k],true);}
+  const ss={v:2,mode,context,facing:m.facing||'han',lesson:m.lessons[0],keys,goals:{},date:todayStr(),serial:0,current:null,recent:[],attempts:0,correct:0,revealed:false,finished:false,deferred:[]};
+  for(const k of keys){const plan=recallPlan(k);const entry=m.entries[k],lesson=mode==='new'&&lessonWords(ss.lesson).some(w=>w.key===k)?ss.lesson:entry?.lesson||WORD_L[k];ss.goals[k]={phase:plan.phase,date:ss.date,lesson};recallData(k,ss.goals[k],true);if(lesson)m.entries[k].lesson=lesson;}
   m.session=ss;recallAdvance(ss);save('meta');go('cards',{run:true});return true;
 }
 function recallSessionReady(){
@@ -110,29 +116,31 @@ function recallSessionReady(){
   return ss.finished?null:ss;
 }
 function recallIntro(){const ss=recallSessionReady(),x=ss?.current;if(!x||x.skill!=='intro')return false;recallState().entries[x.k].familiar=true;ss.previous=x;ss.recent=(ss.recent||[]).concat(x.k).slice(-3);recallAdvance(ss);save('meta');render();return true;}
-function recallReveal(){const ss=recallSessionReady(),x=ss?.current;if(!x||!['py','meaning'].includes(x.skill))return false;ss.revealed=true;save('meta');render();return true;}
+function recallReveal(){const ss=recallSessionReady(),x=ss?.current;if(!x||!['py','meaning','flip'].includes(x.skill))return false;ss.revealed=true;save('meta');render();return true;}
 function recallRecord(ss,x,grade){
   if(x.practice){ss.practiceQueue.splice(ss.practiceQueue.findIndex(t=>t.k===x.k&&t.skill===x.skill),1);ss.previous=x;ss.recent=ss.recent.concat(x.k).slice(-3);recallAdvance(ss);save('meta');render();return;}
-  const row=recallData(x.k,ss.goals[x.k],true),e=recallState().entries[x.k],datum=row[x.skill];
+  const row=recallData(x.k,ss.goals[x.k],true),e=recallState().entries[x.k],datum=row[x.skill==='flip'?'py':x.skill];
   const first=datum.tries===0;datum.tries++;ss.attempts++;if(grade>=2)ss.correct++;
   if(x.skill==='write')datum.passed=grade>=2;else datum.streak=grade>=2?(datum.streak||0)+1:0;
+  if(x.skill==='flip'){row.meaning.tries++;row.meaning.streak=datum.streak;e.familiar=true;}
   if(first){
     datum.firstGrade=grade;const prev=e.skills[x.skill];if(!prev?.state||prev.due<=Date.now()||grade===1)e.skills[x.skill]=FSRS.review(prev||{},grade,REQ);
     // Repeated drills and immediate corrections do not inflate FSRS or XP.
     D().t++;if(grade>=2){D().ok++;addXP(2);}
   }
-  if(grade===1){const others=ss.keys.filter(k=>k!==x.k&&!recallExcluded(k)&&recallState().entries[k]?.familiar),pool=others.length?others:[x.k];ss.practiceQueue=Array.from({length:3},(_,n)=>({k:pool[n%pool.length],skill:x.skill==='py'?'meaning':x.skill==='meaning'?'py':n%2?'meaning':'py',practice:true}));}
+  if(grade===1&&!ss.facing){const others=ss.keys.filter(k=>k!==x.k&&!recallExcluded(k)&&recallState().entries[k]?.familiar),pool=others.length?others:[x.k];ss.practiceQueue=Array.from({length:3},(_,n)=>({k:pool[n%pool.length],skill:x.skill==='py'?'meaning':x.skill==='meaning'?'py':n%2?'meaning':'py',practice:true}));}
+  if(grade===1&&ss.facing){ss.keys=ss.keys.filter(k=>k!==x.k);ss.keys.push(x.k);}
   e.lastAt=Date.now();e.lastGrade=grade;ss.previous={k:x.k,skill:x.skill};ss.recent=(ss.recent||[]).concat(x.k).slice(-3);recallAdvance(ss);save('meta');render();
 }
 function recallGrade(grade){
-  const ss=recallSessionReady(),x=ss?.current;if(!x||!ss.revealed||![1,2,3].includes(grade)||!['py','meaning'].includes(x.skill))return false;
+  const ss=recallSessionReady(),x=ss?.current;if(!x||!ss.revealed||![1,2,3].includes(grade)||!['py','meaning','flip'].includes(x.skill))return false;
   recallRecord(ss,x,grade);return true;
 }
 function recallWriteGrade(){
   const ss=recallSessionReady(),x=ss?.current;if(!x||x.skill!=='write'||!ss.revealed||!x.writer?.completed)return false;
   recallRecord(ss,x,x.writer.mistakes||x.writer.assisted?1:3);return true;
 }
-function recallWritingForms(k){const info=recallInfo(k),known=recallVerifiedChars();return isRad(k)?info.forms:info.forms.filter(ch=>!known.has(ch));}
+function recallWritingForms(k){return recallInfo(k).forms;}
 function recallWriterCurrent(ss,x,host){return host.isConnected&&recallCurrentSession()===ss&&ss.current===x&&ss.date===todayStr()&&!recallExcluded(x.k);}
 async function recallWriter(host,ss,x){
   const forms=recallWritingForms(x.k);if(!forms.length){recallAdvance(ss);save('meta');render();return;}
@@ -164,11 +172,14 @@ function recallSessionView(v){
   const raw=recallState().session,ss=recallSessionReady(),back=el('button','back','‹ К карточкам');back.onclick=()=>go('cards');v.appendChild(back);
   if(!ss){
     v.appendChild(el('h1','',raw?.stale?'Начался новый день':'Порция завершена'));
-    v.appendChild(el('p','note',raw?.stale?'Вчерашние ответы сохранены. Открой сегодняшнее занятие.':`Готово на сегодня: ${raw?.completed?.length||0} из ${raw?.keys?.filter(k=>!recallExcluded(k)).length||0}. Повторение изученного будет доступно завтра.`));
+    v.appendChild(el('p','note',raw?.stale?'Вчерашние ответы сохранены. Открой сегодняшнее занятие.':`Готово на сегодня: ${raw?.completed?.length||0} из ${raw?.keys?.filter(k=>!recallExcluded(k)).length||0}. Готовые слова доступны в повторении.`));
     if(raw?.deferred?.length)v.appendChild(el('p','note','Отложено знаков: '+raw.deferred.length+'. Их этап остаётся незавершённым.'));
-    const more=el('button','btn','К занятиям на сегодня');more.onclick=()=>go('cards');v.appendChild(more);return;
+    if(raw?.mode==='new'&&recallDue().length){const review=el('button','btn','Повторить изученное');review.onclick=()=>recallStart('today');v.appendChild(review);}
+    const more=el('button','btn ghost','К карточкам');more.onclick=()=>go('cards');v.appendChild(more);return;
   }
   const x=ss.current,info=recallInfo(x.k),goal=ss.goals[x.k],datum=recallData(x.k,goal,false),need=recallGoal(goal.phase);
+  const word=textbookWords(goal.lesson||WORD_L[x.k]).find(w=>w.key===x.k);
+  if(word)Object.assign(info,{hz:word.d||word.s,py:word.p,ru:word.ru});
   v.appendChild(el('p','eyebrow',(goal.phase===4?'Повторение':'Изучение')+' · '+info.label));
   const total=ss.keys.filter(k=>!recallExcluded(k)).length,completed=ss.keys.filter(k=>!recallExcluded(k)&&recallRowDone(recallData(k,ss.goals[k],false),ss.goals[k].phase)).length;
   v.appendChild(el('div','study-progress',`<i style="width:${Math.round(completed/total*100)}%"></i>`));
@@ -179,10 +190,19 @@ function recallSessionView(v){
     const speak=el('button','linkbtn',IC('speaker',18)+' Послушать');speak.onclick=()=>Speech.say(info.forms[0]&&isRad(x.k)?info.forms[0]:info.hz,undefined,info.py);card.appendChild(speak);
     card.appendChild(el('p','note','Посмотри, произнеси с тонами и свяжи со смыслом. Затем ответ будет скрыт.'));
     const next=el('button','btn','Начать вспоминать');next.onclick=recallIntro;card.appendChild(next);
+  }else if(x.skill==='flip'){
+    const faces={han:['han recall-glyph',esc(info.hz)],ru:['tr recall-answer',esc(info.ru)],py:['py recall-answer',pinyinHTML(info.py)]};
+    card.appendChild(el('div',...faces[ss.facing]));
+    if(!ss.revealed){
+      const show=el('button','btn','Показать ответ');show.dataset.key='space';show.onclick=recallReveal;card.appendChild(show);
+    }else{
+      for(const side of ['han','py','ru'])if(side!==ss.facing)card.appendChild(el('div',...faces[side]));
+      const again=el('button','btn ghost','Ещё раз'),good=el('button','btn','Вспомнил');
+      again.onclick=()=>recallGrade(1);good.onclick=()=>recallGrade(3);card.append(again,good);
+    }
   }else if(x.skill==='write'){
     card.appendChild(el('p','kind','Напиши по переводу'));card.appendChild(el('h2','recall-prompt',esc(info.ru)));
-    card.appendChild(el('p','note',isRad(x.k)?'Ключ: напиши форму из пособия.':'Напиши иероглифы слова по очереди. Уже подтверждённые знаки пропускаются.'));
-    if(!isRad(x.k)&&recallVerifiedChars().size){const known=info.forms.filter(ch=>recallVerifiedChars().has(ch));if(known.length)card.appendChild(el('p','note','Эти знаки уже подтверждены и не проверяются: '+known.join(' ')));}
+    card.appendChild(el('p','note',isRad(x.k)?'Ключ: напиши форму из пособия.':'Напиши все иероглифы слова по очереди.'));
     if(!ss.revealed){const host=el('div','recall-writer');card.appendChild(host);recallWriter(host,ss,x);const hint=el('button','linkbtn','Не помню — показать порядок черт');hint.onclick=recallHint;card.appendChild(hint);}
     else{
       const w=x.writer,good=w?.completed&&!w.mistakes&&!w.assisted;
