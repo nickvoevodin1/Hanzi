@@ -48,9 +48,15 @@ await T('entire reading round precedes writing and each interval gates the next 
  ev("State.meta=freshMeta();recallState().lessons=[1];Date.now=()=>window.__clock;window.__clock=100000;go('cards')");
  click(/^Начать урок$/);
  ok(ev("recallCurrentSession().facing==='han'"),'staged face changed');
- ev("recallReveal();recallGrade(3)");
- ok(ev("recallCurrentSession().current.skill==='flip'"),'writing started before whole deck');
- ev("recallReveal();recallGrade(3)");
+ const first=ev('recallCurrentSession().current.k');
+ click(/^Показать ответ$/);
+ ok(click(/^Не вспомнил$/),'forgotten rating missing');
+ ok(ev('recallCurrentSession().current.k')!==first,'forgotten card stayed at front');
+ click(/^Показать ответ$/);
+ ok(click(/^С трудом$/),'hard rating missing');
+ ok(ev("recallCurrentSession().current.skill==='flip'&&recallCurrentSession().current.k")===first,'forgotten card did not return before writing');
+ click(/^Показать ответ$/);
+ ok(click(/^Вспомнил$/),'remembered rating missing');
  ok(doc.querySelector('.recall-writer'),'writing round missing');
  ev("window.__complete=()=>{while(recallCurrentSession()){const s=recallCurrentSession();if(s.current.skill==='flip'){recallReveal();recallGrade(3)}else{s.current.writer={completed:true};s.revealed=true;recallWriteGrade()}}};window.__complete()");
  for(const hours of [4,12,24,48,120]){

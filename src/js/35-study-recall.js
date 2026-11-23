@@ -206,13 +206,14 @@ function recallSessionView(v){
       const show=el('button','btn','Показать ответ');show.dataset.key='space';show.onclick=recallReveal;card.appendChild(show);
     }else{
       for(const side of ['han','py','ru'])if(side!==ss.facing)card.appendChild(el('div',...faces[side]));
-      const next=el('button','btn',ss.staged?'Дальше':'Вспомнил');
-      next.onclick=()=>recallGrade(3);
-      if(!ss.staged){
-        const again=el('button','btn ghost','Ещё раз');
-        again.onclick=()=>recallGrade(1);card.appendChild(again);
+      const grades=el('div','study-grades');
+      const options=ss.staged?[[1,'Не вспомнил'],[2,'С трудом'],[3,'Вспомнил']]:[[1,'Ещё раз'],[3,'Вспомнил']];
+      for(const [grade,label]of options){
+        const button=el('button',grade===3?'btn':'btn ghost',label);
+        button.onclick=()=>recallGrade(grade);
+        grades.appendChild(button);
       }
-      card.appendChild(next);
+      card.appendChild(grades);
     }
   }else if(x.skill==='write'){
     card.appendChild(el('p','kind','Напиши по переводу'));card.appendChild(el('h2','recall-prompt',esc(info.ru)));
