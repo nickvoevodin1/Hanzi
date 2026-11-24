@@ -64,6 +64,7 @@ function recallData(k,goal,create){
   return bag[id]||null;
 }
 function recallActiveSession(){
+  if(State.route.free)return State.route.practice;
   const state=recallState(),lesson=State.route.staged;
   return lesson?state.staged?.[lesson]?.session:state.session;
 }
@@ -115,13 +116,14 @@ function recallStart(mode,selected){
 }
 function recallSessionReady(){
   const ss=recallCurrentSession();if(!ss)return null;
-  if(!ss.staged&&ss.date!==todayStr()){ss.finished=true;ss.stale=true;save('meta');return null;}
-  if(!ss.staged&&ss.current&&recallExcluded(ss.current.k)){recallAdvance(ss);save('meta');}
+  if(!ss.staged&&!ss.free&&ss.date!==todayStr()){ss.finished=true;ss.stale=true;save('meta');return null;}
+  if(!ss.staged&&!ss.free&&ss.current&&recallExcluded(ss.current.k)){recallAdvance(ss);save('meta');}
   return ss.finished?null:ss;
 }
 function recallIntro(){const ss=recallSessionReady(),x=ss?.current;if(!x||x.skill!=='intro')return false;recallState().entries[x.k].familiar=true;ss.previous=x;ss.recent=(ss.recent||[]).concat(x.k).slice(-3);recallAdvance(ss);save('meta');render();return true;}
 function recallReveal(){const ss=recallSessionReady(),x=ss?.current;if(!x||!['py','meaning','flip'].includes(x.skill))return false;ss.revealed=true;save('meta');render();return true;}
 function recallRecord(ss,x,grade){
+  if(ss.free){advanceFreeCard(ss,grade);return;}
   if(ss.staged){stageCardRecord(ss,grade);return;}
   if(x.practice){ss.practiceQueue.splice(ss.practiceQueue.findIndex(t=>t.k===x.k&&t.skill===x.skill),1);ss.previous=x;ss.recent=ss.recent.concat(x.k).slice(-3);recallAdvance(ss);save('meta');render();return;}
   const row=recallData(x.k,ss.goals[x.k],true),e=recallState().entries[x.k],datum=row[x.skill==='flip'?'py':x.skill];
@@ -146,7 +148,7 @@ function recallWriteGrade(){
   recallRecord(ss,x,x.writer.mistakes||x.writer.assisted?1:3);return true;
 }
 function recallWritingForms(k){return recallInfo(k).forms;}
-function recallWriterCurrent(ss,x,host){return host.isConnected&&recallCurrentSession()===ss&&ss.current===x&&(ss.staged||ss.date===todayStr()&&!recallExcluded(x.k));}
+function recallWriterCurrent(ss,x,host){return host.isConnected&&recallCurrentSession()===ss&&ss.current===x&&(ss.free||ss.staged||ss.date===todayStr()&&!recallExcluded(x.k));}
 async function recallWriter(host,ss,x){
   const forms=recallWritingForms(x.k);if(!forms.length){recallAdvance(ss);save('meta');render();return;}
   if(x.writer?.forms&&x.writer.forms.join()!==forms.join())x.writer=null;
@@ -157,7 +159,7 @@ async function recallWriter(host,ss,x){
   const size=Math.max(220,Math.min(360,(window.innerWidth||390)-44));pad.style.width=size+'px';pad.style.height=size+'px';
   let data=null;try{if(window.HZREADY)await window.HZREADY;data=window.HZDATA?.[f]||await hwLoad(f);}catch(e){}
   if(!recallWriterCurrent(ss,x,host))return;
-  const unavailable=()=>{cap.textContent='Проверка черт сейчас недоступна. Этот знак не будет засчитан.';const retry=el('button','btn ghost','Загрузить поле ещё раз');retry.onclick=render;const later=el('button','linkbtn','Отложить знак');later.onclick=()=>{if(ss.staged){go('cards');return;}ss.deferred.push(x.k);recallAdvance(ss);save('meta');render();};host.append(retry,later);};
+  const unavailable=()=>{cap.textContent='Проверка черт сейчас недоступна. Этот знак не будет засчитан.';const retry=el('button','btn ghost','Загрузить поле ещё раз');retry.onclick=render;const later=el('button','linkbtn','Отложить знак');later.onclick=()=>{if(ss.free){advanceFreeCard(ss);return;}if(ss.staged){go('cards');return;}ss.deferred.push(x.k);recallAdvance(ss);save('meta');render();};host.append(retry,later);};
   if(!canHW()||!data?.strokes?.length||!data?.medians?.length){unavailable();return;}
   cap.textContent='Пиши черты в правильном порядке и направлении.';
   try{
@@ -183,10 +185,11 @@ function recallSessionView(v){
     if(raw?.mode==='new'&&recallDue().length){const review=el('button','btn','Повторить изученное');review.onclick=()=>recallStart('today');v.appendChild(review);}
     const more=el('button','btn ghost','К карточкам');more.onclick=()=>go('cards');v.appendChild(more);return;
   }
-  const x=ss.current,info=recallInfo(x.k),goal=ss.staged?{lesson:ss.lesson}:ss.goals[x.k];
+  const x=ss.current,info=recallInfo(x.k),goal=ss.staged||ss.free?{lesson:ss.lesson}:ss.goals[x.k];
   const word=textbookWords(goal.lesson||WORD_L[x.k]).find(w=>w.key===x.k);
   if(word)Object.assign(info,{hz:word.d||word.s,py:word.p,ru:word.ru});
-  if(ss.staged)v.appendChild(el('p','eyebrow',`${ss.radicals?'Ключи · урок':'Урок'} ${ss.lesson} · круг ${ss.round+1} из 2 · ${ss.index+1} / ${ss.keys.length}`));
+  if(ss.free)v.appendChild(el('p','eyebrow',`Урок ${ss.lesson} · ${ss.retry?'Ещё раз':((State.route.index||0)+1)+' / '+State.route.deck.length}`));
+  else if(ss.staged)v.appendChild(el('p','eyebrow',`${ss.radicals?'Ключи · урок':'Урок'} ${ss.lesson} · круг ${ss.round+1} из 2 · ${ss.index+1} / ${ss.keys.length}`));
   else{
   v.appendChild(el('p','eyebrow',(goal.phase===4?'Повторение':'Изучение')+' · '+info.label));
   const total=ss.keys.filter(k=>!recallExcluded(k)).length,completed=ss.keys.filter(k=>!recallExcluded(k)&&recallRowDone(recallData(k,ss.goals[k],false),ss.goals[k].phase)).length;
@@ -201,13 +204,14 @@ function recallSessionView(v){
     const next=el('button','btn','Начать вспоминать');next.onclick=recallIntro;card.appendChild(next);
   }else if(x.skill==='flip'){
     const faces={han:['han recall-glyph',esc(info.hz)],ru:['tr recall-answer',esc(info.ru)],py:['py recall-answer',pinyinHTML(info.py)]};
+    if(ss.free&&State.route.mixTypes)card.appendChild(el('p','kind',isRad(x.k)?'Вспомни значение':'Вспомни пиньинь и перевод'));
     card.appendChild(el('div',...faces[ss.facing]));
     if(!ss.revealed){
       const show=el('button','btn','Показать ответ');show.dataset.key='space';show.onclick=recallReveal;card.appendChild(show);
     }else{
       for(const side of ['han','py','ru'])if(side!==ss.facing)card.appendChild(el('div',...faces[side]));
       const grades=el('div','study-grades');
-      const options=ss.staged?[[1,'Не вспомнил'],[2,'С трудом'],[3,'Вспомнил']]:[[1,'Ещё раз'],[3,'Вспомнил']];
+      const options=ss.staged||ss.free?[[1,'Не вспомнил'],[2,'С трудом'],[3,'Вспомнил']]:[[1,'Ещё раз'],[3,'Вспомнил']];
       for(const [grade,label]of options){
         const button=el('button',grade===3?'btn':'btn ghost',label);
         button.onclick=()=>recallGrade(grade);
@@ -216,14 +220,38 @@ function recallSessionView(v){
       card.appendChild(grades);
     }
   }else if(x.skill==='write'){
-    card.appendChild(el('p','kind','Напиши по переводу'));card.appendChild(el('h2','recall-prompt',esc(info.ru)));
-    card.appendChild(el('p','note',isRad(x.k)?'Ключ: напиши форму из пособия.':'Напиши все иероглифы слова по очереди.'));
-    if(!ss.revealed){const host=el('div','recall-writer');card.appendChild(host);recallWriter(host,ss,x);const hint=el('button','linkbtn','Не помню — показать порядок черт');hint.onclick=recallHint;card.appendChild(hint);}
+    const byPinyin=ss.free&&ss.facing==='py';
+    const mixed=ss.free&&State.route.mixTypes;
+    const extra=mixed&&(byPinyin||!isRad(x.k))?(byPinyin?'перевод':'пиньинь'):'';
+    card.appendChild(el('p','kind',byPinyin?'Напиши по пиньиню':'Напиши по переводу'));
+    card.appendChild(el('h2',byPinyin?'py recall-prompt':'recall-prompt',byPinyin?pinyinHTML(info.py):esc(info.ru)));
+    card.appendChild(el('p','note',isRad(x.k)?'Напиши ключ по памяти.':'Напиши все иероглифы слова по очереди.'));
+    if(!ss.revealed){
+      if(extra&&!x.extraReady){
+        const answer=el('input','search');
+        answer.placeholder=extra==='перевод'?'Запиши перевод':'Запиши пиньинь';
+        answer.setAttribute('aria-label',answer.placeholder);
+        answer.value=x.extraAnswer||'';
+        const start=el('button','btn','Перейти к письму');
+        start.disabled=!answer.value.trim();
+        answer.oninput=()=>{x.extraAnswer=answer.value;start.disabled=!answer.value.trim();Resume.later();};
+        start.onclick=()=>{x.extraReady=true;render();};
+        card.append(answer,start);
+      }else{
+        const host=el('div','recall-writer');card.appendChild(host);recallWriter(host,ss,x);
+      }
+      const hint=el('button','linkbtn','Не помню — показать порядок черт');
+      hint.onclick=recallHint;card.appendChild(hint);
+    }
     else{
       const w=x.writer,good=w?.completed&&!w.mistakes&&!w.assisted;
       card.appendChild(el('p','recall-verdict',good?'Верно: форма, порядок и направление черт проверены.':'Это была тренировка. Позже напишем ещё раз без подсказки и ошибок.'));
       if(!good){const model=el('div','recall-demo');card.appendChild(model);notebookStrokeDemo(model,{...info,hz:recallWritingForms(x.k)[Math.min(w?.index||0,recallWritingForms(x.k).length-1)]});}
-      const next=el('button','btn',good?'Верно · Дальше':'Повторить после других карточек');next.onclick=recallWriteGrade;card.appendChild(next);
+      if(extra){
+        if(x.extraAnswer)card.appendChild(el('p','note','Твой ответ — '+esc(x.extraAnswer)));
+        card.appendChild(el('p',byPinyin?'tr recall-answer':'py recall-answer',byPinyin?esc(info.ru):pinyinHTML(info.py)));
+      }
+      const next=el('button','btn',ss.free?'Дальше':good?'Верно · Дальше':'Повторить после других карточек');next.onclick=recallWriteGrade;card.appendChild(next);
     }
   }else{
     const datum=recallData(x.k,goal,false),need=recallGoal(goal.phase),reading=x.skill==='py';card.appendChild(el('p','kind',(x.practice?'Пауза перед повторной попыткой · ':'')+(reading?'Как читается?':'Что это значит?')));card.appendChild(el('h1','han recall-glyph',esc(info.hz)));

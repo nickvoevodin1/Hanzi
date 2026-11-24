@@ -37,11 +37,13 @@ await T('writing gates completion and every finished word transfers to review',(
 });
 await T('free deck wraps without touching scheduled progress',()=>{
  ev("State.meta=freshMeta();recallState().lessons=[1];recallState().facing='py';go('cards')");
- click(/^Постоянные$/);click(/^Листать карточки$/);
+ click(/^Постоянные$/);click(/^Начать тренировку$/);
  ok(doc.querySelector('.recall-card .py')&&!doc.querySelector('.recall-card .han'),'free face ignored');
  click(/^Показать ответ$/);ok(doc.querySelector('.recall-card .han'),'free reveal failed');
- click(/^Дальше$/);click(/^Дальше$/);
- ok(ev('State.route.index')===0&&!ev('State.route.revealed'),'free deck did not wrap');
+ click(/^Вспомнил$/);
+ ok(doc.querySelector('.recall-writer'),'free writing missing');
+ ev("for(let i=0;i<3;i++){const s=recallCurrentSession();if(s.current.skill==='flip'){recallReveal();recallGrade(3)}else{s.current.writer={completed:true};s.revealed=true;recallWriteGrade()}}");
+ ok(ev('State.route.index')===0&&!ev('State.route.practice.revealed'),'free deck did not wrap');
  ok(!ev('recallState().staged'),'free deck affected schedule');
 });
 await T('entire reading round precedes writing and each interval gates the next round',()=>{
@@ -72,7 +74,7 @@ await T('radicals by lesson have their own deck and schedule',()=>{
  ok(click(/Ключи по урокам/),'radical lessons missing from search');
  ok(click(/Урок 1/),'lesson missing from radical catalogue');
  ok(ev('recallState().radicalDeck&&recallState().radicalLesson===1'),'catalogue opened wrong deck');
- click(/^Постоянные$/);click(/^Листать карточки$/);
+ click(/^Постоянные$/);click(/^Начать тренировку$/);
  ok(ev("State.route.deck.map(x=>x.key).join()")==='r:9,r:38,r:39','free deck differs from guide');
  ev("go('cards');stageCardStart(1);stageCardStart(1,true)");
  ok(ev("stageCardEntry(1).session.keys.every(k=>!isRad(k))"),'word session was overwritten');
@@ -86,9 +88,9 @@ await T('multiple lesson selections, free deck and staged batch',()=>{
  ev("State.meta=freshMeta();recallState().lessons=[1];go('cards')");
  click(/^Постоянные$/);
  const toggle=n=>doc.querySelector(`input[aria-label="Урок ${n}"]`).click();
- toggle(2);click(/^Листать карточки$/);
+ toggle(2);click(/^Начать тренировку$/);
  ok(ev('State.route.deck.some(card=>card.lesson===1)&&State.route.deck.some(card=>card.lesson===2)'),'word deck missing selected lesson');
- ev("go('cards')");click(/^Ключи по урокам$/);toggle(2);click(/^Листать карточки$/);
+ ev("go('cards')");click(/^Ключи по урокам$/);toggle(2);click(/^Начать тренировку$/);
  ok(ev('State.route.deck.length')===ev('recallLessonKeys(1).length+recallLessonKeys(2).length'),'radical deck missing selected lesson');
  ev("go('cards')");click(/^Поэтапные$/);click(/^Пройти выбранные/);
  ok(ev("State.route.staged==='keys:1'&&State.route.remainingLessons.join()==='2'"),'batch did not enqueue lesson 2');
@@ -97,5 +99,22 @@ await T('multiple lesson selections, free deck and staged batch',()=>{
  ok(ev("State.route.staged==='keys:2'&&stageCardEntry(1,true).completed===1&&stageCardEntry(2,true).completed===0"),'batch mixed schedules');
  ev("go('cards')");click(/^Слова по урокам$/);
  ok(ev("recallState().lessons.join()==='1,2'"),'key lesson selection changed word lesson selection');
+});
+await T('mixed permanent prompts require the complementary answer and handwriting',()=>{
+ ev("State.meta=freshMeta();recallState().lessons=[1];recallState().mixTypes=true;shuffle=a=>a.slice();startFreeCards([1])");
+ ok(ev("recallCurrentSession().current.skill")==='flip','character cue did not start with recall');
+ click(/^Показать ответ$/);click(/^Вспомнил$/);
+ for(const [cue,prompt]of [['ru','Запиши пиньинь'],['py','Запиши перевод']]){
+   ok(ev('recallCurrentSession().facing')===cue,'wrong mixed cue');
+   const input=doc.querySelector('input[aria-label="'+prompt+'"]');
+   ok(input,'complementary answer missing');
+   input.value='ответ';input.dispatchEvent(new A.w.Event('input'));
+   click(/^Перейти к письму$/);
+   ok(doc.querySelector('.recall-writer'),'missing writing field');
+   ev("const session=recallCurrentSession();session.current.writer={completed:true};session.revealed=true;render()");
+   ok(doc.body.textContent.includes('Твой ответ — ответ'),'answer not available for comparison');
+   click(/^Дальше$/);
+ }
+ ok(!ev('recallState().staged'),'mixed practice changed scheduled progress');
 });
 A.finish('simple cards');
