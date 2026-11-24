@@ -100,7 +100,7 @@ await T('multiple lesson selections, free deck and staged batch',()=>{
  ev("go('cards')");click(/^Слова по урокам$/);
  ok(ev("recallState().lessons.join()==='1,2'"),'key lesson selection changed word lesson selection');
 });
-await T('mixed permanent prompts require the complementary answer and handwriting',()=>{
+await T('mixed permanent prompts show handwriting without waiting for text input',()=>{
  ev("State.meta=freshMeta();recallState().lessons=[1];recallState().mixTypes=true;shuffle=a=>a.slice();startFreeCards([1])");
  ok(ev("recallCurrentSession().current.skill")==='flip','character cue did not start with recall');
  click(/^Показать ответ$/);click(/^Вспомнил$/);
@@ -108,9 +108,8 @@ await T('mixed permanent prompts require the complementary answer and handwritin
    ok(ev('recallCurrentSession().facing')===cue,'wrong mixed cue');
    const input=doc.querySelector('input[aria-label="'+prompt+'"]');
    ok(input,'complementary answer missing');
+   ok(doc.querySelector('.recall-writer'),'writing field gated by text input');
    input.value='ответ';input.dispatchEvent(new A.w.Event('input'));
-   click(/^Перейти к письму$/);
-   ok(doc.querySelector('.recall-writer'),'missing writing field');
    ev("const session=recallCurrentSession();session.current.writer={completed:true};session.revealed=true;render()");
    ok(doc.body.textContent.includes('Твой ответ — ответ'),'answer not available for comparison');
    click(/^Дальше$/);

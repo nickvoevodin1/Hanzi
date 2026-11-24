@@ -156,11 +156,12 @@ async function recallWriter(host,ss,x){
   // A partial current character starts again after reload; finished characters survive.
   const index=w.index,f=forms[index];if(!f)return;
   const progress=el('p','note',`Знак ${index+1} из ${forms.length} · без образца`),pad=el('div','writer recall-pad'),cap=el('p','recall-stroke-note','Загружаем поле письма…');host.append(progress,pad,cap);
-  const size=Math.max(220,Math.min(360,(window.innerWidth||390)-44));pad.style.width=size+'px';pad.style.height=size+'px';
+  pad.style.width='100%';pad.style.maxWidth='360px';pad.style.height='auto';pad.style.aspectRatio='1';
   let data=null;try{if(window.HZREADY)await window.HZREADY;data=window.HZDATA?.[f]||await hwLoad(f);}catch(e){}
   if(!recallWriterCurrent(ss,x,host))return;
   const unavailable=()=>{cap.textContent='Проверка черт сейчас недоступна. Этот знак не будет засчитан.';const retry=el('button','btn ghost','Загрузить поле ещё раз');retry.onclick=render;const later=el('button','linkbtn','Отложить знак');later.onclick=()=>{if(ss.free){advanceFreeCard(ss);return;}if(ss.staged){go('cards');return;}ss.deferred.push(x.k);recallAdvance(ss);save('meta');render();};host.append(retry,later);};
   if(!canHW()||!data?.strokes?.length||!data?.medians?.length){unavailable();return;}
+  const size=pad.clientWidth||Math.min(360,(window.innerWidth||390)-64);
   cap.textContent='Пиши черты в правильном порядке и направлении.';
   try{
     const hw=HanziWriter.create(pad,f,{width:size,height:size,padding:12,showCharacter:false,showOutline:false,strokeColor:HWC.stroke,outlineColor:HWC.outline,drawingColor:HWC.draw,drawingWidth:6,highlightColor:HWC.hl,charDataLoader:(ch,ok)=>ok(data),acceptBackwardsStrokes:false,leniency:1});
@@ -227,19 +228,15 @@ function recallSessionView(v){
     card.appendChild(el('h2',byPinyin?'py recall-prompt':'recall-prompt',byPinyin?pinyinHTML(info.py):esc(info.ru)));
     card.appendChild(el('p','note',isRad(x.k)?'Напиши ключ по памяти.':'Напиши все иероглифы слова по очереди.'));
     if(!ss.revealed){
-      if(extra&&!x.extraReady){
+      if(extra){
         const answer=el('input','search');
         answer.placeholder=extra==='перевод'?'Запиши перевод':'Запиши пиньинь';
         answer.setAttribute('aria-label',answer.placeholder);
         answer.value=x.extraAnswer||'';
-        const start=el('button','btn','Перейти к письму');
-        start.disabled=!answer.value.trim();
-        answer.oninput=()=>{x.extraAnswer=answer.value;start.disabled=!answer.value.trim();Resume.later();};
-        start.onclick=()=>{x.extraReady=true;render();};
-        card.append(answer,start);
-      }else{
-        const host=el('div','recall-writer');card.appendChild(host);recallWriter(host,ss,x);
+        answer.oninput=()=>{x.extraAnswer=answer.value;Resume.later();};
+        card.appendChild(answer);
       }
+      const host=el('div','recall-writer');card.appendChild(host);recallWriter(host,ss,x);
       const hint=el('button','linkbtn','Не помню — показать порядок черт');
       hint.onclick=recallHint;card.appendChild(hint);
     }
